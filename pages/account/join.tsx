@@ -74,7 +74,7 @@ const Join: NextPage = () => {
 							{/* @ts-ignore */}
 							<Box className={'logo'}>
 								<img src="/img/logo/logoText.svg" alt="" />
-								<span>Nestar</span>
+								<span>La Memoria</span>
 							</Box>
 							<Box className={'info'}>
 								<span>{loginView ? 'login' : 'signup'}</span>
@@ -137,7 +137,7 @@ const Join: NextPage = () => {
 															checked={input?.type == 'USER'}
 														/>
 													}
-													label="User"
+													label="Couple"
 												/>
 											</FormGroup>
 											<FormGroup>
@@ -145,12 +145,12 @@ const Join: NextPage = () => {
 													control={
 														<Checkbox
 															size="small"
-															name={'AGENT'}
+															name={'STUDIO'}
 															onChange={checkUserTypeHandler}
-															checked={input?.type == 'AGENT'}
+															checked={input?.type == 'STUDIO'}
 														/>
 													}
-													label="Agent"
+													label="Studio"
 												/>
 											</FormGroup>
 										</div>

@@ -17,7 +17,7 @@ export const UPDATE_MEMBER_BY_ADMIN = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			memberProperties
+			memberPackages
 			memberRank
 			memberArticles
 			memberPoints
@@ -34,61 +34,61 @@ export const UPDATE_MEMBER_BY_ADMIN = gql`
 `;
 
 /**************************
- *        PROPERTY        *
+ *        PACKAGE        *
  *************************/
 
-export const UPDATE_PROPERTY_BY_ADMIN = gql`
-	mutation UpdatePropertyByAdmin($input: PropertyUpdate!) {
-		updatePropertyByAdmin(input: $input) {
+export const UPDATE_PACKAGE_BY_ADMIN = gql`
+	mutation UpdatePackageByAdmin($input: PackageUpdate!) {
+		updatePackageByAdmin(input: $input) {
 			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
+			packageType
+			packageStatus
+			packageLocation
+			packageAddress
+			packageTitle
+			packagePrice
+			packageDuration
+			packagePhotos
+			packageStyle
+			packageViews
+			packageLikes
+			packageImages
+			packageDesc
+			packageAlbum
+			packageDress
+			packageMakeup
 			memberId
-			soldAt
+			pausedAt
 			deletedAt
-			constructedAt
 			createdAt
 			updatedAt
 		}
 	}
 `;
 
-export const REMOVE_PROPERTY_BY_ADMIN = gql`
-	mutation RemovePropertyByAdmin($input: String!) {
-		removePropertyByAdmin(propertyId: $input) {
+export const REMOVE_PACKAGE_BY_ADMIN = gql`
+	mutation RemovePackageByAdmin($input: String!) {
+		removePackageByAdmin(packageId: $input) {
 			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
+			packageType
+			packageStatus
+			packageLocation
+			packageAddress
+			packageTitle
+			packagePrice
+			packageDuration
+			packagePhotos
+			packageStyle
+			packageViews
+			packageLikes
+			packageImages
+			packageDesc
+			packageAlbum
+			packageDress
+			packageMakeup
 			memberId
-			soldAt
+			pausedAt
 			deletedAt
-			constructedAt
 			createdAt
 			updatedAt
 		}

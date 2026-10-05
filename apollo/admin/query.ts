@@ -20,7 +20,7 @@ export const GET_ALL_MEMBERS_BY_ADMIN = gql`
 				memberDesc
 				memberWarnings
 				memberBlocks
-				memberProperties
+				memberPackages
 				memberRank
 				memberArticles
 				memberPoints
@@ -39,33 +39,33 @@ export const GET_ALL_MEMBERS_BY_ADMIN = gql`
 `;
 
 /**************************
- *        PROPERTY        *
+ *        PACKAGE        *
  *************************/
 
-export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
-	query GetAllPropertiesByAdmin($input: AllPropertiesInquiry!) {
-		getAllPropertiesByAdmin(input: $input) {
+export const GET_ALL_PACKAGES_BY_ADMIN = gql`
+	query GetAllPackagesByAdmin($input: AllPackagesInquiry!) {
+		getAllPackagesByAdmin(input: $input) {
 			list {
 				_id
-				propertyType
-				propertyStatus
-				propertyLocation
-				propertyAddress
-				propertyTitle
-				propertyPrice
-				propertySquare
-				propertyBeds
-				propertyRooms
-				propertyViews
-				propertyLikes
-				propertyImages
-				propertyDesc
-				propertyBarter
-				propertyRent
+				packageType
+				packageStatus
+				packageLocation
+				packageAddress
+				packageTitle
+				packagePrice
+				packageDuration
+				packagePhotos
+				packageStyle
+				packageViews
+				packageLikes
+				packageImages
+				packageDesc
+				packageAlbum
+				packageDress
+				packageMakeup
 				memberId
-				soldAt
+				pausedAt
 				deletedAt
-				constructedAt
 				createdAt
 				updatedAt
 				memberData {
@@ -81,7 +81,7 @@ export const GET_ALL_PROPERTIES_BY_ADMIN = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberPackages
 					memberRank
 					memberPoints
 					memberLikes
@@ -131,7 +131,7 @@ export const GET_ALL_BOARD_ARTICLES_BY_ADMIN = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberPackages
 					memberRank
 					memberPoints
 					memberLikes
@@ -178,7 +178,7 @@ export const GET_COMMENTS = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberPackages
 					memberRank
 					memberPoints
 					memberLikes
@@ -187,6 +187,50 @@ export const GET_COMMENTS = gql`
 					createdAt
 					updatedAt
 					accessToken
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *      RESERVATION       *
+ *************************/
+
+export const GET_ALL_RESERVATIONS_BY_ADMIN = gql`
+	query GetAllReservationsByAdmin($input: ReservationsInquiry!) {
+		getAllReservationsByAdmin(input: $input) {
+			list {
+				_id
+				reservationStatus
+				reservationDate
+				reservationPrice
+				reservationNote
+				studioId
+				memberId
+				packageId
+				confirmedAt
+				cancelledAt
+				completedAt
+				createdAt
+				updatedAt
+				packageData {
+					_id
+					packageTitle
+					packageType
+					packageStyle
+					packageLocation
+					packageImages
+					packagePrice
+				}
+				memberData {
+					_id
+					memberNick
+					memberPhone
+					memberImage
 				}
 			}
 			metaCounter {

@@ -15,7 +15,7 @@ const About: NextPage = () => {
 				<Stack className={'intro'}>
 					<Stack className={'container'}>
 						<Stack className={'left'}>
-							<strong>We're on a Mission to Change View of Real Estate Field.</strong>
+							<strong>We're on a Mission to Make Every Wedding Memory Unforgettable.</strong>
 						</Stack>
 						<Stack className={'right'}>
 							<p>
@@ -33,7 +33,7 @@ const About: NextPage = () => {
 									<div>
 										<img src="/img/icons/garden.svg" alt="" />
 									</div>
-									<span>Modern Villa</span>
+									<span>Curated Studios</span>
 									<p>Nullam sollicitudin blandit Nullam maximus.</p>
 								</div>
 								<div className={'box'}>
@@ -59,7 +59,7 @@ const About: NextPage = () => {
 							</Box>
 							<Box component={'div'}>
 								<strong>12K</strong>
-								<p>Property Ready</p>
+								<p>Package Ready</p>
 							</Box>
 							<Box component={'div'}>
 								<strong>20M</strong>
@@ -68,13 +68,13 @@ const About: NextPage = () => {
 						</Stack>
 					</Stack>
 				</Stack>
-				<Stack className={'agents'}>
+				<Stack className={'studios'}>
 					<Stack className={'container'}>
-						<span className={'title'}>Our Exclusive Agetns</span>
+						<span className={'title'}>Our Exclusive Studios</span>
 						<p className={'desc'}>Aliquam lacinia diam quis lacus euismod</p>
 						<Stack className={'wrap'}>
 							{/*{[1, 2, 3, 4, 5].map(() => {*/}
-							{/*	return <AgentCard />;*/}
+							{/*	return <StudioCard />;*/}
 							{/*})}*/}
 						</Stack>
 					</Stack>
@@ -82,13 +82,13 @@ const About: NextPage = () => {
 				<Stack className={'options'}>
 					<img src="/img/banner/aboutBanner.svg" alt="" className={'about-banner'} />
 					<Stack className={'container'}>
-						<strong>Let’s find the right selling option for you</strong>
+						<strong>Let’s find the right photoshoot package for you</strong>
 						<Stack>
 							<div className={'icon-box'}>
 								<img src="/img/icons/security.svg" alt="" />
 							</div>
 							<div className={'text-box'}>
-								<span>Property Management</span>
+								<span>Package Management</span>
 								<p>Nullam sollicitudin blandit eros eu pretium. Nullam maximus ultricies auctor.</p>
 							</div>
 						</Stack>
@@ -97,7 +97,7 @@ const About: NextPage = () => {
 								<img src="/img/icons/keywording.svg" alt="" />
 							</div>
 							<div className={'text_-box'}>
-								<span>Property Management</span>
+								<span>Package Management</span>
 								<p>Nullam sollicitudin blandit eros eu pretium. Nullam maximus ultricies auctor.</p>
 							</div>
 						</Stack>
@@ -106,7 +106,7 @@ const About: NextPage = () => {
 								<img src="/img/icons/investment.svg" alt="" />
 							</div>
 							<div className={'text-box'}>
-								<span>Property Management</span>
+								<span>Package Management</span>
 								<p>Nullam sollicitudin blandit eros eu pretium. Nullam maximus ultricies auctor.</p>
 							</div>
 						</Stack>
@@ -118,7 +118,7 @@ const About: NextPage = () => {
 				</Stack>
 				<Stack className={'partners'}>
 					<Stack className={'container'}>
-						<span>Trusted bu the world's best</span>
+						<span>Trusted by the best studios</span>
 						<Stack className={'wrap'}>
 							<img src="/img/icons/brands/amazon.svg" alt="" />
 							<img src="/img/icons/brands/amd.svg" alt="" />
@@ -132,7 +132,7 @@ const About: NextPage = () => {
 					<Stack className={'container'}>
 						<Box component={'div'} className={'left'}>
 							<strong>Need help? Talk to our expert.</strong>
-							<p>Talk to our experts or Browse through more properties.</p>
+							<p>Talk to our experts or Browse through more packages.</p>
 						</Box>
 						<Box component={'div'} className={'right'}>
 							<div className={'white'}>

@@ -30,7 +30,7 @@
 
   }
 
-  .trend-properties {
+  .trend-packages {
     padding: 0px 10px;
     width: 100%;
     height: auto;
@@ -51,12 +51,12 @@
           justify-content: center;
           align-items: center;
         }
-        .trend-property-swiper {
+        .trend-package-swiper {
           width: 100%;
           height: 400px;
           display: flex;
           flex-direction: row;
-          .trend-property-slide {
+          .trend-package-slide {
             width: 98%;
             height: auto;
             display: flex;
@@ -314,7 +314,7 @@
     }
   }
 
-  .popular-properties {
+  .popular-packages {
     padding: 10px 10px;
     width: 100%;
     height: auto;
@@ -332,12 +332,12 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        .popular-property-swiper {
+        .popular-package-swiper {
           width: 100%;
           height: 390px;
           display: flex;
           flex-direction: row;
-          .popular-property-slide {
+          .popular-package-slide {
             width: 98%;
             height: auto;
             display: flex;
@@ -521,7 +521,7 @@
     box-shadow: -3px 0px 20px 14px #34343480;
   }
 
-  .top-properties {
+  .top-packages {
     padding: 0px 10px;
     width: 100%;
     height: auto;
@@ -536,12 +536,12 @@
         margin-top: 25px;
         display: flex;
         flex-direction: row;
-        .top-property-swiper {
+        .top-package-swiper {
           width: 100%;
           height: 400px;
           display: flex;
           flex-direction: row;
-          .top-property-slide {
+          .top-package-slide {
             width: 98%;
             height: auto;
             display: flex;
@@ -676,7 +676,7 @@
     }
   }
 
-  .top-agents {
+  .top-studios {
     position: relative;
     padding: 20px 10px;
     width: 100%;
@@ -695,16 +695,16 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        .top-agents-swiper {
+        .top-studios-swiper {
           width: 100%;
           height: 280px;
           display: flex;
           flex-direction: row;
-          .top-agents-slide {
+          .top-studios-slide {
             width: 98%;
             height: auto;
             display: flex;
-            .top-agent-card {
+            .top-studio-card {
               width: 100%;
               height: 280px;
               display: flex;

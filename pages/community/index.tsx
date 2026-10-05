@@ -99,7 +99,7 @@ const Community: NextPage = ({ initialInput, ...props }: T) => {
 			await boardArticleRefetch({ input: searchCommunity });
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
-			console.log('Error:likePropertyHandler', err.message);
+			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
@@ -116,7 +116,7 @@ const Community: NextPage = ({ initialInput, ...props }: T) => {
 								<Stack className={'image-info'}>
 									<img src={'/img/logo/logoText.svg'} />
 									<Stack className={'community-name'}>
-										<Typography className={'name'}>Nestar Community</Typography>
+										<Typography className={'name'}>La Memoria Community</Typography>
 									</Stack>
 								</Stack>
 

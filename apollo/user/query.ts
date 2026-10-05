@@ -4,9 +4,9 @@ import { gql } from '@apollo/client';
  *         MEMBER         *
  *************************/
 
-export const GET_AGENTS = gql`
-	query GetAgents($input: AgentsInquiry!) {
-		getAgents(input: $input) {
+export const GET_STUDIOS = gql`
+	query GetStudios($input: StudiosInquiry!) {
+		getStudios(input: $input) {
 			list {
 				_id
 				memberType
@@ -20,7 +20,7 @@ export const GET_AGENTS = gql`
 				memberDesc
 				memberWarnings
 				memberBlocks
-				memberProperties
+				memberPackages
 				memberRank
 				memberPoints
 				memberLikes
@@ -55,7 +55,7 @@ query GetMember($input: String!) {
         memberImage
         memberAddress
         memberDesc
-        memberProperties
+        memberPackages
         memberArticles
         memberPoints
         memberLikes
@@ -79,32 +79,35 @@ query GetMember($input: String!) {
 `);
 
 /**************************
- *        PROPERTY        *
+ *        PACKAGE        *
  *************************/
 
-export const GET_PROPERTY = gql`
-	query GetProperty($input: String!) {
-		getProperty(propertyId: $input) {
+export const GET_PACKAGE = gql`
+	query GetPackage($input: String!) {
+		getPackage(packageId: $input) {
 			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
+			packageType
+			packageStatus
+			packageLocation
+			packageAddress
+			packageTitle
+			packagePrice
+			packageDuration
+			packagePhotos
+			packageStyle
+			packageViews
+			packageLikes
+			packageComments
+			packageReservations
+			packageRank
+			packageImages
+			packageDesc
+			packageAlbum
+			packageDress
+			packageMakeup
 			memberId
-			soldAt
+			pausedAt
 			deletedAt
-			constructedAt
 			createdAt
 			updatedAt
 			memberData {
@@ -137,31 +140,31 @@ export const GET_PROPERTY = gql`
 	}
 `;
 
-export const GET_PROPERTIES = gql`
-	query GetProperties($input: PropertiesInquiry!) {
-		getProperties(input: $input) {
+export const GET_PACKAGES = gql`
+	query GetPackages($input: PackagesInquiry!) {
+		getPackages(input: $input) {
 			list {
 				_id
-				propertyType
-				propertyStatus
-				propertyLocation
-				propertyAddress
-				propertyTitle
-				propertyPrice
-				propertySquare
-				propertyBeds
-				propertyRooms
-				propertyViews
-				propertyLikes
-				propertyRank
-				propertyImages
-				propertyDesc
-				propertyBarter
-				propertyRent
+				packageType
+				packageStatus
+				packageLocation
+				packageAddress
+				packageTitle
+				packagePrice
+				packageDuration
+				packagePhotos
+				packageStyle
+				packageViews
+				packageLikes
+				packageRank
+				packageImages
+				packageDesc
+				packageAlbum
+				packageDress
+				packageMakeup
 				memberId
-				soldAt
+				pausedAt
 				deletedAt
-				constructedAt
 				createdAt
 				updatedAt
 				memberData {
@@ -177,7 +180,7 @@ export const GET_PROPERTIES = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberPackages
 					memberRank
 					memberPoints
 					memberLikes
@@ -199,30 +202,30 @@ export const GET_PROPERTIES = gql`
 	}
 `;
 
-export const GET_AGENT_PROPERTIES = gql`
-	query GetAgentProperties($input: AgentPropertiesInquiry!) {
-		getAgentProperties(input: $input) {
+export const GET_STUDIO_PACKAGES = gql`
+	query GetStudioPackages($input: StudioPackagesInquiry!) {
+		getStudioPackages(input: $input) {
 			list {
 				_id
-				propertyType
-				propertyStatus
-				propertyLocation
-				propertyAddress
-				propertyTitle
-				propertyPrice
-				propertySquare
-				propertyBeds
-				propertyRooms
-				propertyViews
-				propertyLikes
-				propertyImages
-				propertyDesc
-				propertyBarter
-				propertyRent
+				packageType
+				packageStatus
+				packageLocation
+				packageAddress
+				packageTitle
+				packagePrice
+				packageDuration
+				packagePhotos
+				packageStyle
+				packageViews
+				packageLikes
+				packageImages
+				packageDesc
+				packageAlbum
+				packageDress
+				packageMakeup
 				memberId
-				soldAt
+				pausedAt
 				deletedAt
-				constructedAt
 				createdAt
 				updatedAt
 			}
@@ -238,27 +241,28 @@ export const GET_FAVORITES = gql`
 		getFavorites(input: $input) {
 			list {
 				_id
-				propertyType
-				propertyStatus
-				propertyLocation
-				propertyAddress
-				propertyTitle
-				propertyPrice
-				propertySquare
-				propertyBeds
-				propertyRooms
-				propertyViews
-				propertyLikes
-				propertyComments
-				propertyRank
-				propertyImages
-				propertyDesc
-				propertyBarter
-				propertyRent
+				packageType
+				packageStatus
+				packageLocation
+				packageAddress
+				packageTitle
+				packagePrice
+				packageDuration
+				packagePhotos
+				packageStyle
+				packageViews
+				packageLikes
+				packageComments
+				packageReservations
+				packageRank
+				packageImages
+				packageDesc
+				packageAlbum
+				packageDress
+				packageMakeup
 				memberId
-				soldAt
+				pausedAt
 				deletedAt
-				constructedAt
 				createdAt
 				updatedAt
 				memberData {
@@ -272,7 +276,7 @@ export const GET_FAVORITES = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberPackages
 					memberArticles
 					memberPoints
 					memberLikes
@@ -301,27 +305,28 @@ export const GET_VISITED = gql`
 		getVisited(input: $input) {
 			list {
 				_id
-				propertyType
-				propertyStatus
-				propertyLocation
-				propertyAddress
-				propertyTitle
-				propertyPrice
-				propertySquare
-				propertyBeds
-				propertyRooms
-				propertyViews
-				propertyLikes
-				propertyComments
-				propertyRank
-				propertyImages
-				propertyDesc
-				propertyBarter
-				propertyRent
+				packageType
+				packageStatus
+				packageLocation
+				packageAddress
+				packageTitle
+				packagePrice
+				packageDuration
+				packagePhotos
+				packageStyle
+				packageViews
+				packageLikes
+				packageComments
+				packageReservations
+				packageRank
+				packageImages
+				packageDesc
+				packageAlbum
+				packageDress
+				packageMakeup
 				memberId
-				soldAt
+				pausedAt
 				deletedAt
-				constructedAt
 				createdAt
 				updatedAt
 				memberData {
@@ -335,7 +340,7 @@ export const GET_VISITED = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberPackages
 					memberArticles
 					memberPoints
 					memberLikes
@@ -391,7 +396,7 @@ export const GET_BOARD_ARTICLE = gql`
 				memberDesc
 				memberWarnings
 				memberBlocks
-				memberProperties
+				memberPackages
 				memberRank
 				memberPoints
 				memberLikes
@@ -443,7 +448,7 @@ export const GET_BOARD_ARTICLES = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberPackages
 					memberRank
 					memberPoints
 					memberLikes
@@ -489,7 +494,7 @@ export const GET_COMMENTS = gql`
 					memberDesc
 					memberWarnings
 					memberBlocks
-					memberProperties
+					memberPackages
 					memberRank
 					memberPoints
 					memberLikes
@@ -540,7 +545,7 @@ export const GET_MEMBER_FOLLOWERS = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberPackages
 					memberArticles
 					memberPoints
 					memberLikes
@@ -583,7 +588,7 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 					memberImage
 					memberAddress
 					memberDesc
-					memberProperties
+					memberPackages
 					memberArticles
 					memberPoints
 					memberLikes
@@ -608,6 +613,90 @@ export const GET_MEMBER_FOLLOWINGS = gql`
 					followingId
 					followerId
 					myFollowing
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *      RESERVATION       *
+ *************************/
+
+export const GET_MY_RESERVATIONS = gql`
+	query GetMyReservations($input: ReservationsInquiry!) {
+		getMyReservations(input: $input) {
+			list {
+				_id
+				reservationStatus
+				reservationDate
+				reservationPrice
+				reservationNote
+				studioId
+				memberId
+				packageId
+				confirmedAt
+				cancelledAt
+				completedAt
+				createdAt
+				updatedAt
+				packageData {
+					_id
+					packageTitle
+					packageType
+					packageStyle
+					packageLocation
+					packageImages
+					packagePrice
+				}
+				memberData {
+					_id
+					memberNick
+					memberPhone
+					memberImage
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_STUDIO_RESERVATIONS = gql`
+	query GetStudioReservations($input: ReservationsInquiry!) {
+		getStudioReservations(input: $input) {
+			list {
+				_id
+				reservationStatus
+				reservationDate
+				reservationPrice
+				reservationNote
+				studioId
+				memberId
+				packageId
+				confirmedAt
+				cancelledAt
+				completedAt
+				createdAt
+				updatedAt
+				packageData {
+					_id
+					packageTitle
+					packageType
+					packageStyle
+					packageLocation
+					packageImages
+					packagePrice
+				}
+				memberData {
+					_id
+					memberNick
+					memberPhone
+					memberImage
 				}
 			}
 			metaCounter {

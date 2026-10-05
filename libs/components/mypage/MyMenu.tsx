@@ -55,29 +55,32 @@ const MyMenu = () => {
 					</Stack>
 				</Stack>
 				<Stack className={'sections'}>
-					<Stack className={'section'} style={{ height: user.memberType === 'AGENT' ? '228px' : '153px' }}>
+					<Stack
+						className={'section'}
+						style={{ height: user.memberType === 'STUDIO' ? '266px' : user.memberType === 'USER' ? '190px' : '153px' }}
+					>
 						<Typography className="title" variant={'h5'}>
-							MANAGE LISTINGS
+							MANAGE PACKAGES
 						</Typography>
 						<List className={'sub-section'}>
-							{user.memberType === 'AGENT' && (
+							{user.memberType === 'STUDIO' && (
 								<>
-									<ListItem className={pathname === 'addProperty' ? 'focus' : ''}>
+									<ListItem className={pathname === 'addPackage' ? 'focus' : ''}>
 										<Link
 											href={{
 												pathname: '/mypage',
-												query: { category: 'addProperty' },
+												query: { category: 'addPackage' },
 											}}
 											scroll={false}
 										>
 											<div className={'flex-box'}>
-												{category === 'addProperty' ? (
+												{category === 'addPackage' ? (
 													<img className={'com-icon'} src={'/img/icons/whiteTab.svg'} alt={'com-icon'} />
 												) : (
 													<img className={'com-icon'} src={'/img/icons/newTab.svg'} alt={'com_icon'} />
 												)}
 												<Typography className={'sub-title'} variant={'subtitle1'} component={'p'}>
-													Add Property
+													Add Package
 												</Typography>
 												<IconButton aria-label="delete" sx={{ ml: '40px' }}>
 													<PortraitIcon style={{ color: 'red' }} />
@@ -85,22 +88,22 @@ const MyMenu = () => {
 											</div>
 										</Link>
 									</ListItem>
-									<ListItem className={pathname === 'myProperties' ? 'focus' : ''}>
+									<ListItem className={pathname === 'myPackages' ? 'focus' : ''}>
 										<Link
 											href={{
 												pathname: '/mypage',
-												query: { category: 'myProperties' },
+												query: { category: 'myPackages' },
 											}}
 											scroll={false}
 										>
 											<div className={'flex-box'}>
-												{category === 'myProperties' ? (
+												{category === 'myPackages' ? (
 													<img className={'com-icon'} src={'/img/icons/homeWhite.svg'} alt={'com-icon'} />
 												) : (
 													<img className={'com-icon'} src={'/img/icons/home.svg'} alt={'com-icon'} />
 												)}
 												<Typography className={'sub-title'} variant={'subtitle1'} component={'p'}>
-													My Properties
+													My Packages
 												</Typography>
 												<IconButton aria-label="delete" sx={{ ml: '36px' }}>
 													<PortraitIcon style={{ color: 'red' }} />
@@ -126,7 +129,7 @@ const MyMenu = () => {
 										)}
 
 										<Typography className={'sub-title'} variant={'subtitle1'} component={'p'}>
-											My Favorites
+											Saved Packages
 										</Typography>
 									</div>
 								</Link>
@@ -147,11 +150,34 @@ const MyMenu = () => {
 										)}
 
 										<Typography className={'sub-title'} variant={'subtitle1'} component={'p'}>
-											Recently Visited
+											Recently Viewed
 										</Typography>
 									</div>
 								</Link>
 							</ListItem>
+							{user.memberType !== 'ADMIN' && (
+								<ListItem className={pathname === 'myReservations' ? 'focus' : ''}>
+									<Link
+										href={{
+											pathname: '/mypage',
+											query: { category: 'myReservations' },
+										}}
+										scroll={false}
+									>
+										<div className={'flex-box'}>
+											{category === 'myReservations' ? (
+												<img className={'com-icon'} src={'/img/icons/reviewWhite.svg'} alt={'com-icon'} />
+											) : (
+												<img className={'com-icon'} src={'/img/icons/review.svg'} alt={'com-icon'} />
+											)}
+
+											<Typography className={'sub-title'} variant={'subtitle1'} component={'p'}>
+												{user.memberType === 'STUDIO' ? 'Reservations' : 'My Reservations'}
+											</Typography>
+										</div>
+									</Link>
+								</ListItem>
+							)}
 							<ListItem className={pathname === 'followers' ? 'focus' : ''}>
 								<Link
 									href={{

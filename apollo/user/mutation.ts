@@ -19,7 +19,7 @@ export const SIGN_UP = gql`
 			memberDesc
 			memberWarnings
 			memberBlocks
-			memberProperties
+			memberPackages
 			memberRank
 			memberArticles
 			memberPoints
@@ -48,7 +48,7 @@ export const LOGIN = gql`
 			memberDesc
 			memberWarnings
 			memberBlocks
-			memberProperties
+			memberPackages
 			memberRank
 			memberPoints
 			memberLikes
@@ -74,7 +74,7 @@ export const UPDATE_MEMBER = gql`
 			memberImage
 			memberAddress
 			memberDesc
-			memberProperties
+			memberPackages
 			memberRank
 			memberArticles
 			memberPoints
@@ -105,7 +105,7 @@ export const LIKE_TARGET_MEMBER = gql`
 			memberDesc
 			memberWarnings
 			memberBlocks
-			memberProperties
+			memberPackages
 			memberRank
 			memberPoints
 			memberLikes
@@ -119,90 +119,90 @@ export const LIKE_TARGET_MEMBER = gql`
 `;
 
 /**************************
- *        PROPERTY        *
+ *        PACKAGE        *
  *************************/
 
-export const CREATE_PROPERTY = gql`
-	mutation CreateProperty($input: PropertyInput!) {
-		createProperty(input: $input) {
+export const CREATE_PACKAGE = gql`
+	mutation CreatePackage($input: PackageInput!) {
+		createPackage(input: $input) {
 			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
+			packageType
+			packageStatus
+			packageLocation
+			packageAddress
+			packageTitle
+			packagePrice
+			packageDuration
+			packagePhotos
+			packageStyle
+			packageViews
+			packageLikes
+			packageImages
+			packageDesc
+			packageAlbum
+			packageDress
+			packageMakeup
 			memberId
-			soldAt
+			pausedAt
 			deletedAt
-			constructedAt
 			createdAt
 			updatedAt
 		}
 	}
 `;
 
-export const UPDATE_PROPERTY = gql`
-	mutation UpdateProperty($input: PropertyUpdate!) {
-		updateProperty(input: $input) {
+export const UPDATE_PACKAGE = gql`
+	mutation UpdatePackage($input: PackageUpdate!) {
+		updatePackage(input: $input) {
 			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
+			packageType
+			packageStatus
+			packageLocation
+			packageAddress
+			packageTitle
+			packagePrice
+			packageDuration
+			packagePhotos
+			packageStyle
+			packageViews
+			packageLikes
+			packageImages
+			packageDesc
+			packageAlbum
+			packageDress
+			packageMakeup
 			memberId
-			soldAt
+			pausedAt
 			deletedAt
-			constructedAt
 			createdAt
 			updatedAt
 		}
 	}
 `;
 
-export const LIKE_TARGET_PROPERTY = gql`
-	mutation LikeTargetProperty($input: String!) {
-		likeTargetProperty(propertyId: $input) {
+export const LIKE_TARGET_PACKAGE = gql`
+	mutation LikeTargetPackage($input: String!) {
+		likeTargetPackage(packageId: $input) {
 			_id
-			propertyType
-			propertyStatus
-			propertyLocation
-			propertyAddress
-			propertyTitle
-			propertyPrice
-			propertySquare
-			propertyBeds
-			propertyRooms
-			propertyViews
-			propertyLikes
-			propertyImages
-			propertyDesc
-			propertyBarter
-			propertyRent
+			packageType
+			packageStatus
+			packageLocation
+			packageAddress
+			packageTitle
+			packagePrice
+			packageDuration
+			packagePhotos
+			packageStyle
+			packageViews
+			packageLikes
+			packageImages
+			packageDesc
+			packageAlbum
+			packageDress
+			packageMakeup
 			memberId
-			soldAt
+			pausedAt
 			deletedAt
-			constructedAt
 			createdAt
 			updatedAt
 		}
@@ -323,6 +323,50 @@ export const UNSUBSCRIBE = gql`
 			_id
 			followingId
 			followerId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+/**************************
+ *      RESERVATION       *
+ *************************/
+
+export const CREATE_RESERVATION = gql`
+	mutation CreateReservation($input: ReservationInput!) {
+		createReservation(input: $input) {
+			_id
+			reservationStatus
+			reservationDate
+			reservationPrice
+			reservationNote
+			studioId
+			memberId
+			packageId
+			confirmedAt
+			cancelledAt
+			completedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const UPDATE_RESERVATION = gql`
+	mutation UpdateReservation($input: ReservationUpdate!) {
+		updateReservation(input: $input) {
+			_id
+			reservationStatus
+			reservationDate
+			reservationPrice
+			reservationNote
+			studioId
+			memberId
+			packageId
+			confirmedAt
+			cancelledAt
+			completedAt
 			createdAt
 			updatedAt
 		}

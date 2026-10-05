@@ -33,7 +33,7 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
 const Faq = () => {
 	const device = useDeviceDetect();
 	const router = useRouter();
-	const [category, setCategory] = useState<string>('property');
+	const [category, setCategory] = useState<string>('package');
 	const [expanded, setExpanded] = useState<string | false>('panel1');
 
 	/** APOLLO REQUESTS **/
@@ -49,73 +49,73 @@ const Faq = () => {
 	};
 
 	const data: any = {
-		property: [
+		package: [
 			{
 				id: '00f5a45ed8897f8090116a01',
-				subject: 'Are the properties displayed on the site reliable?',
-				content: 'of course we only have verified properties',
+				subject: 'Are the packages displayed on the site reliable?',
+				content: 'Yes. Every package is published by a registered studio and can be reviewed by couples after the shoot.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a22',
-				subject: 'What types of properties do you offer?',
-				content: 'We offer single-family homes, condos, townhouses, apartments, and penthouses',
+				subject: 'What types of packages do you offer?',
+				content: 'Packages come in three tiers (Pearl, Gold and Diamond) and four styles: Classic, Modern, Vintage and Romantic.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a21',
-				subject: 'How can I search for properties on your website?',
-				content: 'Simply use our search bar to enter location, price range, bedrooms/bathrooms, and property type.',
+				subject: 'How can I search for packages on your website?',
+				content: 'Use the search bar and filters to choose location, package type, style, edited photo count, shoot duration and price range.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a23',
-				subject: 'Do you provide assistance for first-time homebuyers?',
-				content: 'Yes, we guide you through the process and help find suitable financing.',
+				subject: 'What is included in a package?',
+				content: 'Each package lists its shoot duration, number of edited photos and whether an album, dress and makeup are included.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a24',
-				subject: 'What should I consider when buying a property?',
-				content: 'Location, condition, size, amenities, and future development plans.',
+				subject: 'What should I consider when choosing a package?',
+				content: 'Compare the studio portfolio, style, shoot duration, number of edited photos and the extras included.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a25',
-				subject: 'How long does the home-buying process typically take?',
-				content: 'Usually 3 to 6 days, depending on various factors.',
+				subject: 'How far in advance should we reserve?',
+				content: 'We recommend reserving 1 to 3 months before your preferred date, especially for spring and autumn weekends.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a29',
-				subject: 'What happens if I encounter issues with the property after purchase?',
-				content: 'We offer post-purchase support to address any concerns promptly.',
+				subject: 'What happens if there is an issue after the shoot?',
+				content: 'Contact the studio first; if it is not resolved, our support team will help mediate.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a28',
-				subject: 'Do you offer properties in specific neighborhoods?',
-				content: 'Yes, we have listings in various neighborhoods based on your preferences.',
+				subject: 'Do you offer packages in specific cities?',
+				content: 'Yes, packages are available in Seoul, Busan, Incheon, Daegu, Gyeongju, Gwangju, Chonju, Daejon and Jeju.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a27',
-				subject: 'Can I sell my property through your website?',
-				content: 'Absolutely, we provide services for selling properties as well.',
+				subject: 'Can I save packages to compare later?',
+				content: 'Yes, like a package to add it to Saved Packages in My Page.',
 			},
 			{
 				id: '00f5a45ed8897f8090116b99',
-				subject: 'What if I need help understanding legal aspects of property purchase?',
-				content: 'Our team can provide basic guidance and recommend legal professionals if needed.',
+				subject: 'Can a package be paused?',
+				content: 'Studios may temporarily pause a package; paused packages are hidden from search until reactivated.',
 			},
 		],
 		payment: [
 			{
 				id: '00f5a45ed8897f8090116a02',
 				subject: 'How can I make the payment?',
-				content: 'you make the payment through an agent!',
+				content: 'Payment is arranged directly with the studio.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a91',
 				subject: 'Are there any additional fees for using your services?',
-				content: 'No, our services are free for buyers. Sellers pay a commission upon successful sale.',
+				content: 'No, browsing and reserving are free for couples.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a92',
 				subject: 'Is there an option for installment payments?',
-				content: 'Yes, we offer installment payment plans for certain properties. Please inquire for more details.',
+				content: 'Yes, we offer installment payment plans for certain packages. Please inquire for more details.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a93',
@@ -161,117 +161,106 @@ const Faq = () => {
 		buyers: [
 			{
 				id: '00f5a45ed8897f8090116a03',
-				subject: 'What should buyers pay attention to?',
-				content: 'Buyers should check and decide whether the property they want to buy or rent is actually suitable!',
+				subject: 'What should couples pay attention to?',
+				content: 'Check the studio portfolio, reviews and exactly what the package includes before reserving.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a85',
-				subject: 'How can I determine if a property is within my budget?',
-				content:
-					'Calculate your budget by considering your income, down payment, and potential mortgage payments. Our agents can assist you within your budget.',
+				subject: 'How can I find a package within my budget?',
+				content: 'Use the price range filter on the package search page to see packages within your budget.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a84',
-				subject: 'What documents do I need to provide when purchasing a property?',
-				content:
-					"You'll typically need identification, proof of income, bank statements, and any necessary loan documentation. Our team will guide you through.",
+				subject: 'What information do I need to make a reservation?',
+				content: 'Pick a date, add an optional note for the studio, and submit the reservation from the package page.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a83',
-				subject: 'What factors should I consider when choosing a neighborhood?',
-				content:
-					'Consider factors such as location, safety, schools, amenities, transportation, and future development plans.',
+				subject: 'How will I know my reservation is confirmed?',
+				content: 'The status in My Reservations changes from Pending to Confirmed once the studio accepts it.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a82',
-				subject: 'Can I negotiate the price of a property?',
-				content:
-					'Yes, you can negotiate the price of a property. Our agents will assist you in making competitive offers and negotiating terms with the seller.',
+				subject: 'Can I cancel a reservation?',
+				content: 'Yes, pending or confirmed reservations can be cancelled from My Reservations.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a81',
-				subject: 'What are some red flags to watch out for when viewing properties?',
-				content:
-					'Watch out for signs of structural damage, water damage, mold, outdated systems, and undesirable neighborhood conditions.',
+				subject: 'Can we bring our own dress or makeup artist?',
+				content: 'If the package does not include dress or makeup, you can usually bring your own; confirm with the studio in your reservation note.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a80',
-				subject: 'Do you provide assistance with property inspections?',
-				content:
-					'Yes, we can recommend reputable inspectors and accompany you during property inspections to identify any potential issues.',
+				subject: 'Can we choose an outdoor location?',
+				content: 'Many studios offer outdoor shoots; check the package description or ask the studio.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a79',
-				subject: 'How long does it typically take to find the right property?',
-				content:
-					'The timeframe varies depending on your preferences and market conditions. Our agents will work diligently to find the right property as quickly as possible.',
+				subject: 'How long until we receive the edited photos?',
+				content: 'Delivery times vary by studio; most deliver edited photos within 2 to 6 weeks.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a78',
-				subject: 'What are the advantages of using a real estate agent when buying a property?',
-				content:
-					'Real estate agents provide expertise, negotiation skills, and guidance throughout the buying process, ultimately saving you time and hassle.',
+				subject: 'Can I follow a studio?',
+				content: 'Yes, follow a studio to keep track of its new packages.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a77',
-				subject: 'What happens if I change my mind about a property after making an offer?',
-				content:
-					'Depending on the terms of the offer and the stage of the transaction, you may have options to withdraw your offer.',
+				subject: 'Can I leave a review after the shoot?',
+				content: 'Yes, you can leave comments on the package and studio pages.',
 			},
 		],
 
-		agents: [
+		studios: [
 			{
 				id: '00f5a45ed8897f8090116a04',
-				subject: 'What do I need to do if I want to become an agent?',
-				content:
-					'If you really decide to become an agent, you should read our terms and conditions and contact the admin!',
+				subject: 'How do I become a studio on La Memoria?',
+				content: 'Sign up and choose the Studio account type, then complete your studio profile.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a62',
-				subject: 'What qualifications do I need to become a real estate agent?',
-				content: 'Complete pre-licensing course, pass licensing exam, meet state requirements.',
+				subject: 'How do I publish a package?',
+				content: 'Go to My Page, choose Add Package, fill in the package details, upload photos and save.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a63',
-				subject: 'How do I find clients as a new real estate agent?',
-				content: 'Build network, use online/offline marketing, join reputable brokerage.',
+				subject: 'What do the package statuses mean?',
+				content: 'Active packages are visible in search, Paused and Hold packages are hidden, and Deleted packages are removed.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a64',
-				subject: 'What are some effective marketing strategies for selling properties?',
-				content: 'Use social media, online platforms, networking events, and direct mail.',
+				subject: 'How do I manage reservations?',
+				content: 'Open Reservations in My Page to confirm, complete or cancel couple reservations.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a65',
-				subject: 'How do I handle negotiations with buyers and sellers?',
-				content: 'Develop strong negotiation skills, understand market trends, represent client interests.',
+				subject: 'How can I attract more couples?',
+				content: 'Use high quality sample photos, a clear description and competitive pricing.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a66',
-				subject: 'What should I do to stay updated with market trends and changes?',
-				content: 'Attend industry events, follow real estate news, participate in training.',
+				subject: 'Can I edit a package after publishing?',
+				content: 'Yes, edit any non-deleted package from My Packages.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a67',
-				subject: 'How do I handle difficult clients or situations?',
-				content:
-					'Approach with professionalism, empathy, and patience. Listen actively, address issues collaboratively.',
+				subject: 'How is the package rank calculated?',
+				content: 'Rank is based on package views and likes and is refreshed regularly.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a68',
-				subject: 'What tools and technologies should I utilize as a real estate agent?',
-				content: 'Use CRM software, virtual tours, digital marketing tools, and mobile apps.',
+				subject: 'How should I handle difficult situations with couples?',
+				content: 'Communicate clearly, document agreements in the reservation note, and contact support if needed.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a69',
-				subject: 'How do I ensure compliance with real estate laws and regulations?',
-				content: 'Stay updated with laws, attend education courses, consult legal professionals.',
+				subject: 'Can I upload more than five photos?',
+				content: 'Each upload supports up to five images; choose your strongest work.',
 			},
 			{
 				id: '00f5a45ed8897f8090116a70',
-				subject: 'What strategies can I use to grow my real estate business?',
-				content: 'Build relationships, provide exceptional service, seek referrals, and continuously improve skills.',
+				subject: 'How do I stay visible on the homepage?',
+				content: 'Popular and top packages are chosen by views, likes and rank, so keep your packages active and up to date.',
 			},
 		],
 		membership: [
@@ -302,7 +291,7 @@ const Faq = () => {
 			},
 			{
 				id: '00f5a45ed8897f8090116a56',
-				subject: 'Do members receive discounts on property listings or services?',
+				subject: 'Do members receive discounts on packages or services?',
 				content: 'Membership discounts are not part of our current offerings.',
 			},
 			{
@@ -422,7 +411,7 @@ const Faq = () => {
 			},
 			{
 				id: '00f5a45ed8897f8090116a31',
-				subject: 'Do you host events or webinars related to real estate?',
+				subject: 'Do you host wedding fairs or events?',
 				content: "We're not hosting events or webinars at this time.",
 			},
 			{
@@ -440,12 +429,12 @@ const Faq = () => {
 			<Stack className={'faq-content'}>
 				<Box className={'categories'} component={'div'}>
 					<div
-						className={category === 'property' ? 'active' : ''}
+						className={category === 'package' ? 'active' : ''}
 						onClick={() => {
-							changeCategoryHandler('property');
+							changeCategoryHandler('package');
 						}}
 					>
-						Property
+						Package
 					</div>
 					<div
 						className={category === 'payment' ? 'active' : ''}
@@ -461,15 +450,15 @@ const Faq = () => {
 							changeCategoryHandler('buyers');
 						}}
 					>
-						Foy Buyers
+						For Couples
 					</div>
 					<div
-						className={category === 'agents' ? 'active' : ''}
+						className={category === 'studios' ? 'active' : ''}
 						onClick={() => {
-							changeCategoryHandler('agents');
+							changeCategoryHandler('studios');
 						}}
 					>
-						For Agents
+						For Studios
 					</div>
 					<div
 						className={category === 'membership' ? 'active' : ''}

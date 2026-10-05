@@ -25,7 +25,7 @@ const MemberFollowers = (props: MemberFollowsProps) => {
 	const device = useDeviceDetect();
 	const router = useRouter();
 	const [total, setTotal] = useState<number>(0);
-	const category: any = router.query?.category ?? 'properties';
+	const category: any = router.query?.category ?? 'packages';
 	const [followInquiry, setFollowInquiry] = useState<FollowInquiry>(initialInput);
 	const [memberFollowers, setMemberFollowers] = useState<Follower[]>([]);
 	const user = useReactiveVar(userVar);
@@ -68,7 +68,7 @@ const MemberFollowers = (props: MemberFollowsProps) => {
 	};
 
 	if (device === 'mobile') {
-		return <div>NESTAR FOLLOWS MOBILE</div>;
+		return <div>LA MEMORIA FOLLOWS MOBILE</div>;
 	} else {
 		return (
 			<div id="member-follows-page">

@@ -2,24 +2,24 @@ import React, { useState } from 'react';
 import { NextPage } from 'next';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import { Pagination, Stack, Typography } from '@mui/material';
-import PropertyCard from '../property/PropertyCard';
-import { Property } from '../../types/property/property';
+import PackageCard from '../package/PackageCard';
+import { Package } from '../../types/package/package';
 import { T } from '../../types/common';
 import { useMutation, useQuery } from '@apollo/client';
-import { LIKE_TARGET_PROPERTY } from '../../../apollo/user/mutation';
+import { LIKE_TARGET_PACKAGE } from '../../../apollo/user/mutation';
 import { GET_FAVORITES } from '../../../apollo/user/query';
 import { Messages } from '../../config';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 
 const MyFavorites: NextPage = () => {
 	const device = useDeviceDetect();
-	const [myFavorites, setMyFavorites] = useState<Property[]>([]);
+	const [myFavorites, setMyFavorites] = useState<Package[]>([]);
 	const [total, setTotal] = useState<number>(0);
 	const [searchFavorites, setSearchFavorites] = useState<T>({ page: 1, limit: 6 });
 
 	/** APOLLO REQUESTS **/
 
-	const [likeTargetProperty] = useMutation(LIKE_TARGET_PROPERTY);
+	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
 
 	const {
 		loading: getFavoritesLoading,
@@ -42,25 +42,25 @@ const MyFavorites: NextPage = () => {
 		setSearchFavorites({ ...searchFavorites, page: value });
 	};
 
-	const likePropertyHandler = async (user: T, id: string) => {
+	const likePackageHandler = async (user: T, id: string) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Messages.error2);
 
-			await likeTargetProperty({
+			await likeTargetPackage({
 				variables: { input: id },
 			});
 
 			await getFavoritesRefetch({ input: searchFavorites });
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
-			console.log('Error, likePropertyHandler', err.message);
+			console.log('Error, likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
 	if (device === 'mobile') {
-		return <div>NESTAR MY FAVORITES MOBILE</div>;
+		return <div>LA MEMORIA SAVED PACKAGES MOBILE</div>;
 	} else {
 		return (
 			<div id="my-favorites-page">
@@ -72,8 +72,8 @@ const MyFavorites: NextPage = () => {
 				</Stack>
 				<Stack className="favorites-list-box">
 					{myFavorites?.length ? (
-						myFavorites?.map((property: Property) => {
-							return <PropertyCard property={property} likePropertyHandler={likePropertyHandler} myFavorites={true} />;
+						myFavorites?.map((pkg: Package) => {
+							return <PackageCard pkg={pkg} likePackageHandler={likePackageHandler} myFavorites={true} />;
 						})
 					) : (
 						<div className={'no-data'}>
@@ -95,7 +95,7 @@ const MyFavorites: NextPage = () => {
 						</Stack>
 						<Stack className="total-result">
 							<Typography>
-								Total {total} favorite propert{total > 1 ? 'ies' : 'y'}
+								Total {total} saved package{total > 1 ? 's' : ''}
 							</Typography>
 						</Stack>
 					</Stack>

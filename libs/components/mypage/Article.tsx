@@ -6,7 +6,7 @@ const Article = () => {
 	const device = useDeviceDetect();
 
 	if (device === 'mobile') {
-		return <div>PROPERTY CARD</div>;
+		return <div>PACKAGE CARD</div>;
 	} else {
 		return (
 			<Stack className="card-config">

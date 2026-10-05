@@ -4,10 +4,11 @@ import { NextPage } from 'next';
 import { Stack } from '@mui/material';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import MyProperties from '../../libs/components/mypage/MyProperties';
+import MyPackages from '../../libs/components/mypage/MyPackages';
 import MyFavorites from '../../libs/components/mypage/MyFavorites';
 import RecentlyVisited from '../../libs/components/mypage/RecentlyVisited';
-import AddProperty from '../../libs/components/mypage/AddNewProperty';
+import MyReservations from '../../libs/components/mypage/MyReservations';
+import AddPackage from '../../libs/components/mypage/AddNewPackage';
 import MyProfile from '../../libs/components/mypage/MyProfile';
 import MyArticles from '../../libs/components/mypage/MyArticles';
 import { useMutation, useReactiveVar } from '@apollo/client';
@@ -125,10 +126,11 @@ const MyPage: NextPage = () => {
 							</Stack>
 							<Stack className="main-config" mb={'76px'}>
 								<Stack className={'list-config'}>
-									{category === 'addProperty' && <AddProperty />}
-									{category === 'myProperties' && <MyProperties />}
+									{category === 'addPackage' && <AddPackage />}
+									{category === 'myPackages' && <MyPackages />}
 									{category === 'myFavorites' && <MyFavorites />}
 									{category === 'recentlyVisited' && <RecentlyVisited />}
+									{category === 'myReservations' && <MyReservations />}
 									{category === 'myArticles' && <MyArticles />}
 									{category === 'writeArticle' && <WriteArticle />}
 									{category === 'myProfile' && <MyProfile />}

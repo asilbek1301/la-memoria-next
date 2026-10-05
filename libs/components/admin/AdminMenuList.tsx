@@ -6,7 +6,7 @@ import Collapse from '@mui/material/Collapse';
 import Typography from '@mui/material/Typography';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { ChatsCircle, Headset, User, UserCircleGear } from 'phosphor-react';
+import { CalendarCheck, ChatsCircle, Headset, User, UserCircleGear } from 'phosphor-react';
 import cookies from 'js-cookie';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
@@ -30,8 +30,11 @@ const AdminMenuList = (props: any) => {
 		if (device === 'mobile') setMobileLayout(true);
 
 		switch (pathnames[1]) {
-			case 'properties':
-				setClickMenu(['Properties']);
+			case 'packages':
+				setClickMenu(['Packages']);
+				break;
+			case 'reservations':
+				setClickMenu(['Reservations']);
 				break;
 			case 'community':
 				setClickMenu(['Community']);
@@ -84,9 +87,14 @@ const AdminMenuList = (props: any) => {
 			on_click: () => subMenuChangeHandler('Users'),
 		},
 		{
-			title: 'Properties',
+			title: 'Packages',
 			icon: <UserCircleGear size={20} color="#bdbdbd" weight="fill" />,
-			on_click: () => subMenuChangeHandler('Properties'),
+			on_click: () => subMenuChangeHandler('Packages'),
+		},
+		{
+			title: 'Reservations',
+			icon: <CalendarCheck size={20} color="#bdbdbd" weight="fill" />,
+			on_click: () => subMenuChangeHandler('Reservations'),
 		},
 		{
 			title: 'Community',
@@ -102,7 +110,8 @@ const AdminMenuList = (props: any) => {
 
 	const sub_menu_set: any = {
 		Users: [{ title: 'List', url: '/_admin/users' }],
-		Properties: [{ title: 'List', url: '/_admin/properties' }],
+		Packages: [{ title: 'List', url: '/_admin/packages' }],
+		Reservations: [{ title: 'List', url: '/_admin/reservations' }],
 		Community: [{ title: 'List', url: '/_admin/community' }],
 		Cs: [
 			{ title: 'FAQ', url: '/_admin/cs/faq' },
