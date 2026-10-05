@@ -66,8 +66,10 @@ body::-webkit-scrollbar {
 					align-items: center;
 					justify-content: space-between;
 					.logo-box {
-						img {
+						img,
+						.lm-logo svg {
 							width: 150px;
+							height: auto;
 							cursor: pointer;
 						}
 					}
