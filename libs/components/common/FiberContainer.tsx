@@ -30,16 +30,21 @@ function Page({ m = 0.4, urls, ...props }: any) {
 	);
 }
 
+/** 15 unique photos, 3 per screen **/
+const galleryPages: string[][] = Array.from({ length: 5 }, (_, page) =>
+	[1, 2, 3].map((n) => `/img/fiber/img${page * 3 + n}.jpg`),
+);
+
 function Pages() {
 	const { width } = useThree((state) => state.viewport);
 
 	return (
 		<>
-			<Page position={[width * 0, 0, 0]} urls={['/img/fiber/img7.jpg', '/img/fiber/img8.jpg', '/img/fiber/img1.jpg']} />
-			<Page position={[width * 1, 0, 0]} urls={['/img/fiber/img4.jpg', '/img/fiber/img5.jpg', '/img/fiber/img6.jpg']} />
-			<Page position={[width * 2, 0, 0]} urls={['/img/fiber/img2.jpg', '/img/fiber/img3.jpg', '/img/fiber/img4.jpg']} />
-			<Page position={[width * 3, 0, 0]} urls={['/img/fiber/img7.jpg', '/img/fiber/img8.jpg', '/img/fiber/img1.jpg']} />
-			<Page position={[width * 4, 0, 0]} urls={['/img/fiber/img4.jpg', '/img/fiber/img5.jpg', '/img/fiber/img6.jpg']} />
+			{galleryPages.map((urls, index) => (
+				<Page key={index} position={[width * index, 0, 0]} urls={urls} />
+			))}
+			{/* mirrors the first screen so the infinite scroll wraps seamlessly */}
+			<Page position={[width * galleryPages.length, 0, 0]} urls={galleryPages[0]} />
 		</>
 	);
 }
@@ -49,7 +54,7 @@ export default function FiberContainer() {
 		<div className="threeJSContainer" style={{ marginTop: '100px', width: '100%', height: '512px' }}>
 			<Canvas gl={{ antialias: false }} dpr={[1, 1.5]}>
 				<Suspense fallback={null}>
-					<ScrollControls infinite horizontal damping={4} pages={4} distance={1}>
+					<ScrollControls infinite horizontal damping={4} pages={galleryPages.length + 1} distance={1}>
 						<Scroll>
 							<Pages />
 						</Scroll>
