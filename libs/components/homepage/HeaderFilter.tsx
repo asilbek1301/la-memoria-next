@@ -11,6 +11,8 @@ import { PackageLocation, PackageStyle, PackageType } from '../../enums/package.
 import { PackagesInquiry } from '../../types/package/package.input';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
+import { dropdownVariants, glassPress, itemFadeUp, searchShellVariants, springSnappy } from '../common/motion';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -298,70 +300,143 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 		return <div>HEADER FILTER MOBILE</div>;
 	} else {
 		return (
-			<>
-				<Stack className={'search-box'}>
-					<Stack className={'select-box'}>
-						<Box component={'div'} className={`box ${openLocation ? 'on' : ''}`} onClick={locationStateChangeHandler}>
-							<span>{searchFilter?.search?.locationList ? searchFilter?.search?.locationList[0] : t('Location')} </span>
-							<ExpandMoreIcon />
-						</Box>
-						<Box className={`box ${openType ? 'on' : ''}`} onClick={typeStateChangeHandler}>
-							<span> {searchFilter?.search?.typeList ? searchFilter?.search?.typeList[0] : t('Package type')} </span>
-							<ExpandMoreIcon />
-						</Box>
-						<Box className={`box ${openRooms ? 'on' : ''}`} onClick={roomStateChangeHandler}>
-							<span>
-								{searchFilter?.search?.styleList ? searchFilter?.search?.styleList[0] : t('Style')}
-							</span>
-							<ExpandMoreIcon />
-						</Box>
-					</Stack>
-					<Stack className={'search-box-other'}>
-						<Box className={'advanced-filter'} onClick={() => advancedFilterHandler(true)}>
+			<MotionConfig reducedMotion="user">
+				<motion.div className={'search-box'} variants={searchShellVariants} initial="hidden" animate="visible">
+					<div className={'select-box'}>
+						{[
+							{
+								key: 'location',
+								open: openLocation,
+								onClick: locationStateChangeHandler,
+								label: searchFilter?.search?.locationList ? searchFilter?.search?.locationList[0] : t('Location'),
+							},
+							{
+								key: 'type',
+								open: openType,
+								onClick: typeStateChangeHandler,
+								label: searchFilter?.search?.typeList ? searchFilter?.search?.typeList[0] : t('Package type'),
+							},
+							{
+								key: 'style',
+								open: openRooms,
+								onClick: roomStateChangeHandler,
+								label: searchFilter?.search?.styleList ? searchFilter?.search?.styleList[0] : t('Style'),
+							},
+						].map((chip) => (
+							<motion.div
+								key={chip.key}
+								variants={itemFadeUp}
+								{...glassPress}
+								className={`box ${chip.open ? 'on' : ''}`}
+								onClick={chip.onClick}
+								role={'button'}
+								tabIndex={0}
+							>
+								{chip.open && (
+									<motion.span layoutId={'search-active'} className={'box-highlight'} transition={springSnappy} />
+								)}
+								<span className={'box-label'}>{chip.label}</span>
+								<motion.span className={'box-icon'} animate={{ rotate: chip.open ? 180 : 0 }} transition={springSnappy}>
+									<ExpandMoreIcon />
+								</motion.span>
+							</motion.div>
+						))}
+					</div>
+					<div className={'search-box-other'}>
+						<motion.div
+							variants={itemFadeUp}
+							{...glassPress}
+							className={'advanced-filter'}
+							onClick={() => advancedFilterHandler(true)}
+						>
 							<img src="/img/icons/tune.svg" alt="" />
 							<span>{t('Advanced')}</span>
-						</Box>
-						<Box className={'search-btn'} onClick={pushSearchHandler}>
+						</motion.div>
+						<motion.div variants={itemFadeUp} {...glassPress} className={'search-btn'} onClick={pushSearchHandler}>
 							<img src="/img/icons/search_white.svg" alt="" />
-						</Box>
-					</Stack>
+						</motion.div>
+					</div>
 
 					{/*MENU */}
-					<div className={`filter-location ${openLocation ? 'on' : ''}`} ref={locationRef}>
-						{packageLocation.map((location: string) => {
-							return (
-								<div onClick={() => packageLocationSelectHandler(location)} key={location}>
-									<img src={`img/banner/cities/${location}.webp`} alt="" />
-									<span>{location}</span>
-								</div>
-							);
-						})}
-					</div>
+					<AnimatePresence>
+						{openLocation && (
+							<motion.div
+								key={'filter-location'}
+								className={'filter-location'}
+								ref={locationRef}
+								variants={dropdownVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
+							>
+								{packageLocation.map((location: string) => {
+									return (
+										<motion.div
+											variants={itemFadeUp}
+											whileHover={{ y: -3 }}
+											onClick={() => packageLocationSelectHandler(location)}
+											key={location}
+										>
+											<img src={`img/banner/cities/${location}.webp`} alt="" />
+											<span>{location}</span>
+										</motion.div>
+									);
+								})}
+							</motion.div>
+						)}
 
-					<div className={`filter-type ${openType ? 'on' : ''}`} ref={typeRef}>
-						{packageType.map((type: string) => {
-							return (
-								<div
-									style={{ backgroundImage: `url(${packageTypeImages[type]})` }}
-									onClick={() => packageTypeSelectHandler(type)}
-									key={type}
-								>
-									<span>{type}</span>
-								</div>
-							);
-						})}
-					</div>
+						{openType && (
+							<motion.div
+								key={'filter-type'}
+								className={'filter-type'}
+								ref={typeRef}
+								variants={dropdownVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
+							>
+								{packageType.map((type: string) => {
+									return (
+										<motion.div
+											variants={itemFadeUp}
+											whileHover={{ y: -4, scale: 1.02 }}
+											style={{ backgroundImage: `url(${packageTypeImages[type]})` }}
+											onClick={() => packageTypeSelectHandler(type)}
+											key={type}
+										>
+											<span>{type}</span>
+										</motion.div>
+									);
+								})}
+							</motion.div>
+						)}
 
-					<div className={`filter-rooms ${openRooms ? 'on' : ''}`} ref={roomsRef}>
-						{packageStyle.map((style: string) => {
-							return (
-								<span onClick={() => packageStyleSelectHandler(style)} key={style}>
-									{style}
-								</span>
-							);
-						})}
-					</div>
-				</Stack>
+						{openRooms && (
+							<motion.div
+								key={'filter-rooms'}
+								className={'filter-rooms'}
+								ref={roomsRef}
+								variants={dropdownVariants}
+								initial="hidden"
+								animate="visible"
+								exit="exit"
+							>
+								{packageStyle.map((style: string) => {
+									return (
+										<motion.span
+											variants={itemFadeUp}
+											{...glassPress}
+											onClick={() => packageStyleSelectHandler(style)}
+											key={style}
+										>
+											{style}
+										</motion.span>
+									);
+								})}
+							</motion.div>
+						)}
+					</AnimatePresence>
+				</motion.div>
 
 				{/* ADVANCED FILTER MODAL */}
 				<Modal
@@ -372,7 +447,12 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 				>
 					{/* @ts-ignore */}
 					<Box sx={style}>
-						<Box className={'advanced-filter-modal'}>
+						<motion.div
+							className={'advanced-filter-modal'}
+							initial={{ opacity: 0, scale: 0.96, y: 12 }}
+							animate={{ opacity: 1, scale: 1, y: 0 }}
+							transition={springSnappy}
+						>
 							<div className={'close'} onClick={() => advancedFilterHandler(false)}>
 								<CloseIcon />
 							</div>
@@ -496,10 +576,10 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 									Search
 								</Button>
 							</div>
-						</Box>
+						</motion.div>
 					</Box>
 				</Modal>
-			</>
+			</MotionConfig>
 		);
 	}
 };

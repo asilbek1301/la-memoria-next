@@ -49,113 +49,133 @@ body::-webkit-scrollbar {
 		.navbar {
 			.navbar-main {
 				position: fixed;
-				padding: 22px 0px;
-				width: 100%;
-				height: 87px;
+				top: 14px;
+				left: 0;
+				right: 0;
+				margin: 0 auto;
+				padding: 0 24px;
+				width: min(1348px, calc(100% - 48px));
+				height: 72px;
 				display: flex;
 				flex-direction: row;
+				align-items: center;
+				border-radius: 999px;
 				box-sizing: border-box;
 				z-index: 99;
-				align-items: center;
-				border-top: 1px solid rgba(255, 255, 255, 0.07);
-				&.transparent {
-					background-color: #181a209e;
+				.glass-backdrop {
+					position: absolute;
+					inset: 0;
+					pointer-events: none;
+					z-index: 0;
+					@include glass(rgba(24, 26, 32, 0.32), 24px, 999px);
+				}
+				&.solid .glass-backdrop {
+					background: rgba(24, 26, 32, 0.78);
 				}
 				.container {
+					position: relative;
+					width: 100%;
+					z-index: 1;
 					flex-direction: row;
 					align-items: center;
 					justify-content: space-between;
 					.logo-box {
+						display: flex;
+						align-items: center;
 						img,
 						.lm-logo svg {
-							width: 150px;
+							width: 140px;
 							height: auto;
 							cursor: pointer;
 						}
 					}
 					.router-box {
 						position: relative;
-						width: 617px;
 						display: flex;
 						flex-direction: row;
-						justify-content: space-between;
-						div {
+						align-items: center;
+						gap: 4px;
+						.nav-link {
 							position: relative;
-							color: #eeeeeeed;
-							font-family: $font;
-							font-size: 15px;
-							font-style: normal;
-							font-weight: 600;
-							line-height: normal;
+							padding: 10px 18px;
+							border-radius: 999px;
 							cursor: pointer;
-							.community_menu {
+							.nav-pill {
 								position: absolute;
-								left: -177%;
-								top: 30px;
-								width: 434px;
-								height: 33px;
-								background: white;
-								transition: all ease 2s;
-								&:before {
-									content: '';
-									display: block;
-									position: absolute;
-									top: 0;
-									right: 50%;
-									width: 10px;
-									height: 10px;
-									background: white;
-									transform: translateY(-50%) rotate(45deg);
-									z-index: 0;
-								}
+								inset: 0;
+								z-index: 0;
+								@include glass(rgba(255, 255, 255, 0.18), 12px, 999px);
+								box-shadow: $glass-highlight;
+							}
+							.nav-label {
+								position: relative;
+								z-index: 1;
+								color: rgba(238, 238, 238, 0.82);
+								font-family: $font;
+								font-size: 15px;
+								font-weight: 600;
+								white-space: nowrap;
+								transition: color 0.2s ease;
+							}
+							&:hover .nav-label,
+							&.active .nav-label {
+								color: #ffffff;
 							}
 						}
 					}
 					.user-box {
-						width: 270px;
 						display: flex;
 						flex-direction: row;
+						align-items: center;
 						justify-content: flex-end;
 						.join-box {
-							width: 184px;
-							height: 47px;
+							padding: 0 20px;
+							height: 46px;
 							display: flex;
 							align-items: center;
 							justify-content: center;
-							border-radius: 60px;
-							border: 1px solid #ffffff;
 							cursor: pointer;
+							@include glass(rgba(255, 255, 255, 0.12), 16px, 999px);
 							svg {
 								color: #ffffff;
-								margin-right: 10px;
+								margin-right: 8px;
 							}
 							span {
 								font-family: $font;
 								font-size: 14px;
-								font-style: normal;
 								font-weight: 600;
-								line-height: normal;
 								color: #ffffff;
+								white-space: nowrap;
 							}
 						}
 						.login-user {
+							display: flex;
+							cursor: pointer;
 							img {
 								width: 42px;
 								height: 42px;
 								border-radius: 50%;
 								object-fit: cover;
+								border: 2px solid $glass-border;
+								box-shadow: $glass-shadow;
 							}
 						}
 					}
 					.lan-box {
-						margin-left: 28px;
+						margin-left: 16px;
 						display: flex;
 						align-items: center;
+						gap: 8px;
 						.notification-icon {
 							color: white;
 						}
 						.btn-lang {
-							border-radius: 4px;
+							min-width: 0;
+							padding: 8px 12px;
+							@include glass(rgba(255, 255, 255, 0.12), 16px, 999px);
+							.flag {
+								display: flex;
+							}
 							img {
 								width: 24px;
 								height: 17px;
@@ -188,45 +208,72 @@ body::-webkit-scrollbar {
 			.search-box {
 				position: relative;
 				margin-top: 56px;
-				padding: 16px 29px;
+				padding: 14px;
 				width: 1094px;
-				height: 96px;
 				display: flex;
 				flex-direction: row;
+				align-items: center;
 				justify-content: space-between;
-				background: rgba(255, 255, 255, 0.28);
-				border-radius: 12px;
+				gap: 16px;
+				z-index: 5;
+				@include glass(rgba(255, 255, 255, 0.16), 28px, 24px);
 				.select-box {
-					width: 712px;
+					flex: 1;
 					display: flex;
 					flex-direction: row;
-					justify-content: space-between;
+					gap: 12px;
 					.box {
-						padding: 24px 22px;
-						width: 213px;
-						height: 56px;
+						position: relative;
+						flex: 1;
+						padding: 0 22px;
+						height: 60px;
 						display: flex;
 						flex-direction: row;
 						align-items: center;
 						justify-content: space-between;
-						border-radius: 12px;
-						background: rgba(255, 255, 255, 0.575);
+						border-radius: 16px;
+						border: 1px solid rgba(255, 255, 255, 0.22);
+						background: rgba(255, 255, 255, 0.12);
 						box-sizing: border-box;
 						cursor: pointer;
-						&.on {
-							background: #ffffff;
-							border: 1px solid #000;
-							color: #181a20;
+						outline: none;
+						transition: background 0.2s ease;
+						&:hover {
+							background: rgba(255, 255, 255, 0.22);
 						}
-						span {
-							color: #181a20;
+						&:focus-visible {
+							box-shadow: 0 0 0 3px rgba(241, 119, 66, 0.6);
+						}
+						.box-highlight {
+							position: absolute;
+							inset: 0;
+							z-index: 0;
+							border-radius: inherit;
+							background: rgba(255, 255, 255, 0.92);
+							box-shadow: $glass-highlight, 0 6px 20px rgba(0, 0, 0, 0.15);
+						}
+						.box-label,
+						.box-icon {
+							position: relative;
+							z-index: 1;
+							color: #ffffff;
+							transition: color 0.2s ease;
+						}
+						.box-label {
 							font-family: $font;
-							font-size: 14px;
-							font-style: normal;
-							font-weight: 400;
+							font-size: 15px;
+							font-weight: 500;
 							line-height: 26px;
+							text-transform: capitalize;
 						}
-						svg {
+						.box-icon {
+							display: flex;
+						}
+						&.on {
+							.box-label,
+							.box-icon {
+								color: #181a20;
+							}
 						}
 					}
 				}
@@ -234,179 +281,133 @@ body::-webkit-scrollbar {
 					display: flex;
 					flex-direction: row;
 					align-items: center;
+					gap: 12px;
 					.advanced-filter {
+						padding: 0 20px;
+						height: 60px;
 						display: flex;
 						flex-direction: row;
 						align-items: center;
+						cursor: pointer;
+						@include glass(rgba(255, 255, 255, 0.12), 16px, 999px);
 						img {
 							margin-right: 10px;
-							width: 25px;
-							height: 22px;
-							cursor: pointer;
+							width: 22px;
+							height: 20px;
 						}
 						span {
 							color: #fff;
 							font-family: $font;
-							font-size: 20px;
-							font-style: normal;
+							font-size: 16px;
 							font-weight: 600;
-							line-height: normal;
-							cursor: pointer;
 						}
 					}
 					.search-btn {
-						margin-left: 12px;
-						width: 62px;
-						height: 62px;
+						width: 60px;
+						height: 60px;
 						display: flex;
 						align-items: center;
 						justify-content: center;
-						border-radius: 55px;
-						background: #f17742;
 						cursor: pointer;
-						svg {
-							width: 20px;
-							height: 20px;
-							color: #ffffff;
+						@include glass(rgba(241, 119, 66, 0.88), 16px, 999px);
+						box-shadow: $glass-highlight, 0 8px 24px rgba(241, 119, 66, 0.45);
+						img {
+							width: 22px;
+							height: 22px;
 						}
 					}
 				}
-				.filter-location {
+				.filter-location,
+				.filter-type,
+				.filter-rooms {
 					position: absolute;
-					padding: 40px 60px;
-					width: 1094px;
-					min-height: 120px;
-					height: auto;
-					top: 96px;
-					right: 0px;
+					top: calc(100% + 12px);
+					left: 0;
+					width: 100%;
+					transform-origin: top center;
+					z-index: 3;
+					@include glass(rgba(24, 26, 32, 0.42), 30px, 20px);
+				}
+				.filter-location {
+					padding: 28px 40px;
 					display: flex;
 					flex-direction: row;
 					flex-wrap: wrap;
-					gap: 40px;
-					visibility: hidden;
-					border-radius: 12px;
-					background: #ffffff;
-					box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-					box-sizing: border-box;
-					z-index: 2;
-					&.on {
-						visibility: visible;
-						transition: 0.2s ease-out;
-						background: #fffdfd;
-					}
+					gap: 16px 24px;
 					div {
-						width: 295px;
+						width: 316px;
+						padding: 8px;
 						display: flex;
 						flex-direction: row;
 						align-items: center;
+						border-radius: 16px;
+						cursor: pointer;
+						transition: background 0.2s ease;
+						&:hover {
+							background: rgba(255, 255, 255, 0.12);
+						}
 						img {
-							width: 122px;
-							height: 85px;
-							border-radius: 15px;
-							cursor: pointer;
+							width: 112px;
+							height: 78px;
+							border-radius: 12px;
+							object-fit: cover;
 						}
 						span {
-							margin-left: 22px;
-							color: #181a20;
+							margin-left: 20px;
+							color: #ffffff;
 							font-family: $font;
-							font-size: 20px;
-							font-style: normal;
-							font-weight: 400;
-							line-height: 26px;
-							cursor: pointer;
+							font-size: 18px;
+							font-weight: 500;
 							text-transform: capitalize;
-						}
-						label {
-							line-height: 13px;
 						}
 					}
 				}
 				.filter-type {
-					position: absolute;
-					padding: 50px;
-					width: 1094px;
-					min-height: 120px;
-					height: auto;
-					top: 96px;
-					right: 0px;
+					padding: 28px;
 					display: flex;
 					flex-direction: row;
-					justify-content: space-between;
-					visibility: hidden;
-					border-radius: 12px;
-					background: #fff;
-					box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-					box-sizing: border-box;
-					z-index: 1;
-					&.on {
-						visibility: visible;
-						transition: 0.2s ease-out;
-						background: #fffdfd;
-					}
+					gap: 24px;
 					div {
 						position: relative;
-						width: 272px;
+						flex: 1;
 						height: 168px;
-						border-radius: 15px;
-						cursor: pointer;
+						border-radius: 16px;
+						border: 1px solid $glass-border;
 						background-size: cover;
+						background-position: center;
+						cursor: pointer;
+						overflow: hidden;
 						span {
 							position: absolute;
-							top: 13px;
+							top: 12px;
 							right: 12px;
-							padding: 1px 5px 5px 5px;
-							border-radius: 2px 2px 0px 0px;
+							padding: 4px 14px;
+							color: #ffffff;
 							font-family: $font;
-							font-size: 20px;
-							font-style: normal;
+							font-size: 16px;
 							font-weight: 700;
-							line-height: 26px;
-							background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
-							// -webkit-background-clip: text;
-							// -webkit-text-fill-color: transparent;
 							text-transform: capitalize;
+							@include glass(rgba(24, 26, 32, 0.35), 12px, 999px);
 						}
 					}
 				}
 				.filter-rooms {
-					position: absolute;
-					padding: 10px 92px;
-					width: 1094px;
-					min-height: 120px;
-					height: auto;
-					top: 96px;
-					right: 0px;
+					padding: 24px 40px;
 					display: flex;
 					flex-direction: row;
 					justify-content: space-between;
 					align-items: center;
-					visibility: hidden;
-					border-radius: 12px;
-					background: #fff;
-					box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
-					box-sizing: border-box;
-					z-index: 1;
-					&.on {
-						visibility: visible;
-						transition: 0.2s ease-out;
-						background: #fffdfd;
-					}
 					span {
-						display: flex;
-						align-items: center;
-						padding: 10px 30px;
-						border: 1px solid #fffdfd;
-						color: #181a20;
+						padding: 12px 32px;
+						color: #ffffff;
 						font-family: $font;
-						font-size: 20px;
-						font-style: normal;
-						font-weight: 400;
-						line-height: 26px;
+						font-size: 17px;
+						font-weight: 500;
+						text-transform: capitalize;
 						cursor: pointer;
+						@include glass(rgba(255, 255, 255, 0.1), 12px, 999px);
 						&:hover {
-							border-radius: 5px;
-							border: 1px solid #b9b9b9;
-							box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+							background: rgba(255, 255, 255, 0.24);
 						}
 					}
 				}
