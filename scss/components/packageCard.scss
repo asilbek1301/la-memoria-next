@@ -1,0 +1,271 @@
+/** LA MEMORIA PACKAGE CARD: shadcn/ui-style card (TrendPackageCard.tsx) **/
+/** Themed through shadcn-style CSS variables (see .agents/skills/shadcn-ui customization guide) **/
+
+$card-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+.lm-pkg-card {
+	--card: 0 0% 100%;
+	--card-foreground: 240 10% 3.9%; // zinc-950
+	--muted: 240 4.8% 95.9%; // zinc-100
+	--muted-foreground: 240 3.8% 46.1%; // zinc-500
+	--border: 240 5.9% 90%; // zinc-200
+	--border-strong: 240 4.9% 83.9%; // zinc-300
+	--primary: 9 79% 62%; // La Memoria coral #eb6753
+	--ring: 240 10% 3.9%;
+	--radius: 1rem;
+
+	position: relative;
+	width: 300px;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	background: hsl(var(--card));
+	border: 1px solid hsl(var(--border));
+	border-radius: var(--radius);
+	box-shadow: 0 1px 2px rgba(24, 24, 27, 0.05);
+	font-family: $font;
+	color: hsl(var(--card-foreground));
+	transition: transform 0.5s $card-ease, box-shadow 0.5s $card-ease, border-color 0.5s ease;
+
+	&:hover {
+		transform: translateY(-4px);
+		border-color: hsl(var(--border-strong));
+		box-shadow: 0 12px 32px -12px rgba(24, 24, 27, 0.18);
+
+		.lm-pkg-media img {
+			transform: scale(1.04);
+		}
+	}
+
+	&.mobile {
+		width: 272px;
+	}
+
+	.lm-pkg-media {
+		position: relative;
+		aspect-ratio: 4 / 3;
+		overflow: hidden;
+		background: hsl(var(--muted));
+
+		.lm-pkg-media-link {
+			width: 100%;
+			height: 100%;
+			cursor: pointer;
+
+			&:focus-visible {
+				outline: 2px solid hsl(var(--ring));
+				outline-offset: -2px;
+			}
+		}
+
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			transition: transform 0.6s $card-ease;
+		}
+
+		&::after {
+			content: '';
+			position: absolute;
+			inset: auto 0 0 0;
+			height: 40%;
+			background: linear-gradient(to top, rgba(24, 24, 27, 0.18), transparent);
+			pointer-events: none;
+		}
+	}
+
+	.lm-pkg-tier {
+		position: absolute;
+		top: 12px;
+		left: 12px;
+		z-index: 1;
+		padding: 4px 10px;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.82);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 1.2px;
+		line-height: 1.4;
+		color: hsl(var(--card-foreground));
+	}
+
+	.lm-pkg-like {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		z-index: 1;
+		width: 34px;
+		height: 34px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 999px;
+		background: rgba(255, 255, 255, 0.82);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		color: hsl(var(--card-foreground));
+		cursor: pointer;
+		transition: transform 0.3s $card-ease, color 0.3s ease;
+
+		svg {
+			font-size: 18px;
+		}
+		&:hover {
+			transform: scale(1.08);
+		}
+		&.liked {
+			color: hsl(var(--primary));
+		}
+		&:focus-visible {
+			outline: 2px solid hsl(var(--ring));
+			outline-offset: 2px;
+		}
+	}
+
+	.lm-pkg-content {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 16px 16px 14px;
+	}
+
+	.lm-pkg-eyebrow {
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 1.4;
+		letter-spacing: 0.8px;
+		text-transform: uppercase;
+		color: hsl(var(--muted-foreground));
+
+		svg {
+			font-size: 14px;
+		}
+	}
+
+	.lm-pkg-title {
+		margin: 0;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.4;
+		letter-spacing: -0.2px;
+		color: hsl(var(--card-foreground));
+		cursor: pointer;
+		transition: color 0.3s ease;
+
+		&:hover {
+			color: hsl(var(--primary));
+		}
+		&:focus-visible {
+			outline: 2px solid hsl(var(--ring));
+			outline-offset: 2px;
+			border-radius: 4px;
+		}
+	}
+
+	.lm-pkg-meta {
+		display: flex;
+		gap: 14px;
+		font-size: 13px;
+		line-height: 1.4;
+		color: hsl(var(--muted-foreground));
+
+		span {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+		}
+		svg {
+			font-size: 16px;
+		}
+	}
+
+	.lm-pkg-badges {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+		margin-top: 2px;
+	}
+
+	.lm-pkg-badge {
+		padding: 2px 10px;
+		border: 1px solid hsl(var(--border));
+		border-radius: 999px;
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 1.6;
+		color: hsl(var(--card-foreground));
+
+		&.muted {
+			color: hsl(var(--muted-foreground));
+			background: hsl(var(--muted));
+			border-color: transparent;
+		}
+	}
+
+	.lm-pkg-footer {
+		margin: 0 16px;
+		padding: 12px 0 14px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-top: 1px solid hsl(var(--muted));
+	}
+
+	.lm-pkg-price {
+		margin: 0;
+		font-size: 17px;
+		font-weight: 600;
+		line-height: 1.2;
+		letter-spacing: -0.3px;
+		color: hsl(var(--card-foreground));
+
+		small {
+			margin-left: 4px;
+			font-size: 11px;
+			font-weight: 400;
+			letter-spacing: 0;
+			color: hsl(var(--muted-foreground));
+		}
+	}
+
+	.lm-pkg-stats {
+		display: flex;
+		gap: 10px;
+		font-size: 12px;
+		color: hsl(var(--muted-foreground));
+
+		span {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+		}
+		svg {
+			font-size: 15px;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.lm-pkg-card,
+	.lm-pkg-card .lm-pkg-media img,
+	.lm-pkg-card .lm-pkg-like {
+		transition: none;
+	}
+	.lm-pkg-card:hover,
+	.lm-pkg-card:hover .lm-pkg-media img {
+		transform: none;
+	}
+}
