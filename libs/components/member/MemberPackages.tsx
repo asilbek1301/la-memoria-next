@@ -21,9 +21,6 @@ const MyPackages: NextPage = ({ initialInput, ...props }: any) => {
 	/** APOLLO REQUESTS **/
 
 	const {
-		loading: getPackagesLoading,
-		data: getPackagesData,
-		error: getPackagesError,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'network-only',

@@ -1,8 +1,9 @@
 /** VARIABLES **/
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-$font: 'Poppins', sans-serif;
+/** FONTS (Stitch "Editorial Archive"): loaded with next/font in libs/fonts.ts, exposed as CSS variables in pages/_app.tsx.
+    Each stack ends with Pretendard, so Korean text never falls back to a system font. **/
+$font: var(--font-body), Arial, sans-serif; // DM Sans: body, UI, labels, buttons
+$font-heading: var(--font-heading), Arial, sans-serif; // Chivo: display, headlines, titles
 
 /** LIQUID GLASS (web translation of SwiftUI glassEffect) **/
 $glass-border: rgba(255, 255, 255, 0.28);
@@ -22,5 +23,267 @@ $glass-accent: #f17742;
 	/* fallback when backdrop-filter is unsupported */
 	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 		background: rgba(24, 26, 32, 0.85);
+	}
+}
+
+/** LA MEMORIA EDITORIAL (Stitch "La Memoria Wedding Studios") **/
+
+$ivory: #fdf9f3;
+$ivory-deep: #f5f1ea;
+$sand: #efe6da;
+$blush: #f6ebe3;
+$line: #e5dacd;
+$mocha: #6b4e3d;
+$mocha-deep: #553c2d;
+$espresso: #3e2c23;
+$champagne: #c9a87c;
+$muted: #6e5a4d; // darker than Stitch #8c7465 for readable contrast on ivory
+
+$soft-shadow: 0 12px 36px -8px rgba(62, 44, 35, 0.07), 0 2px 8px -2px rgba(62, 44, 35, 0.04);
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+/** HOMEPAGE HERO COPY (HomeHero.tsx) **/
+// warm espresso shade from the left, so ivory copy stays AA over any part of the photo
+// darker at the bottom and the left, as in the Stitch "remaked sample" hero
+$hero-scrim: linear-gradient(to top, rgba(20, 14, 10, 0.75) 0%, rgba(20, 14, 10, 0.3) 50%, rgba(20, 14, 10, 0.25) 100%),
+	linear-gradient(to right, rgba(20, 14, 10, 0.55) 0%, rgba(20, 14, 10, 0) 60%);
+$hero-ink: $ivory; // headline on the photo
+$hero-ink-soft: rgba(253, 249, 243, 0.85); // description on the photo
+$hero-title-size: 60px; // Stitch hero headline (lg:text-6xl)
+$hero-photo-shift: 8%; // desktop: photo drawn this much wider, anchored left, so the couple sits a little to the right
+$hero-title-size-mobile: 36px;
+$hero-tag-bg: rgba(255, 255, 255, 0.15); // glass tag + glass button on the photo
+$hero-tag-line: rgba(255, 255, 255, 0.3);
+$hero-tag-dot: #e8c1ab;
+$btn-hero-font-size: 14px; // hero buttons: sentence case, as in the Stitch hero
+
+/** LAYOUT: one page container and one section rhythm for every homepage section **/
+$container-width: 1300px; // content width, the same as `#pc-wrap .container`
+$container-gutter: 48px; // smallest side gap, only when the screen is narrower than the container
+$container-pad: clamp(48px, 6.67vw, 96px); // inner padding of wide boxes (philosophy text)
+$container-pad-mobile: 24px;
+$section-space: 112px;
+$section-space-mobile: 72px;
+
+/** SHAPES (Stitch "remaked sample"): rounded boxes, pill buttons and tags **/
+$radius-card: 24px; // boxes: hero photo, feature card, philosophy, tier rows, empty states
+$radius-tile: 16px; // photos inside cards, search panel, panels on photos
+$radius-menu: 12px; // dropdown menus and their items
+$radius-pill: 999px; // buttons, tabs, tags
+$hero-card-inset: clamp(16px, 3.33vw, 48px); // gap between the rounded hero card and the screen edge
+$hero-card-shadow: 0 24px 60px -28px rgba(34, 24, 18, 0.45);
+$btn-arrow-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath d='M0 5h14.5M10.5 1l4 4-4 4' fill='none' stroke='%23fdf9f3' stroke-width='1.4'/%3E%3C/svg%3E");
+
+/** BUTTONS: shared tokens for button-primary / button-secondary / text-link **/
+$btn-height: 52px;
+$btn-pad-x: 32px;
+$btn-font-size: 11px; // Stitch label-uppercase
+$btn-weight: 500;
+$btn-tracking: 0.18em;
+$btn-radius: $radius-pill; // pill buttons (Stitch "remaked sample")
+$btn-primary-bg: $espresso;
+$btn-primary-bg-hover: $mocha;
+$btn-primary-bg-pressed: #2e211a;
+$btn-primary-text: $ivory;
+$btn-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath d='M0 5h14.5M10.5 1l4 4-4 4' fill='none' stroke='black' stroke-width='1.2'/%3E%3C/svg%3E");
+
+// full-width box whose content is exactly $container-width (1300px), centred
+@mixin page-container {
+	width: 100%;
+	padding-left: max(#{$container-gutter}, calc((100% - #{$container-width}) / 2));
+	padding-right: max(#{$container-gutter}, calc((100% - #{$container-width}) / 2));
+	box-sizing: border-box;
+}
+
+@mixin page-container-mobile {
+	width: 100%;
+	padding-left: $container-pad-mobile;
+	padding-right: $container-pad-mobile;
+	box-sizing: border-box;
+}
+
+@mixin button-base {
+	min-height: $btn-height;
+	padding: 0 $btn-pad-x;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	border: 1px solid transparent;
+	border-radius: $btn-radius;
+	font-family: $font;
+	font-size: $btn-font-size;
+	font-style: normal;
+	font-weight: $btn-weight;
+	letter-spacing: $btn-tracking;
+	line-height: 1;
+	text-transform: uppercase;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	box-sizing: border-box;
+	transition: background-color 0.35s $ease-out, border-color 0.35s $ease-out, color 0.35s $ease-out, transform 0.15s ease;
+	&:focus-visible {
+		outline: 2px solid $mocha;
+		outline-offset: 3px;
+	}
+	&:active:not(:disabled) {
+		transform: translateY(1px);
+	}
+	&:disabled,
+	&[aria-disabled='true'] {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+}
+
+/** PRIMARY: solid espresso, arrow slides right on hover **/
+@mixin button-primary {
+	@include button-base;
+	border-color: $btn-primary-bg;
+	background: $btn-primary-bg;
+	color: $btn-primary-text;
+	&::after {
+		content: '';
+		width: 16px;
+		height: 10px;
+		flex-shrink: 0;
+		background-color: currentColor;
+		-webkit-mask: $btn-arrow center / contain no-repeat;
+		mask: $btn-arrow center / contain no-repeat;
+		transition: transform 0.35s $ease-out;
+	}
+	&:hover:not(:disabled) {
+		border-color: $btn-primary-bg-hover;
+		background: $btn-primary-bg-hover;
+		color: $btn-primary-text;
+		&::after {
+			transform: translateX(4px);
+		}
+	}
+	&:active:not(:disabled) {
+		border-color: $btn-primary-bg-pressed;
+		background: $btn-primary-bg-pressed;
+	}
+}
+
+/** SECONDARY: espresso outline that fills on hover **/
+@mixin button-secondary {
+	@include button-base;
+	border-color: $espresso;
+	background: transparent;
+	color: $espresso;
+	&:hover:not(:disabled) {
+		background: $espresso;
+		color: $ivory;
+	}
+	&:active:not(:disabled) {
+		border-color: $btn-primary-bg-pressed;
+		background: $btn-primary-bg-pressed;
+		color: $ivory;
+	}
+}
+
+/** TEXT STYLES (Stitch "Editorial Archive" type scale; label-meta raised from 10px to the 11px minimum) **/
+@mixin type-style($family, $size, $line, $tracking, $weight: 400) {
+	font-family: $family;
+	font-size: $size;
+	font-weight: $weight;
+	line-height: $line;
+	letter-spacing: $tracking;
+}
+@mixin text-display-hero {
+	@include type-style($font-heading, 72px, 80px, -0.02em);
+}
+@mixin text-display-hero-mobile {
+	@include type-style($font-heading, 44px, 52px, -0.01em);
+}
+@mixin text-headline-lg {
+	@include type-style($font-heading, 48px, 56px, -0.01em);
+}
+@mixin text-headline-lg-mobile {
+	@include type-style($font-heading, 32px, 40px, 0);
+}
+@mixin text-headline-md {
+	@include type-style($font-heading, 32px, 40px, 0);
+}
+@mixin text-headline-sm {
+	@include type-style($font-heading, 24px, 32px, 0.01em);
+}
+@mixin text-title-editorial {
+	@include type-style($font-heading, 20px, 28px, 0.02em);
+}
+@mixin text-body-lg {
+	@include type-style($font, 16px, 26px, 0.01em);
+}
+@mixin text-body-md {
+	@include type-style($font, 14px, 22px, 0.015em);
+}
+@mixin text-body-sm {
+	@include type-style($font, 12px, 18px, 0.02em);
+}
+@mixin text-label-uppercase {
+	@include type-style($font, 11px, 16px, 0.18em, 500);
+	text-transform: uppercase;
+}
+@mixin text-label-meta {
+	@include type-style($font, 11px, 14px, 0.14em);
+	text-transform: uppercase;
+}
+
+@mixin eyebrow {
+	@include text-label-uppercase;
+	color: $muted;
+	font-style: normal;
+}
+
+/** TEXT LINK: uppercase label, underline draws in from the left on hover **/
+@mixin text-link {
+	padding: 6px 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border: none;
+	border-radius: 0;
+	background: linear-gradient(currentColor, currentColor) left bottom / 0% 1px no-repeat;
+	color: $espresso;
+	font-family: $font;
+	font-size: $btn-font-size;
+	font-style: normal;
+	font-weight: $btn-weight;
+	letter-spacing: $btn-tracking;
+	line-height: 1.4;
+	text-transform: uppercase;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-size 0.45s $ease-out, color 0.3s ease;
+	svg {
+		font-size: 16px;
+	}
+	&:hover {
+		background-size: 100% 1px;
+		color: $mocha;
+	}
+	&:focus-visible {
+		outline: 2px solid $mocha;
+		outline-offset: 4px;
+		background-size: 100% 1px;
+	}
+	&:active {
+		color: $mocha-deep;
+	}
+	&:disabled,
+	&[aria-disabled='true'] {
+		opacity: 0.4;
+		background-size: 0% 1px;
+		cursor: not-allowed;
+	}
+}
+
+@mixin focus-ring {
+	&:focus-visible {
+		outline: 2px solid $mocha;
+		outline-offset: 3px;
 	}
 }

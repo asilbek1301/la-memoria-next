@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Stack, Box, Modal, Divider, Button } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
+import { Box, Modal, Divider, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloseIcon from '@mui/icons-material/Close';
 import FormControl from '@mui/material/FormControl';
@@ -9,10 +8,11 @@ import MenuItem from '@mui/material/MenuItem';
 import { packageDurations, packagePhotosList } from '../../config';
 import { PackageLocation, PackageStyle, PackageType } from '../../enums/package.enum';
 import { PackagesInquiry } from '../../types/package/package.input';
+import { prettyEnum } from '../../utils';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
-import { dropdownVariants, glassPress, itemFadeUp, searchShellVariants, springSnappy } from '../common/motion';
+import { dropdownVariants, itemFadeUp, searchShellVariants, springSnappy } from '../common/motion';
 
 const style = {
 	position: 'absolute' as 'absolute',
@@ -34,21 +34,13 @@ const MenuProps = {
 	},
 };
 
-/** placeholder banners until package-type artwork is added **/
-const packageTypeImages: Record<string, string> = {
-	PEARL: '/img/banner/types/apartment.webp',
-	GOLD: '/img/banner/types/villa.webp',
-	DIAMOND: '/img/banner/types/house.webp',
-};
-
 interface HeaderFilterProps {
 	initialInput: PackagesInquiry;
 }
 
 const HeaderFilter = (props: HeaderFilterProps) => {
 	const { initialInput } = props;
-	const device = useDeviceDetect();
-	const { t, i18n } = useTranslation('common');
+	const { t } = useTranslation('common');
 	const [searchFilter, setSearchFilter] = useState<PackagesInquiry>(initialInput);
 	const locationRef: any = useRef();
 	const typeRef: any = useRef();
@@ -58,9 +50,9 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 	const [openLocation, setOpenLocation] = useState(false);
 	const [openType, setOpenType] = useState(false);
 	const [openRooms, setOpenRooms] = useState(false);
-	const [packageLocation, setPackageLocation] = useState<PackageLocation[]>(Object.values(PackageLocation));
-	const [packageType, setPackageType] = useState<PackageType[]>(Object.values(PackageType));
-	const [packageStyle, setPackageStyle] = useState<PackageStyle[]>(Object.values(PackageStyle));
+	const [packageLocation] = useState<PackageLocation[]>(Object.values(PackageLocation));
+	const [packageType] = useState<PackageType[]>(Object.values(PackageType));
+	const [packageStyle] = useState<PackageStyle[]>(Object.values(PackageStyle));
 	const [optionCheck, setOptionCheck] = useState('all');
 
 	/** LIFECYCLES **/
@@ -116,6 +108,13 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 		setOpenRooms(false);
 		setOpenType(false);
 		setOpenLocation(false);
+	};
+
+	const clearFieldHandler = (key: 'locationList' | 'typeList' | 'styleList') => {
+		const search = { ...searchFilter.search };
+		delete search[key];
+		setSearchFilter({ ...searchFilter, search });
+		disableAllStateHandler();
 	};
 
 	const packageLocationSelectHandler = useCallback(
@@ -296,147 +295,120 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 		}
 	};
 
-	if (device === 'mobile') {
-		return <div>HEADER FILTER MOBILE</div>;
-	} else {
-		return (
-			<MotionConfig reducedMotion="user">
-				<motion.div className={'search-box'} variants={searchShellVariants} initial="hidden" animate="visible">
-					<div className={'select-box'}>
-						{[
-							{
-								key: 'location',
-								open: openLocation,
-								onClick: locationStateChangeHandler,
-								label: searchFilter?.search?.locationList ? searchFilter?.search?.locationList[0] : t('Location'),
-							},
-							{
-								key: 'type',
-								open: openType,
-								onClick: typeStateChangeHandler,
-								label: searchFilter?.search?.typeList ? searchFilter?.search?.typeList[0] : t('Package type'),
-							},
-							{
-								key: 'style',
-								open: openRooms,
-								onClick: roomStateChangeHandler,
-								label: searchFilter?.search?.styleList ? searchFilter?.search?.styleList[0] : t('Style'),
-							},
-						].map((chip) => (
-							<motion.div
-								key={chip.key}
-								variants={itemFadeUp}
-								{...glassPress}
-								className={`box ${chip.open ? 'on' : ''}`}
-								onClick={chip.onClick}
-								role={'button'}
-								tabIndex={0}
+	const searchFields = [
+		{
+			key: 'locationList' as const,
+			label: 'Location',
+			allLabel: 'All locations',
+			open: openLocation,
+			ref: locationRef,
+			toggle: locationStateChangeHandler,
+			options: packageLocation,
+			selected: searchFilter?.search?.locationList?.[0],
+			onSelect: packageLocationSelectHandler,
+		},
+		{
+			key: 'typeList' as const,
+			label: 'Package type',
+			allLabel: 'All tiers',
+			open: openType,
+			ref: typeRef,
+			toggle: typeStateChangeHandler,
+			options: packageType,
+			selected: searchFilter?.search?.typeList?.[0],
+			onSelect: packageTypeSelectHandler,
+		},
+		{
+			key: 'styleList' as const,
+			label: 'Style',
+			allLabel: 'All styles',
+			open: openRooms,
+			ref: roomsRef,
+			toggle: roomStateChangeHandler,
+			options: packageStyle,
+			selected: searchFilter?.search?.styleList?.[0],
+			onSelect: packageStyleSelectHandler,
+		},
+	];
+
+	return (
+		<MotionConfig reducedMotion="user">
+			{/* no initial/animate here: it follows the hero timeline set on HomeHero's root */}
+			<motion.div className={'search-box'} variants={searchShellVariants}>
+				<div className={'search-fields'}>
+					{searchFields.map((field) => (
+						<motion.div variants={itemFadeUp} className={'search-field'} ref={field.ref} key={field.key}>
+							<button
+								type="button"
+								className={`field-trigger ${field.open ? 'on' : ''}`}
+								aria-haspopup="listbox"
+								aria-expanded={field.open}
+								onClick={field.toggle}
 							>
-								{chip.open && (
-									<motion.span layoutId={'search-active'} className={'box-highlight'} transition={springSnappy} />
-								)}
-								<span className={'box-label'}>{chip.label}</span>
-								<motion.span className={'box-icon'} animate={{ rotate: chip.open ? 180 : 0 }} transition={springSnappy}>
+								<span className={'field-label'}>{t(field.label)}</span>
+								<span className={'field-value'}>
+									{field.selected ? prettyEnum(field.selected) : field.allLabel}
+								</span>
+								<motion.span
+									className={'field-chevron'}
+									animate={{ rotate: field.open ? 180 : 0 }}
+									transition={springSnappy}
+								>
 									<ExpandMoreIcon />
 								</motion.span>
-							</motion.div>
-						))}
-					</div>
-					<div className={'search-box-other'}>
-						<motion.div
-							variants={itemFadeUp}
-							{...glassPress}
-							className={'advanced-filter'}
-							onClick={() => advancedFilterHandler(true)}
-						>
-							<img src="/img/icons/tune.svg" alt="" />
-							<span>{t('Advanced')}</span>
+							</button>
+
+							<AnimatePresence>
+								{field.open && (
+									<motion.ul
+										className={'field-menu'}
+										role="listbox"
+										aria-label={field.label}
+										variants={dropdownVariants}
+										initial="hidden"
+										animate="visible"
+										exit="exit"
+									>
+										<li>
+											<button
+												type="button"
+												role="option"
+												aria-selected={!field.selected}
+												className={!field.selected ? 'selected' : ''}
+												onClick={() => clearFieldHandler(field.key)}
+											>
+												{field.allLabel}
+											</button>
+										</li>
+										{field.options.map((option: string) => (
+											<li key={option}>
+												<button
+													type="button"
+													role="option"
+													aria-selected={field.selected === option}
+													className={field.selected === option ? 'selected' : ''}
+													onClick={() => field.onSelect(option)}
+												>
+													{prettyEnum(option)}
+												</button>
+											</li>
+										))}
+									</motion.ul>
+								)}
+							</AnimatePresence>
 						</motion.div>
-						<motion.div variants={itemFadeUp} {...glassPress} className={'search-btn'} onClick={pushSearchHandler}>
-							<img src="/img/icons/search_white.svg" alt="" />
-						</motion.div>
-					</div>
-
-					{/*MENU */}
-					<AnimatePresence>
-						{openLocation && (
-							<motion.div
-								key={'filter-location'}
-								className={'filter-location'}
-								ref={locationRef}
-								variants={dropdownVariants}
-								initial="hidden"
-								animate="visible"
-								exit="exit"
-							>
-								{packageLocation.map((location: string) => {
-									return (
-										<motion.div
-											variants={itemFadeUp}
-											whileHover={{ y: -3 }}
-											onClick={() => packageLocationSelectHandler(location)}
-											key={location}
-										>
-											<img src={`img/banner/cities/${location}.webp`} alt="" />
-											<span>{location}</span>
-										</motion.div>
-									);
-								})}
-							</motion.div>
-						)}
-
-						{openType && (
-							<motion.div
-								key={'filter-type'}
-								className={'filter-type'}
-								ref={typeRef}
-								variants={dropdownVariants}
-								initial="hidden"
-								animate="visible"
-								exit="exit"
-							>
-								{packageType.map((type: string) => {
-									return (
-										<motion.div
-											variants={itemFadeUp}
-											whileHover={{ y: -4, scale: 1.02 }}
-											style={{ backgroundImage: `url(${packageTypeImages[type]})` }}
-											onClick={() => packageTypeSelectHandler(type)}
-											key={type}
-										>
-											<span>{type}</span>
-										</motion.div>
-									);
-								})}
-							</motion.div>
-						)}
-
-						{openRooms && (
-							<motion.div
-								key={'filter-rooms'}
-								className={'filter-rooms'}
-								ref={roomsRef}
-								variants={dropdownVariants}
-								initial="hidden"
-								animate="visible"
-								exit="exit"
-							>
-								{packageStyle.map((style: string) => {
-									return (
-										<motion.span
-											variants={itemFadeUp}
-											{...glassPress}
-											onClick={() => packageStyleSelectHandler(style)}
-											key={style}
-										>
-											{style}
-										</motion.span>
-									);
-								})}
-							</motion.div>
-						)}
-					</AnimatePresence>
+					))}
+				</div>
+				<motion.div variants={itemFadeUp} className={'search-actions'}>
+					{/* <button type="button" className={'advanced-btn'} onClick={() => advancedFilterHandler(true)}>
+						<TuneRoundedIcon />
+						<span>{t('Advanced')}</span>
+					</button> */}
+					<button type="button" className={'search-btn'} onClick={pushSearchHandler}>
+						Search
+					</button>
 				</motion.div>
+			</motion.div>
 
 				{/* ADVANCED FILTER MODAL */}
 				<Modal
@@ -581,7 +553,6 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 				</Modal>
 			</MotionConfig>
 		);
-	}
 };
 
 HeaderFilter.defaultProps = {

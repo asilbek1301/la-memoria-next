@@ -37,9 +37,6 @@ const AdminUsers: NextPage = ({ initialInquiry, ...props }: any) => {
 	const [updateMemberByAdmin] = useMutation(UPDATE_MEMBER_BY_ADMIN);
 
 	const {
-		loading: getAllMembersByAdminLoading,
-		data: getAllMembersByAdminData,
-		error: getAllMembersByAdminError,
 		refetch: getAllMembersRefetch,
 	} = useQuery(GET_ALL_MEMBERS_BY_ADMIN, {
 		fetchPolicy: 'network-only',

@@ -15,7 +15,7 @@ const About: NextPage = () => {
 				<Stack className={'intro'}>
 					<Stack className={'container'}>
 						<Stack className={'left'}>
-							<strong>We're on a Mission to Make Every Wedding Memory Unforgettable.</strong>
+							<strong>We&apos;re on a Mission to Make Every Wedding Memory Unforgettable.</strong>
 						</Stack>
 						<Stack className={'right'}>
 							<p>
@@ -73,9 +73,6 @@ const About: NextPage = () => {
 						<span className={'title'}>Our Exclusive Studios</span>
 						<p className={'desc'}>Aliquam lacinia diam quis lacus euismod</p>
 						<Stack className={'wrap'}>
-							{/*{[1, 2, 3, 4, 5].map(() => {*/}
-							{/*	return <StudioCard />;*/}
-							{/*})}*/}
 						</Stack>
 					</Stack>
 				</Stack>

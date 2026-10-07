@@ -112,11 +112,6 @@ const TuiEditor = () => {
 		}
 	};
 
-	const doDisabledCheck = () => {
-		if (memoizedValues.articleContent === '' || memoizedValues.articleTitle === '') {
-			return true;
-		}
-	};
 
 	return (
 		<Stack>

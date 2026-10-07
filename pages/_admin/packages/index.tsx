@@ -35,9 +35,6 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 	const [removePackageByAdmin] = useMutation(REMOVE_PACKAGE_BY_ADMIN);
 
 	const {
-		loading: getAllPackagesByAdminLoading,
-		data: getAllPackagesByAdminData,
-		error: getAllPackagesByAdminError,
 		refetch: getAllPackagesByAdminRefetch,
 	} = useQuery(GET_ALL_PACKAGES_BY_ADMIN, {
 		fetchPolicy: 'network-only',

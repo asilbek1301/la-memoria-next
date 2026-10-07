@@ -1,56 +1,47 @@
 import React from 'react';
 import Link from 'next/link';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Box } from '@mui/material';
 import Moment from 'react-moment';
 import { BoardArticle } from '../../types/board-article/board-article';
+import { REACT_APP_API_URL } from '../../config';
+import { prettyEnum } from '../../utils';
 
 interface CommunityCardProps {
-	vertical: boolean;
 	article: BoardArticle;
-	index: number;
 }
 
-const CommunityCard = (props: CommunityCardProps) => {
-	const { vertical, article, index } = props;
-	const device = useDeviceDetect();
-	const articleImage = article?.articleImage
-		? `${process.env.REACT_APP_API_URL}/${article?.articleImage}`
-		: '/img/event.svg';
+/** plain-text excerpt from the editor's HTML content **/
+const excerpt = (html?: string) =>
+	(html ?? '')
+		.replace(/<[^>]+>/g, ' ')
+		.replace(/&nbsp;/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
 
-	if (device === 'mobile') {
-		return <div>COMMUNITY CARD (MOBILE)</div>;
-	} else {
-		if (vertical) {
-			return (
-				<Link href={`/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`}>
-					<Box component={'div'} className={'vertical-card'}>
-						<div className={'community-img'} style={{ backgroundImage: `url(${articleImage})` }}>
-							<div>{index + 1}</div>
-						</div>
-						<strong>{article?.articleTitle}</strong>
-						<span>Free Board</span>
-					</Box>
-				</Link>
-			);
-		} else {
-			return (
-				<>
-					<Link href={`/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`}>
-						<Box component={'div'} className="horizontal-card">
-							<img src={articleImage} alt="" />
-							<div>
-								<strong>{article.articleTitle}</strong>
-								<span>
-									<Moment format="DD.MM.YY">{article?.createdAt}</Moment>
-								</span>
-							</div>
-						</Box>
-					</Link>
-				</>
-			);
-		}
-	}
+const CommunityCard = (props: CommunityCardProps) => {
+	const { article } = props;
+	const image = article?.articleImage ? `${REACT_APP_API_URL}/${article.articleImage}` : '';
+	const href = `/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`;
+	const text = excerpt(article?.articleContent);
+
+	return (
+		<article className={'article-card'}>
+			<Link href={href} className={'card-media'} tabIndex={-1} aria-hidden="true">
+				{image ? (
+					<img src={image} alt="" loading="lazy" />
+				) : (
+					<span className={'img-placeholder category'}>{prettyEnum(article?.articleCategory)}</span>
+				)}
+			</Link>
+			<div className={'card-meta'}>
+				<span>{prettyEnum(article?.articleCategory)}</span>
+				<Moment format="MMMM D, YYYY">{article?.createdAt}</Moment>
+			</div>
+			<h3 className={'card-title'}>
+				<Link href={href}>{article?.articleTitle}</Link>
+			</h3>
+			{text && <p className={'card-excerpt'}>{text}</p>}
+		</article>
+	);
 };
 
 export default CommunityCard;

@@ -1,7 +1,5 @@
 export const REACT_APP_API_URL = `${process.env.REACT_APP_API_URL}`;
 
-export const availableOptions = ['packageAlbum', 'packageDress', 'packageMakeup'];
-
 /** package duration choices (hours) **/
 export const packageDurations = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12];
 

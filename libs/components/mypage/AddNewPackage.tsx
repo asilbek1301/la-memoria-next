@@ -19,9 +19,9 @@ const AddPackage = ({ initialValues, ...props }: any) => {
 	const router = useRouter();
 	const inputRef = useRef<any>(null);
 	const [insertPackageData, setInsertPackageData] = useState<PackageInput>(initialValues);
-	const [packageType, setPackageType] = useState<PackageType[]>(Object.values(PackageType));
-	const [packageLocation, setPackageLocation] = useState<PackageLocation[]>(Object.values(PackageLocation));
-	const [packageStyle, setPackageStyle] = useState<PackageStyle[]>(Object.values(PackageStyle));
+	const [packageType] = useState<PackageType[]>(Object.values(PackageType));
+	const [packageLocation] = useState<PackageLocation[]>(Object.values(PackageLocation));
+	const [packageStyle] = useState<PackageStyle[]>(Object.values(PackageStyle));
 	const token = getJwtToken();
 	const user = useReactiveVar(userVar);
 
@@ -33,8 +33,6 @@ const AddPackage = ({ initialValues, ...props }: any) => {
 	const {
 		loading: getPackageLoading,
 		data: getPackageData,
-		error: getPackageError,
-		refetch: getPackageRefetch,
 	} = useQuery(GET_PACKAGE, {
 		fetchPolicy: 'network-only',
 		variables: {
@@ -136,7 +134,7 @@ const AddPackage = ({ initialValues, ...props }: any) => {
 
 	const insertPackageHandler = useCallback(async () => {
 		try {
-			const result = await createPackage({
+			await createPackage({
 				variables: {
 					input: insertPackageData,
 				},
@@ -157,7 +155,7 @@ const AddPackage = ({ initialValues, ...props }: any) => {
 		try {
 			//@ts-ignore
 			insertPackageData._id = getPackageData?.getPackage?._id;
-			const result = await updatePackage({
+			await updatePackage({
 				variables: {
 					input: insertPackageData,
 				},

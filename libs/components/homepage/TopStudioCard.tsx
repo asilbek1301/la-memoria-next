@@ -1,41 +1,41 @@
 import React from 'react';
-import { useRouter } from 'next/router';
-import { Stack } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
+import Link from 'next/link';
 import { Member } from '../../types/member/member';
+import { REACT_APP_API_URL } from '../../config';
 
 interface TopStudioProps {
 	studio: Member;
 }
+
 const TopStudioCard = (props: TopStudioProps) => {
 	const { studio } = props;
-	const device = useDeviceDetect();
-	const router = useRouter();
-	const studioImage = studio?.memberImage
-		? `${process.env.REACT_APP_API_URL}/${studio?.memberImage}`
-		: '/img/profile/defaultUser.svg';
+	const name = studio?.memberFullName || studio?.memberNick;
+	const image = studio?.memberImage ? `${REACT_APP_API_URL}/${studio.memberImage}` : '';
+	const href = { pathname: '/studio/detail', query: { studioId: studio?._id } };
 
-	/** HANDLERS **/
-
-	if (device === 'mobile') {
-		return (
-			<Stack className="top-studio-card">
-				<img src={studioImage} alt="" />
-
-				<strong>{studio?.memberNick}</strong>
-				<span>{studio?.memberType}</span>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className="top-studio-card">
-				<img src={studioImage} alt="" />
-
-				<strong>{studio?.memberNick}</strong>
-				<span>{studio?.memberType}</span>
-			</Stack>
-		);
-	}
+	return (
+		<article className={'studio-card'}>
+			<Link href={href} className={'card-media'} tabIndex={-1} aria-hidden="true">
+				{image ? (
+					<img src={image} alt="" loading="lazy" />
+				) : (
+					<span className={'img-placeholder initial'}>{name?.charAt(0).toUpperCase()}</span>
+				)}
+			</Link>
+			<div className={'card-head'}>
+				<h3>
+					<Link href={href}>{name}</Link>
+				</h3>
+				{(studio?.memberPackages ?? 0) > 0 && (
+					<span className={'card-count'}>
+						{studio.memberPackages} {studio.memberPackages === 1 ? 'package' : 'packages'}
+					</span>
+				)}
+			</div>
+			{studio?.memberAddress && <p className={'card-location'}>{studio.memberAddress}</p>}
+			{studio?.memberDesc && <p className={'card-desc'}>{studio.memberDesc}</p>}
+		</article>
+	);
 };
 
 export default TopStudioCard;

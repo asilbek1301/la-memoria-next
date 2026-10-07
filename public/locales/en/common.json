@@ -6,7 +6,6 @@
   "My Page": "My Page",
   "CS": "CS",
   "Login": "Login",
-  "Register": "Register",
   "Location": "Location",
   "Package type": "Package type",
   "Style": "Style",
@@ -21,5 +20,6 @@
   "Login/Signup": "Login/Signup",
   "Member Page": "Member Page",
   "My Reservations": "My Reservations",
-  "Reservations": "Reservations"
+  "Reservations": "Reservations",
+  "Help": "Help"
 }

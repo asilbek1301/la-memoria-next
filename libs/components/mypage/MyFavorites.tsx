@@ -22,9 +22,6 @@ const MyFavorites: NextPage = () => {
 	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
 
 	const {
-		loading: getFavoritesLoading,
-		data: getFavoritesData,
-		error: getFavoritesError,
 		refetch: getFavoritesRefetch,
 	} = useQuery(GET_FAVORITES, {
 		fetchPolicy: 'network-only',

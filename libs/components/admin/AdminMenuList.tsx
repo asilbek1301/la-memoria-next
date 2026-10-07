@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRouter, withRouter } from 'next/router';
+import { withRouter } from 'next/router';
 import Link from 'next/link';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
@@ -11,11 +11,10 @@ import cookies from 'js-cookie';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 const AdminMenuList = (props: any) => {
-	const router = useRouter();
 	const device = useDeviceDetect();
-	const [mobileLayout, setMobileLayout] = useState(false);
-	const [openSubMenu, setOpenSubMenu] = useState('Users');
-	const [openMenu, setOpenMenu] = useState(typeof window === 'object' ? cookies.get('admin_menu') === 'true' : false);
+	const [, setMobileLayout] = useState(false);
+	const [] = useState('Users');
+	const [openMenu] = useState(typeof window === 'object' ? cookies.get('admin_menu') === 'true' : false);
 	const [clickMenu, setClickMenu] = useState<any>([]);
 	const [clickSubMenu, setClickSubMenu] = useState('');
 
@@ -72,10 +71,8 @@ const AdminMenuList = (props: any) => {
 	/** HANDLERS **/
 	const subMenuChangeHandler = (target: string) => {
 		if (clickMenu.find((item: string) => item === target)) {
-			// setOpenSubMenu('');
 			setClickMenu(clickMenu.filter((menu: string) => target !== menu));
 		} else {
-			// setOpenSubMenu(target);
 			setClickMenu([...clickMenu, target]);
 		}
 	};

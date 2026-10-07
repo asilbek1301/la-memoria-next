@@ -47,373 +47,70 @@ body::-webkit-scrollbar {
 #pc-wrap {
 	#top {
 		.navbar {
+			position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;
+			z-index: 99;
+			height: 80px;
 			.navbar-main {
-				position: fixed;
-				top: 14px;
-				left: 0;
-				right: 0;
-				margin: 0 auto;
-				padding: 0 24px;
-				width: min(1348px, calc(100% - 48px));
-				height: 72px;
-				display: flex;
-				flex-direction: row;
+				@include page-container;
+				height: 100%;
+				display: grid;
+				grid-template-columns: 1fr auto 1fr;
 				align-items: center;
-				border-radius: 999px;
-				box-sizing: border-box;
-				z-index: 99;
-				.glass-backdrop {
-					position: absolute;
-					inset: 0;
-					pointer-events: none;
-					z-index: 0;
-					@include glass(rgba(24, 26, 32, 0.32), 24px, 999px);
+				gap: 20px;
+				.menu-btn {
+					display: none;
 				}
-				&.solid .glass-backdrop {
-					background: rgba(24, 26, 32, 0.78);
-				}
-				.container {
-					position: relative;
-					width: 100%;
-					z-index: 1;
-					flex-direction: row;
+				.router-box {
+					display: flex;
 					align-items: center;
-					justify-content: space-between;
-					.logo-box {
-						display: flex;
-						align-items: center;
-						img,
-						.lm-logo svg {
-							width: 140px;
-							height: auto;
-							cursor: pointer;
-						}
+					gap: clamp(18px, 2.5vw, 36px); // 36px from 1440, tighter on narrow screens so links never crowd the logo
+				}
+				.logo-box {
+					justify-self: center;
+					line-height: 0;
+					.animated-logo svg {
+						width: 170px; // logo wordmark, a little larger (was 150px); monogram grows with it in Top.tsx
+						height: auto;
 					}
-					.router-box {
-						position: relative;
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						gap: 4px;
-						.nav-link {
-							position: relative;
-							padding: 10px 18px;
-							border-radius: 999px;
-							cursor: pointer;
-							.nav-pill {
-								position: absolute;
-								inset: 0;
-								z-index: 0;
-								@include glass(rgba(255, 255, 255, 0.18), 12px, 999px);
-								box-shadow: $glass-highlight;
-							}
-							.nav-label {
-								position: relative;
-								z-index: 1;
-								color: rgba(238, 238, 238, 0.82);
-								font-family: $font;
-								font-size: 15px;
-								font-weight: 600;
-								white-space: nowrap;
-								transition: color 0.2s ease;
-							}
-							&:hover .nav-label,
-							&.active .nav-label {
-								color: #ffffff;
-							}
-						}
-					}
-					.user-box {
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						justify-content: flex-end;
-						.join-box {
-							padding: 0 20px;
-							height: 46px;
-							display: flex;
-							align-items: center;
-							justify-content: center;
-							cursor: pointer;
-							@include glass(rgba(255, 255, 255, 0.12), 16px, 999px);
-							svg {
-								color: #ffffff;
-								margin-right: 8px;
-							}
-							span {
-								font-family: $font;
-								font-size: 14px;
-								font-weight: 600;
-								color: #ffffff;
-								white-space: nowrap;
-							}
-						}
-						.login-user {
-							display: flex;
-							cursor: pointer;
-							img {
-								width: 42px;
-								height: 42px;
-								border-radius: 50%;
-								object-fit: cover;
-								border: 2px solid $glass-border;
-								box-shadow: $glass-shadow;
-							}
-						}
-					}
-					.lan-box {
-						margin-left: 16px;
-						display: flex;
-						align-items: center;
-						gap: 8px;
-						.notification-icon {
-							color: white;
-						}
-						.btn-lang {
-							min-width: 0;
-							padding: 8px 12px;
-							@include glass(rgba(255, 255, 255, 0.12), 16px, 999px);
-							.flag {
-								display: flex;
-							}
-							img {
-								width: 24px;
-								height: 17px;
-								border-radius: 2px;
-							}
-						}
-						.img-flag {
-							width: 24px;
-							height: 17px;
-							border-radius: 2px;
-							margin-right: 8px;
-						}
-					}
+				}
+				.user-box {
+					justify-self: end;
+					display: flex;
+					align-items: center;
+					gap: clamp(4px, 0.7vw, 10px);
 				}
 			}
 		}
 	}
 
-	.header-main {
-		position: relative;
-		width: 100%;
-		height: 860px;
-		background-image: url('/img/banner/header1.svg');
-		background-size: cover;
-		.container {
-			position: relative;
-			margin-top: 20px;
-			flex-direction: column;
-			align-items: center;
-			.search-box {
-				position: relative;
-				margin-top: 56px;
-				padding: 14px;
-				width: 1094px;
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-				justify-content: space-between;
-				gap: 16px;
-				z-index: 5;
-				@include glass(rgba(255, 255, 255, 0.16), 28px, 24px);
-				.select-box {
-					flex: 1;
-					display: flex;
-					flex-direction: row;
-					gap: 12px;
-					.box {
-						position: relative;
-						flex: 1;
-						padding: 0 22px;
-						height: 60px;
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						justify-content: space-between;
-						border-radius: 16px;
-						border: 1px solid rgba(255, 255, 255, 0.22);
-						background: rgba(255, 255, 255, 0.12);
-						box-sizing: border-box;
-						cursor: pointer;
-						outline: none;
-						transition: background 0.2s ease;
-						&:hover {
-							background: rgba(255, 255, 255, 0.22);
-						}
-						&:focus-visible {
-							box-shadow: 0 0 0 3px rgba(241, 119, 66, 0.6);
-						}
-						.box-highlight {
-							position: absolute;
-							inset: 0;
-							z-index: 0;
-							border-radius: inherit;
-							background: rgba(255, 255, 255, 0.92);
-							box-shadow: $glass-highlight, 0 6px 20px rgba(0, 0, 0, 0.15);
-						}
-						.box-label,
-						.box-icon {
-							position: relative;
-							z-index: 1;
-							color: #ffffff;
-							transition: color 0.2s ease;
-						}
-						.box-label {
-							font-family: $font;
-							font-size: 15px;
-							font-weight: 500;
-							line-height: 26px;
-							text-transform: capitalize;
-						}
-						.box-icon {
-							display: flex;
-						}
-						&.on {
-							.box-label,
-							.box-icon {
-								color: #181a20;
-							}
-						}
-					}
+	#footer {
+		.footer-container {
+			.footer-main {
+				@include page-container;
+				padding-top: 88px;
+				padding-bottom: 72px;
+				display: grid;
+				grid-template-columns: minmax(280px, 5fr) 7fr;
+				gap: 56px;
+				.about {
+					max-width: 400px;
+					margin: 20px 0 32px;
 				}
-				.search-box-other {
-					display: flex;
-					flex-direction: row;
-					align-items: center;
-					gap: 12px;
-					.advanced-filter {
-						padding: 0 20px;
-						height: 60px;
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						cursor: pointer;
-						@include glass(rgba(255, 255, 255, 0.12), 16px, 999px);
-						img {
-							margin-right: 10px;
-							width: 22px;
-							height: 20px;
-						}
-						span {
-							color: #fff;
-							font-family: $font;
-							font-size: 16px;
-							font-weight: 600;
-						}
-					}
-					.search-btn {
-						width: 60px;
-						height: 60px;
-						display: flex;
-						align-items: center;
-						justify-content: center;
-						cursor: pointer;
-						@include glass(rgba(241, 119, 66, 0.88), 16px, 999px);
-						box-shadow: $glass-highlight, 0 8px 24px rgba(241, 119, 66, 0.45);
-						img {
-							width: 22px;
-							height: 22px;
-						}
-					}
-				}
-				.filter-location,
-				.filter-type,
-				.filter-rooms {
-					position: absolute;
-					top: calc(100% + 12px);
-					left: 0;
-					width: 100%;
-					transform-origin: top center;
-					z-index: 3;
-					@include glass(rgba(24, 26, 32, 0.42), 30px, 20px);
-				}
-				.filter-location {
-					padding: 28px 40px;
-					display: flex;
-					flex-direction: row;
-					flex-wrap: wrap;
-					gap: 16px 24px;
-					div {
-						width: 316px;
-						padding: 8px;
-						display: flex;
-						flex-direction: row;
-						align-items: center;
-						border-radius: 16px;
-						cursor: pointer;
-						transition: background 0.2s ease;
-						&:hover {
-							background: rgba(255, 255, 255, 0.12);
-						}
-						img {
-							width: 112px;
-							height: 78px;
-							border-radius: 12px;
-							object-fit: cover;
-						}
-						span {
-							margin-left: 20px;
-							color: #ffffff;
-							font-family: $font;
-							font-size: 18px;
-							font-weight: 500;
-							text-transform: capitalize;
-						}
-					}
-				}
-				.filter-type {
-					padding: 28px;
-					display: flex;
-					flex-direction: row;
+				.footer-columns {
+					display: grid;
+					grid-template-columns: repeat(4, 1fr);
 					gap: 24px;
-					div {
-						position: relative;
-						flex: 1;
-						height: 168px;
-						border-radius: 16px;
-						border: 1px solid $glass-border;
-						background-size: cover;
-						background-position: center;
-						cursor: pointer;
-						overflow: hidden;
-						span {
-							position: absolute;
-							top: 12px;
-							right: 12px;
-							padding: 4px 14px;
-							color: #ffffff;
-							font-family: $font;
-							font-size: 16px;
-							font-weight: 700;
-							text-transform: capitalize;
-							@include glass(rgba(24, 26, 32, 0.35), 12px, 999px);
-						}
-					}
 				}
-				.filter-rooms {
-					padding: 24px 40px;
-					display: flex;
-					flex-direction: row;
-					justify-content: space-between;
-					align-items: center;
-					span {
-						padding: 12px 32px;
-						color: #ffffff;
-						font-family: $font;
-						font-size: 17px;
-						font-weight: 500;
-						text-transform: capitalize;
-						cursor: pointer;
-						@include glass(rgba(255, 255, 255, 0.1), 12px, 999px);
-						&:hover {
-							background: rgba(255, 255, 255, 0.24);
-						}
-					}
-				}
+			}
+			.footer-bottom {
+				@include page-container;
 			}
 		}
 	}
+
 
 	.header-basic {
 		position: relative;
@@ -430,12 +127,8 @@ body::-webkit-scrollbar {
 			margin-top: 175px;
 			strong {
 				color: #fff;
-				font-family: $font;
-				font-size: 48px;
+				@include text-headline-lg; // page title: Chivo 48/56 (Stitch headline-lg)
 				font-style: normal;
-				font-weight: 600;
-				line-height: normal;
-				letter-spacing: 0.96px;
 				text-transform: capitalize;
 			}
 			span {
@@ -525,11 +218,18 @@ body::-webkit-scrollbar {
 	}
 
 	.chatting {
+		// launcher layer: fixed to the viewport, never part of the page flow
+		position: fixed;
+		right: 0;
+		bottom: 0;
+		width: 0;
+		height: 0;
+		z-index: 999;
 		.chat-button {
 			border: none;
 			position: fixed;
-			bottom: 90px;
-			right: 30px;
+			bottom: calc(90px + env(safe-area-inset-bottom));
+			right: calc(30px + env(safe-area-inset-right));
 			height: 50px;
 			width: 50px;
 			display: flex;
@@ -549,9 +249,9 @@ body::-webkit-scrollbar {
 		}
 		.chat-frame {
 			position: fixed;
-			right: -380px;
-			transition: right 0.7s ease-in-out;
+			right: calc(10px + env(safe-area-inset-right));
 			width: 380px;
+			max-width: calc(100vw - 20px);
 			height: 500px;
 			display: flex;
 			flex-direction: column;
@@ -559,10 +259,18 @@ body::-webkit-scrollbar {
 			border-radius: 34px;
 			box-shadow: 0px 0px 15px 0px rgba(50, 50, 50, 0.3);
 			z-index: 100;
-			bottom: 150px;
-			transition: right 0.7s ease-in-out;
+			bottom: calc(150px + env(safe-area-inset-bottom));
+			// closed by default: hidden in place (an off-screen frame widened the page)
+			opacity: 0;
+			visibility: hidden;
+			pointer-events: none;
+			transform: translateX(24px);
+			transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
 			&.open {
-				right: 10px;
+				opacity: 1;
+				visibility: visible;
+				pointer-events: auto;
+				transform: none;
 			}
 			.chat-top {
 				width: 100%;
@@ -629,7 +337,7 @@ body::-webkit-scrollbar {
 					border-radius: 28px;
 					border: none;
 					outline-color: #257677;
-					font-family: 'Poppins';
+					font-family: $font;
 					font-style: normal;
 					font-weight: 400;
 					font-size: 16px;
@@ -658,167 +366,6 @@ body::-webkit-scrollbar {
 		}
 	}
 
-	#footer {
-		position: relative;
-		padding: 60px 0px 18px 0px;
-		width: 100%;
-		height: auto;
-		display: flex;
-		flex-direction: row;
-		background: #181a20;
-		.footer-container {
-			width: 1300px;
-			height: auto;
-			margin: 0 auto;
-			.main {
-				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				.left {
-					height: 360px;
-					display: flex;
-					flex-direction: column;
-					justify-content: space-between;
-					.footer-box {
-						display: flex;
-						flex-direction: column;
-						.logo {
-							width: 128px;
-							height: 52px;
-							cursor: pointer;
-						}
-						span {
-							color: #bebdbd;
-							font-family: $font;
-							font-size: 14px;
-							font-style: normal;
-							font-weight: 400;
-							text-transform: capitalize;
-						}
-						p {
-							color: #fff;
-							font-family: $font;
-							font-size: 15px;
-							font-style: normal;
-							font-weight: 600;
-							line-height: normal;
-							text-transform: capitalize;
-						}
-						.media-box {
-							margin-top: 12px;
-							color: #929495;
-							svg {
-								font-size: 32px;
-								margin-right: 22px;
-								cursor: pointer;
-							}
-						}
-					}
-				}
-				.right {
-					display: flex;
-					flex-direction: column;
-					.top {
-						display: flex;
-						flex-direction: column;
-						strong {
-							color: #fff;
-							font-family: $font;
-							font-size: 15px;
-							font-style: normal;
-							font-weight: 600;
-							line-height: normal;
-							text-transform: capitalize;
-						}
-						div {
-							padding: 20px 30px;
-							margin-top: 20px;
-							width: 667px;
-							height: 70px;
-							display: flex;
-							flex-direction: row;
-							align-items: center;
-							box-sizing: border-box;
-							border-radius: 12px;
-							background: #212329;
-							input {
-								margin-right: 10px;
-								width: 85%;
-								border: none;
-								outline: none;
-								color: #fff;
-								font-family: $font;
-								font-size: 14px;
-								font-style: normal;
-								font-weight: 400;
-								line-height: 26px;
-								background: none;
-							}
-							span {
-								color: #fff;
-								font-family: $font;
-								font-size: 15px;
-								font-style: normal;
-								font-weight: 600;
-								line-height: normal;
-								cursor: pointer;
-							}
-						}
-					}
-					.bottom {
-						margin-top: 60px;
-						display: flex;
-						flex-direction: row;
-						justify-content: space-between;
-						div {
-							display: flex;
-							flex-direction: column;
-							strong {
-								margin-bottom: 3px;
-								color: #fff;
-								font-family: $font;
-								font-size: 15px;
-								font-style: normal;
-								font-weight: 600;
-								line-height: normal;
-								text-transform: capitalize;
-							}
-							span {
-								margin-top: 25px;
-								color: #bebdbd;
-								font-family: $font;
-								font-size: 14px;
-								font-style: normal;
-								font-weight: 400;
-								cursor: pointer;
-								&:hover {
-									color: #ffffff;
-									text-decoration-line: underline;
-								}
-							}
-						}
-					}
-				}
-			}
-			.second {
-				margin-top: 60px;
-				height: 45px;
-				border-top: 1px solid #212329;
-				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				align-items: flex-end;
-				span {
-					color: #bebdbd;
-					font-family: $font;
-					font-size: 14px;
-					font-style: normal;
-					font-weight: 400;
-					line-height: normal;
-				}
-			}
-		}
-	}
 }
 
 .MuiPaper-root.MuiMenu-paper {
@@ -1052,11 +599,4 @@ body::-webkit-scrollbar {
 		color: #bdbdbd;
 		text-align: center;
 	}
-}
-
-.img-flag {
-	width: 24px;
-	height: 17px;
-	border-radius: 2px;
-	margin-right: 8px;
 }

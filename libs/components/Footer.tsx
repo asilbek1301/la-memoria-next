@@ -1,140 +1,84 @@
-import FacebookOutlinedIcon from '@mui/icons-material/FacebookOutlined';
-import InstagramIcon from '@mui/icons-material/Instagram';
-import TelegramIcon from '@mui/icons-material/Telegram';
-import TwitterIcon from '@mui/icons-material/Twitter';
-import useDeviceDetect from '../hooks/useDeviceDetect';
-import { Stack, Box } from '@mui/material';
+import React from 'react';
+import Link from 'next/link';
 import moment from 'moment';
 import AnimatedLogo from './common/AnimatedLogo';
+import { packageSearchHref, prettyEnum } from '../utils';
+import { PackageLocation, PackageType } from '../enums/package.enum';
+
+const footerColumns = [
+	{
+		title: 'Packages',
+		links: [
+			...Object.values(PackageType).map((type) => ({
+				label: `${prettyEnum(type)} packages`,
+				href: packageSearchHref({ typeList: [type] }),
+			})),
+			{ label: 'All packages', href: '/package' },
+		],
+	},
+	{
+		title: 'Studios',
+		links: [
+			{ label: 'All studios', href: '/studio' },
+			{ label: 'Join as a studio', href: '/account/join' },
+			{ label: 'Community', href: '/community?articleCategory=FREE' },
+		],
+	},
+	{
+		title: 'Help',
+		links: [
+			{ label: 'FAQ', href: '/cs?tab=faq' },
+			{ label: 'Notices', href: '/cs?tab=notice' },
+			{ label: 'About La Memoria', href: '/about' },
+		],
+	},
+	{
+		title: 'Regions',
+		links: [PackageLocation.SEOUL, PackageLocation.BUSAN, PackageLocation.JEJU, PackageLocation.GYEONGJU].map(
+			(location) => ({ label: prettyEnum(location), href: packageSearchHref({ locationList: [location] }) }),
+		),
+	},
+];
 
 const Footer = () => {
-	const device = useDeviceDetect();
+	return (
+		<footer className={'footer-container'}>
+			<div className={'footer-main'}>
+				<div className={'brand-box'}>
+					<Link href={'/'} aria-label="La Memoria home" className={'logo-box'}>
+						<AnimatedLogo tone="dark" width={170} height={59} />
+					</Link>
+					<p className={'about'}>
+						Pre-wedding photography packages from studios across Korea. Compare tiers, save the ones you love and
+						reserve your shoot in one place.
+					</p>
+					<span className={'label'}>Customer care</span>
+					<a className={'phone'} href="tel:+821048672909">
+						+82 10 4867 2909
+					</a>
+				</div>
 
-	if (device == 'mobile') {
-		return (
-			<Stack className={'footer-container'}>
-				<Stack className={'main'}>
-					<Stack className={'left'}>
-						<Box component={'div'} className={'footer-box'}>
-							<AnimatedLogo width={128} height={52} className={'logo'} />
-						</Box>
-						<Box component={'div'} className={'footer-box'}>
-							<span>total free customer care</span>
-							<p>+82 10 4867 2909</p>
-						</Box>
-						<Box component={'div'} className={'footer-box'}>
-							<span>nee live</span>
-							<p>+82 10 4867 2909</p>
-							<span>Support?</span>
-						</Box>
-						<Box component={'div'} className={'footer-box'}>
-							<p>follow us on social media</p>
-							<div className={'media-box'}>
-								<FacebookOutlinedIcon />
-								<TelegramIcon />
-								<InstagramIcon />
-								<TwitterIcon />
-							</div>
-						</Box>
-					</Stack>
-					<Stack className={'right'}>
-						<Box component={'div'} className={'bottom'}>
-							<div>
-								<strong>Popular Search</strong>
-								<span>Wedding Day Packages</span>
-								<span>Packages Low to High</span>
-							</div>
-							<div>
-								<strong>Quick Links</strong>
-								<span>Terms of Use</span>
-								<span>Privacy Policy</span>
-								<span>Pricing Plans</span>
-								<span>Our Services</span>
-								<span>Contact Support</span>
-								<span>FAQs</span>
-							</div>
-							<div>
-								<strong>Discover</strong>
-								<span>Seoul</span>
-								<span>Gyeongido</span>
-								<span>Busan</span>
-								<span>Jejudo</span>
-							</div>
-						</Box>
-					</Stack>
-				</Stack>
-				<Stack className={'second'}>
-					<span>© La Memoria - All rights reserved. La Memoria {moment().year()}</span>
-				</Stack>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className={'footer-container'}>
-				<Stack className={'main'}>
-					<Stack className={'left'}>
-						<Box component={'div'} className={'footer-box'}>
-							<AnimatedLogo width={128} height={52} className={'logo'} />
-						</Box>
-						<Box component={'div'} className={'footer-box'}>
-							<span>total free customer care</span>
-							<p>+82 10 4867 2909</p>
-						</Box>
-						<Box component={'div'} className={'footer-box'}>
-							<span>nee live</span>
-							<p>+82 10 4867 2909</p>
-							<span>Support?</span>
-						</Box>
-						<Box component={'div'} className={'footer-box'}>
-							<p>follow us on social media</p>
-							<div className={'media-box'}>
-								<FacebookOutlinedIcon />
-								<TelegramIcon />
-								<InstagramIcon />
-								<TwitterIcon />
-							</div>
-						</Box>
-					</Stack>
-					<Stack className={'right'}>
-						<Box component={'div'} className={'top'}>
-							<strong>keep yourself up to date</strong>
-							<div>
-								<input type="text" placeholder={'Your Email'} />
-								<span>Subscribe</span>
-							</div>
-						</Box>
-						<Box component={'div'} className={'bottom'}>
-							<div>
-								<strong>Popular Search</strong>
-								<span>Wedding Day Packages</span>
-								<span>Packages Low to High</span>
-							</div>
-							<div>
-								<strong>Quick Links</strong>
-								<span>Terms of Use</span>
-								<span>Privacy Policy</span>
-								<span>Pricing Plans</span>
-								<span>Our Services</span>
-								<span>Contact Support</span>
-								<span>FAQs</span>
-							</div>
-							<div>
-								<strong>Discover</strong>
-								<span>Seoul</span>
-								<span>Gyeongido</span>
-								<span>Busan</span>
-								<span>Jejudo</span>
-							</div>
-						</Box>
-					</Stack>
-				</Stack>
-				<Stack className={'second'}>
-					<span>© La Memoria - All rights reserved. La Memoria {moment().year()}</span>
-					<span>Privacy · Terms · Sitemap</span>
-				</Stack>
-			</Stack>
-		);
-	}
+				<nav className={'footer-columns'} aria-label="Footer">
+					{footerColumns.map((column) => (
+						<div className={'column'} key={column.title}>
+							<h2>{column.title}</h2>
+							<ul>
+								{column.links.map((link) => (
+									<li key={link.label}>
+										<Link href={link.href}>{link.label}</Link>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</nav>
+			</div>
+
+			<div className={'footer-bottom'}>
+				<p>© {moment().year()} La Memoria. All rights reserved.</p>
+			</div>
+		</footer>
+	);
 };
 
 export default Footer;

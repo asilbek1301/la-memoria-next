@@ -1,5 +1,5 @@
 import { MemberAuthType, MemberStatus, MemberType } from '../../enums/member.enum';
-import { MeLiked, TotalCounter } from '../package/package';
+import { MeLiked } from '../package/package';
 import { MeFollowed } from '../follow/follow';
 
 export interface Member {
@@ -32,9 +32,4 @@ export interface Member {
 	meLiked?: MeLiked[];
 	meFollowed?: MeFollowed[];
 	accessToken?: string;
-}
-
-export interface Members {
-	list: Member[];
-	metaCounter: TotalCounter[];
 }

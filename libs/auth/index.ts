@@ -107,15 +107,11 @@ const requestSignUpJwtToken = async ({
 		return { jwtToken: accessToken };
 	} catch (err: any) {
 		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
+		const message: string = err?.graphQLErrors?.[0]?.message ?? err?.message ?? 'Signup failed!';
+		if (message === 'Bad Request Exception') {
+			throw new Error('Nick must be 3-12 characters and password 5-12 characters');
 		}
-		throw new Error('token error');
+		throw new Error(message);
 	}
 };
 

@@ -314,3 +314,1366 @@
 		}
 	}
 }
+
+/** LA MEMORIA: shared looks used by both #pc-wrap and #mobile-wrap (layout lives in pc/main, pc/homepage, mobile/main) **/
+
+/** reset.scss sets the font directly on text elements; inside these blocks let text inherit its parent font **/
+.navbar,
+.nav-drawer,
+.nav-menu,
+.home-hero,
+.home-page,
+.footer-container {
+	:where(p, span, a, li, ul, ol, h1, h2, h3, h4, label, small, strong, em, time, nav, header, article, section) {
+		font-family: inherit;
+	}
+}
+
+/** ANIMATED LOGO (AnimatedLogo.tsx): LM monogram + wordmark **/
+.animated-logo {
+	display: inline-flex;
+	align-items: center;
+	background: none;
+	line-height: 0;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+	&.dark {
+		color: $mocha;
+	}
+	&.light {
+		color: #fdfdfd;
+	}
+	.monogram {
+		flex-shrink: 0;
+		display: block;
+		background-color: currentColor;
+		-webkit-mask: url('/img/logo/monogram.svg') center / contain no-repeat;
+		mask: url('/img/logo/monogram.svg') center / contain no-repeat;
+		transform-origin: center;
+		transition: transform 0.9s $ease-out;
+	}
+	svg {
+		overflow: visible;
+	}
+	.sheen {
+		opacity: 0;
+		transform: translateX(0);
+	}
+	.underline {
+		transform-box: fill-box;
+		transform-origin: center;
+		transform: scaleX(0);
+		transition: transform 0.8s $ease-out;
+	}
+	.tagline {
+		fill-opacity: 0.85;
+		letter-spacing: 2.35px;
+		transition: letter-spacing 0.9s $ease-out, fill-opacity 0.9s $ease-out;
+	}
+	&:hover,
+	a:focus-visible > & {
+		.monogram {
+			transform: translateY(-1px) scale(1.04);
+		}
+		.sheen {
+			animation: logo-sheen 1.4s $ease-out both;
+		}
+		.underline {
+			transform: scaleX(1);
+		}
+		.tagline {
+			fill-opacity: 1;
+			letter-spacing: 2.6px;
+		}
+	}
+}
+
+@keyframes logo-sheen {
+	0% {
+		opacity: 0;
+		transform: translateX(0);
+	}
+	15% {
+		opacity: 1;
+	}
+	85% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(125px);
+	}
+}
+
+@keyframes fade-up {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+/** HEADER LOOKS (Top.tsx); layout is in #pc-wrap #top / #mobile-wrap #top **/
+.navbar {
+	background: rgba(250, 246, 240, 0.86);
+	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(12px);
+	border-bottom: 1px solid rgba(201, 168, 124, 0.25);
+	color: $espresso;
+	font-family: $font;
+	.icon-btn {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: $espresso;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+		@include focus-ring;
+		svg {
+			font-size: 24px;
+		}
+		&:hover {
+			background: $sand;
+		}
+	}
+	.nav-link {
+		position: relative;
+		padding: 8px 0;
+		color: $espresso;
+		font-size: 14px;
+		font-weight: 500;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		text-decoration: none;
+		@include focus-ring;
+		&.active {
+			color: $mocha;
+		}
+	}
+	.nav-indicator {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		height: 1px;
+		background: $mocha;
+	}
+	.logo-box a {
+		display: inline-flex;
+		@include focus-ring;
+	}
+	.saved-btn {
+		position: relative;
+	}
+	.saved-badge {
+		position: absolute;
+		top: 2px;
+		right: 0;
+		min-width: 18px;
+		height: 18px;
+		padding: 0 4px;
+		box-sizing: border-box;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 999px;
+		background: $mocha;
+		color: $ivory;
+		font-size: 11px;
+		font-weight: 600;
+		line-height: 1;
+	}
+	.lang-btn {
+		padding: 8px 6px;
+		border: none;
+		background: transparent;
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		cursor: pointer;
+		@include focus-ring;
+	}
+	.avatar-btn {
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		overflow: hidden;
+		border: 1px solid $line;
+		border-radius: 50%;
+		background: $sand;
+		cursor: pointer;
+		@include focus-ring;
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+	}
+	.login-btn {
+		padding: 8px 4px;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		color: $espresso;
+		font-size: 14px;
+		font-weight: 500;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		text-decoration: none;
+		@include focus-ring;
+		svg {
+			font-size: 22px;
+		}
+	}
+}
+
+/** MUI portals opened from the header (rendered outside the wrappers) **/
+.nav-menu.MuiPaper-root {
+	margin-top: 8px;
+	min-width: 160px;
+	border: 1px solid $line;
+	border-radius: 4px;
+	background: $ivory;
+	box-shadow: $soft-shadow;
+	.MuiMenuItem-root {
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+	}
+	.MuiMenuItem-root.Mui-selected {
+		background: $sand;
+	}
+}
+
+.nav-drawer.MuiPaper-root {
+	width: min(320px, 86vw);
+	padding: 16px 20px 28px;
+	box-sizing: border-box;
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	.icon-btn {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: $espresso;
+		cursor: pointer;
+		@include focus-ring;
+	}
+	.drawer-top {
+		padding-bottom: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 1px solid $line;
+	}
+	.drawer-nav {
+		padding: 12px 0;
+		display: flex;
+		flex-direction: column;
+		a {
+			padding: 14px 0;
+			border-bottom: 1px solid $line;
+			color: $espresso;
+			font-family: $font-heading;
+			font-size: 24px;
+			text-decoration: none;
+			@include focus-ring;
+			&[aria-current='page'] {
+				color: $mocha;
+			}
+		}
+	}
+	.drawer-lang {
+		margin-top: 16px;
+		display: flex;
+		gap: 8px;
+		button {
+			padding: 8px 14px;
+			border: 1px solid $line;
+			border-radius: 999px;
+			background: transparent;
+			color: $espresso;
+			font-family: $font;
+			font-size: 13px;
+			letter-spacing: 0.14em;
+			cursor: pointer;
+			@include focus-ring;
+			&.active {
+				border-color: $mocha;
+				background: $mocha;
+				color: $ivory;
+			}
+		}
+	}
+}
+
+/** FOOTER LOOKS (Footer.tsx); layout is in #pc-wrap #footer / #mobile-wrap #footer **/
+.footer-container {
+	border-top: 1px solid $line;
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	.logo-box {
+		display: inline-flex;
+		line-height: 0;
+		@include focus-ring;
+	}
+	.about {
+		color: $espresso;
+		font-size: 17px;
+		line-height: 1.65;
+	}
+	.label {
+		margin-bottom: 8px;
+		display: block;
+		@include eyebrow;
+		font-size: 12px;
+	}
+	.phone {
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 26px;
+		text-decoration: none;
+		@include focus-ring;
+		&:hover {
+			color: $mocha;
+		}
+	}
+	.column {
+		h2 {
+			margin: 0 0 18px;
+			color: $espresso;
+			font-family: $font;
+			font-size: 13px;
+			font-weight: 600;
+			letter-spacing: 0.16em;
+			text-transform: uppercase;
+		}
+		ul {
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			gap: 12px;
+			list-style: none;
+		}
+		a {
+			color: $muted;
+			font-size: 16px;
+			line-height: 1.4;
+			white-space: normal;
+			text-decoration: none;
+			transition: color 0.3s ease;
+			@include focus-ring;
+			&:hover {
+				color: $mocha;
+			}
+		}
+	}
+	.footer-bottom p {
+		margin: 0;
+		padding: 20px 0 28px;
+		border-top: 1px solid $line;
+		color: $muted;
+		font-size: 13px;
+	}
+}
+
+/** SHARED BUTTONS (tokens and mixins in variables.scss): use on any <button> or link-button **/
+.button-primary {
+	@include button-primary;
+}
+.button-secondary {
+	@include button-secondary;
+}
+/** primary on a dark photo: ivory fill, espresso label, champagne on hover (same arrow, states and tokens) **/
+.button-primary.on-dark {
+	border-color: $ivory;
+	background: $ivory;
+	color: $espresso;
+	&:hover:not(:disabled) {
+		border-color: $champagne;
+		background: $champagne;
+		color: $espresso;
+	}
+	&:active:not(:disabled) {
+		border-color: $sand;
+		background: $sand;
+	}
+}
+.button-link {
+	@include text-link;
+}
+
+/** HOMEPAGE FONTS (Stitch design system "Editorial Archive" v4): headings in Public Sans; body and labels stay DM Sans.
+    $font-heading reads this variable, so every homepage heading follows; the navbar and footer keep the site fonts. **/
+.home-hero,
+.home-page {
+	--font-heading: var(--font-home-heading);
+}
+
+/** HOMEPAGE HERO LOOKS (HomeHero.tsx, HeaderFilter.tsx) **/
+.home-hero {
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	.hero-media img {
+		width: 100%;
+		height: 100%;
+		display: block;
+		object-fit: cover;
+		object-position: 10% 80%;
+	}
+	.hero-media img {
+		transform-origin: 60% 40%; // the slow settle (heroPhoto) zooms toward the couple
+	}
+	.hero-title {
+		max-width: 40vw; // one line on wide screens; two even lines when it would reach the couple
+		margin: 0 0 20px;
+		text-wrap: balance; // when it does wrap (narrow screens), the lines split evenly
+		color: $hero-ink;
+		font-family: $font-heading;
+		font-weight: 400;
+		line-height: 1.08;
+		letter-spacing: -0.025em;
+	}
+	.hero-subtitle {
+		max-width: 560px;
+		margin: 0 0 32px;
+		text-wrap: pretty; // no single word left alone on the last line
+		color: $hero-ink-soft;
+		font-family: $font;
+		font-size: 17px;
+		font-weight: 400;
+		line-height: 1.65;
+	}
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		.button-primary {
+			font-size: $btn-hero-font-size;
+			letter-spacing: 0.02em;
+			text-transform: none;
+		}
+	}
+	.hero-search {
+		animation: fade-up 0.9s 0.15s $ease-out both;
+	}
+	.search-box {
+		display: flex;
+		align-items: stretch;
+		border: 1px solid $line;
+		border-radius: 4px;
+		background: #ffffff;
+		box-shadow: $soft-shadow;
+		font-family: $font;
+	}
+	.search-field {
+		position: relative;
+	}
+	.field-trigger {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		min-height: 80px;
+		padding: 16px 48px 16px 28px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 6px;
+		border: none;
+		background: transparent;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+		&:hover,
+		&.on {
+			background: rgba(239, 230, 218, 0.45);
+		}
+		&:focus-visible {
+			outline: 2px solid $mocha;
+			outline-offset: -2px;
+		}
+	}
+	.field-label {
+		@include eyebrow;
+	}
+	.field-value {
+		color: $espresso;
+		@include text-title-editorial;
+	}
+	.field-chevron {
+		position: absolute;
+		top: 50%;
+		right: 20px;
+		margin-top: -10px;
+		display: inline-flex;
+		color: $muted;
+		svg {
+			font-size: 20px;
+		}
+	}
+	.field-menu {
+		position: absolute;
+		top: calc(100% + 6px);
+		left: 0;
+		right: 0;
+		z-index: 20;
+		max-height: 300px;
+		margin: 0;
+		padding: 6px;
+		overflow-y: auto;
+		border: 1px solid $line;
+		border-radius: 4px;
+		background: $ivory;
+		box-shadow: $soft-shadow;
+		list-style: none;
+		button {
+			width: 100%;
+			padding: 10px 14px;
+			border: none;
+			border-radius: 4px;
+			background: transparent;
+			color: $espresso;
+			font-family: $font;
+			font-size: 14px;
+			text-align: left;
+			cursor: pointer;
+			@include focus-ring;
+			&:hover,
+			&.selected {
+				background: $sand;
+			}
+			&.selected {
+				font-weight: 600;
+			}
+		}
+	}
+	.search-actions {
+		padding: 16px 24px;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+	.advanced-btn {
+		@include text-link;
+		svg {
+			font-size: 18px;
+		}
+	}
+	.search-btn {
+		@include button-primary;
+	}
+}
+
+/** HOMEPAGE SECTION LOOKS (pages/index.tsx); layout is in pc/homepage/homepage.scss and mobile/main.scss **/
+.home-page {
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	.home-section {
+		background: $ivory;
+		&.tinted {
+			background: $ivory-deep;
+		}
+	}
+	.section-title {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+	}
+	.section-subtitle {
+		max-width: 620px;
+		margin: 12px 0 0;
+		color: $muted;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+	.filter-tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px 20px;
+		button {
+			padding: 6px 0;
+			border: none;
+			border-bottom: 1px solid transparent;
+			background: transparent;
+			color: $muted;
+			font-family: $font;
+			font-size: 12px;
+			font-weight: 500;
+			letter-spacing: 0.12em;
+			cursor: pointer;
+			transition: color 0.3s ease, border-color 0.3s ease;
+			@include focus-ring;
+			&:hover {
+				color: $espresso;
+			}
+			&.active {
+				border-bottom-color: $espresso;
+				color: $espresso;
+			}
+		}
+	}
+	.arrow-box {
+		display: flex;
+		gap: 8px;
+	}
+	.arrow-btn {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid $line;
+		border-radius: 4px;
+		background: #ffffff;
+		color: $espresso;
+		cursor: pointer;
+		transition: background-color 0.3s ease, opacity 0.3s ease;
+		@include focus-ring;
+		&:hover {
+			background: $sand;
+		}
+		&.swiper-button-disabled {
+			opacity: 0.4;
+			cursor: default;
+		}
+		&.swiper-button-lock {
+			display: none;
+		}
+	}
+	.tag {
+		padding: 6px 12px;
+		display: inline-block;
+		border: 1px solid $line;
+		background: #ffffff;
+		color: $espresso;
+		font-family: $font;
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+	}
+	.like-btn {
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 4px;
+		background: rgba(255, 255, 255, 0.92);
+		color: $espresso;
+		cursor: pointer;
+		transition: transform 0.3s $ease-out, color 0.3s ease;
+		@include focus-ring;
+		svg {
+			font-size: 19px;
+		}
+		&:hover {
+			transform: scale(1.06);
+		}
+		&.liked {
+			color: $mocha;
+		}
+	}
+	.price {
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 22px;
+		white-space: nowrap;
+		&.large {
+			font-size: 30px;
+		}
+	}
+	.empty-box {
+		padding: 56px 24px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 28px;
+		background: $ivory-deep;
+		text-align: center;
+		p {
+			max-width: 520px;
+			margin: 0;
+			color: $espresso;
+			font-family: $font-heading;
+			font-size: 22px;
+			line-height: 1.4;
+		}
+	}
+	.img-placeholder {
+		width: 100%;
+		height: 100%;
+		display: block;
+		background: linear-gradient(135deg, $sand, $ivory-deep);
+	}
+	.skeleton.MuiSkeleton-root {
+		width: 100%;
+		height: auto;
+		margin-bottom: 14px;
+		background-color: rgba(239, 230, 218, 0.7);
+		transform: none;
+		&.media {
+			aspect-ratio: 4 / 3;
+		}
+		&.portrait {
+			aspect-ratio: 4 / 5;
+		}
+		&.square {
+			aspect-ratio: 1 / 1;
+		}
+		&.wide {
+			aspect-ratio: 16 / 10;
+		}
+	}
+
+	/** cards: image zoom + gentle lift **/
+	.trend-card,
+	.popular-card,
+	.studio-card,
+	.article-card {
+		transition: transform 0.5s $ease-out;
+		img {
+			transition: transform 0.6s $ease-out, filter 0.6s ease;
+		}
+		&:hover {
+			transform: translateY(-4px);
+			img {
+				transform: scale(1.03);
+			}
+		}
+		.card-media {
+			overflow: hidden;
+			display: block;
+			background: $sand;
+			img {
+				width: 100%;
+				height: 100%;
+				display: block;
+				object-fit: cover;
+			}
+		}
+		min-width: 0; // never wider than its grid or flex cell
+		.card-title {
+			margin: 0;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			overflow-wrap: anywhere;
+			font-family: $font-heading;
+			font-weight: 400;
+			height: 55px;
+			a {
+				color: $espresso;
+				text-decoration: none;
+				white-space: normal; // the global `a` rule is nowrap
+				@include focus-ring;
+			}
+		}
+		.card-meta {
+			@include eyebrow;
+		}
+	}
+
+	.trend-feature {
+		position: relative;
+		overflow: hidden;
+		background: $sand;
+		.feature-visual {
+			position: absolute;
+			inset: 0;
+		}
+		.feature-media {
+			position: absolute;
+			inset: 0;
+			img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				transition: transform 0.8s $ease-out;
+			}
+		}
+		&:hover .feature-media img {
+			transform: scale(1.03);
+		}
+		.rank-tag {
+			position: absolute;
+			top: 20px;
+			left: 20px;
+		}
+		.like-box {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+		}
+		.feature-panel {
+			position: absolute;
+			left: 24px;
+			bottom: 24px;
+			width: calc(100% - 48px);
+			max-width: 380px;
+			padding: 24px;
+			box-sizing: border-box;
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			background: rgba(253, 249, 243, 0.94);
+			-webkit-backdrop-filter: blur(6px);
+			backdrop-filter: blur(6px);
+			box-shadow: $soft-shadow;
+			.button-primary {
+				margin-top: 12px;
+				align-self: flex-start;
+			}
+		}
+		.panel-meta {
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			@include eyebrow;
+		}
+		.panel-title {
+			margin: 4px 0 0;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+			overflow-wrap: anywhere;
+			font-family: $font-heading;
+			font-size: 30px;
+			font-weight: 400;
+			line-height: 1.2;
+			a {
+				color: $espresso;
+				text-decoration: none;
+				white-space: normal;
+				@include focus-ring;
+			}
+		}
+		.panel-studio {
+			margin: 0;
+			color: $muted;
+			font-size: 13px;
+		}
+		.panel-details {
+			margin: 6px 0 0;
+			color: $espresso;
+			font-size: 13px;
+			line-height: 1.5;
+		}
+		.panel-price {
+			margin-top: 6px;
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 12px;
+		}
+		.panel-likes {
+			display: inline-flex;
+			align-items: center;
+			gap: 4px;
+			color: $muted;
+			font-size: 12px;
+			svg {
+				font-size: 14px;
+			}
+		}
+	}
+
+	.trend-card {
+		display: flex;
+		flex-direction: column;
+		.card-media {
+			position: relative;
+			aspect-ratio: 4 / 3;
+			> a {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+		}
+		.rank-tag {
+			position: absolute;
+			top: 12px;
+			left: 12px;
+			padding: 4px 10px;
+		}
+		.like-box {
+			position: absolute;
+			top: 12px;
+			right: 12px;
+		}
+		.card-meta {
+			margin: 16px 0 6px;
+		}
+		.card-title {
+			font-size: 22px;
+			line-height: 1.3;
+		}
+		.card-studio {
+			margin: 8px 0 0;
+			color: $muted;
+			font-size: 13px;
+		}
+		.card-footer {
+			margin-top: 14px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+		}
+	}
+
+	.home-story {
+		.story-head {
+			border-top: 1px solid $line;
+		}
+		.story-eyebrow {
+			@include eyebrow;
+			display: inline-block;
+		}
+		.story-quote {
+			margin: 0;
+			color: $espresso;
+			font-family: $font-heading;
+			font-weight: 400;
+			letter-spacing: -0.02em;
+			text-wrap: balance;
+			em {
+				color: $mocha;
+				font-style: normal;
+			}
+		}
+		.story-media {
+			overflow: hidden;
+			border-radius: $radius-card;
+			background: $sand;
+			img {
+				width: 100%;
+				height: 100%;
+				display: block;
+				object-fit: cover;
+				object-position: right;
+			}
+		}
+		.story-body {
+			margin: 0;
+			color: $espresso;
+			font-size: 16px;
+			line-height: 1.75;
+		}
+		.story-points {
+			margin: 0;
+			padding: 0;
+			list-style: none;
+			li {
+				display: flex;
+				align-items: baseline;
+				gap: 20px;
+				border-top: 1px solid $line;
+				&:last-child {
+					border-bottom: 1px solid $line;
+				}
+			}
+			.point-num {
+				@include text-label-meta;
+				min-width: 24px; // equal column so every point starts on the same line
+				color: $mocha;
+				letter-spacing: 0.08em;
+				font-variant-numeric: tabular-nums;
+			}
+			.point-text {
+				color: $espresso;
+				font-family: $font-heading;
+				font-size: 20px;
+				line-height: 1.4;
+			}
+		}
+	}
+
+	.popular-swiper {
+		width: 100%;
+		min-width: 0; // flex child of .container: let Swiper measure the real width
+		padding-top: 8px; // room for the card hover lift inside the clipped track
+		margin-top: -8px;
+		.swiper-slide {
+			height: auto;
+			min-width: 0;
+		}
+	}
+
+	.popular-card {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		.card-media {
+			position: relative;
+			aspect-ratio: 4 / 5;
+			.tag {
+				position: absolute;
+				top: 16px;
+				left: 16px;
+			}
+		}
+		.card-meta {
+			margin-top: 22px;
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 12px;
+			.price {
+				letter-spacing: 0;
+				text-transform: none;
+			}
+		}
+		.card-title {
+			margin-top: 8px;
+			line-height: 1.2;
+		}
+		.card-details {
+			flex: 1;
+			margin: 10px 0 20px;
+			color: $muted;
+			font-size: 13px;
+			line-height: 1.6;
+		}
+		> .button-link {
+			align-self: flex-start;
+		}
+	}
+
+	.tier-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.tier-row {
+		border-bottom: 1px solid $line;
+		&:last-child {
+			border-bottom: none;
+		}
+		.tier-name {
+			h3 {
+				margin: 0;
+				color: $espresso;
+				font-family: $font-heading;
+				font-size: 34px;
+				font-weight: 400;
+			}
+		}
+		.tier-copy {
+			margin: 0;
+			color: $espresso;
+			font-size: 14px;
+			line-height: 1.6;
+		}
+		.tier-chips {
+			display: flex;
+		}
+		.tier-count {
+			color: $muted;
+			font-size: 13px;
+		}
+		.tier-price {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+			.button-secondary {
+				margin-top: 10px;
+			}
+		}
+		.tier-from {
+			@include eyebrow;
+		}
+		.tier-none {
+			color: $muted;
+			font-size: 13px;
+		}
+	}
+
+	.studio-card {
+		.card-media {
+			aspect-ratio: 1 / 1;
+			img {
+				filter: grayscale(1);
+			}
+		}
+		&:hover .card-media img {
+			filter: grayscale(0);
+		}
+		.initial {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: $mocha;
+			font-family: $font-heading;
+			font-size: 72px;
+		}
+		.card-head {
+			margin-top: 18px;
+			display: flex;
+			align-items: baseline;
+			justify-content: space-between;
+			gap: 12px;
+			h3 {
+				margin: 0;
+				font-family: $font-heading;
+				font-size: 22px;
+				font-weight: 400;
+				a {
+					color: $espresso;
+					text-decoration: none;
+					@include focus-ring;
+				}
+			}
+		}
+		.card-count {
+			color: $muted;
+			font-size: 12px;
+			white-space: nowrap;
+		}
+		.card-location {
+			margin: 20px 0 0;
+			@include eyebrow;
+		}
+		.card-desc {
+			margin: 8px 0 0;
+			overflow: hidden;
+			display: -webkit-box;
+			-webkit-line-clamp: 2;
+			-webkit-box-orient: vertical;
+			color: $espresso;
+			font-size: 13px;
+			line-height: 1.55;
+		}
+	}
+
+	.article-card {
+		.card-media {
+			aspect-ratio: 16 / 10;
+		}
+		// post without an image: its category name, quietly, instead of an empty block
+		.img-placeholder.category {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: $mocha;
+			font-family: $font-heading;
+			font-size: 40px;
+		}
+		.card-meta {
+			margin-top: 18px;
+			display: flex;
+			justify-content: space-between;
+			gap: 12px;
+			span {
+				color: $espresso;
+			}
+		}
+		.card-title {
+			margin-top: 10px;
+			font-size: 22px;
+			line-height: 1.35;
+		}
+		.card-excerpt {
+			margin: 10px 0 0;
+			overflow: hidden;
+			display: -webkit-box;
+			-webkit-line-clamp: 3;
+			-webkit-box-orient: vertical;
+			color: $muted;
+			font-size: 13px;
+			line-height: 1.6;
+		}
+	}
+}
+
+/** ROUNDED SHAPES (Stitch "remaked sample"): same homepage, rounded boxes, pill tabs and tags, circular icon buttons **/
+/** hero CTA on the photo: ivory pill with a round espresso arrow chip **/
+.button-primary.on-dark {
+	padding-right: 8px;
+	&::after {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		-webkit-mask: none;
+		mask: none;
+		background: $espresso $btn-arrow-light center / 12px no-repeat;
+	}
+}
+.home-hero {
+	.hero-media {
+		border-radius: $radius-card;
+		box-shadow: $hero-card-shadow;
+	}
+	.search-box {
+		padding: 8px;
+		border-radius: $radius-tile;
+	}
+	.field-trigger {
+		border-radius: $radius-menu;
+	}
+	.field-menu {
+		border-radius: $radius-menu;
+		button {
+			border-radius: 8px;
+		}
+	}
+}
+.home-page {
+	.filter-tabs {
+		gap: 8px;
+		button {
+			padding: 9px 18px;
+			border: 1px solid $line;
+			border-radius: $radius-pill;
+			&:hover {
+				border-color: $espresso;
+			}
+			&.active {
+				border-color: $espresso;
+				background: $espresso;
+				color: $ivory;
+			}
+		}
+	}
+	.arrow-btn,
+	.like-btn {
+		border-radius: 50%;
+	}
+	.tag {
+		padding: 6px 14px;
+		border-radius: $radius-pill;
+	}
+	.empty-box {
+		border: 1px solid $line;
+		border-radius: $radius-card;
+		background: $ivory-deep;
+	}
+	.skeleton.MuiSkeleton-root,
+	.trend-card .card-media,
+	.popular-card .card-media,
+	.studio-card .card-media,
+	.article-card .card-media {
+		overflow: hidden;
+		border-radius: $radius-tile;
+	}
+	.trend-feature {
+		border-radius: $radius-card;
+		.feature-panel {
+			border-radius: $radius-tile;
+		}
+	}
+	.tier-list {
+		border-top: none;
+	}
+	.tier-row {
+		border: 1px solid $line;
+		border-radius: $radius-card;
+		background: $ivory;
+		&:last-child {
+			border-bottom: 1px solid $line;
+		}
+	}
+}
+
+/** accessibility: honour reduced motion (not a breakpoint) **/
+@media (prefers-reduced-motion: reduce) {
+	.animated-logo {
+		.monogram {
+			transition: none;
+		}
+		.underline {
+			opacity: 0;
+			transform: scaleX(1);
+			transition: opacity 0.6s ease;
+		}
+		.tagline {
+			transition: fill-opacity 0.6s ease;
+		}
+		&:hover,
+		a:focus-visible > & {
+			.monogram {
+				transform: none;
+			}
+			.sheen {
+				animation: none;
+			}
+			.underline {
+				opacity: 1;
+			}
+			.tagline {
+				letter-spacing: 2.35px;
+			}
+		}
+	}
+	.home-hero {
+		.hero-search {
+			animation: none;
+		}
+	}
+	.button-primary,
+	.button-secondary,
+	.button-link,
+	.home-hero .search-btn,
+	.home-hero .advanced-btn {
+		transition: none;
+		&::after {
+			transition: none;
+		}
+		&:hover::after,
+		&:active {
+			transform: none;
+		}
+	}
+	.home-page {
+		.trend-card,
+		.popular-card,
+		.studio-card,
+		.article-card,
+		.like-btn {
+			transition: none;
+			&:hover {
+				transform: none;
+			}
+			img {
+				transition: none;
+			}
+		}
+		.trend-card:hover img,
+		.popular-card:hover img,
+		.studio-card:hover img,
+		.article-card:hover img,
+		.trend-feature:hover .feature-media img {
+			transform: none;
+		}
+	}
+}

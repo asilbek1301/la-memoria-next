@@ -2,7 +2,6 @@ import React, { SyntheticEvent, useState } from 'react';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import { AccordionDetails, Box, Stack, Typography } from '@mui/material';
 import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary';
-import { useRouter } from 'next/router';
 import { styled } from '@mui/material/styles';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
@@ -32,7 +31,6 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
 
 const Faq = () => {
 	const device = useDeviceDetect();
-	const router = useRouter();
 	const [category, setCategory] = useState<string>('package');
 	const [expanded, setExpanded] = useState<string | false>('panel1');
 

@@ -38,9 +38,9 @@ const Filter = (props: FilterType) => {
 	const { searchFilter, setSearchFilter, initialInput } = props;
 	const device = useDeviceDetect();
 	const router = useRouter();
-	const [packageLocation, setPackageLocation] = useState<PackageLocation[]>(Object.values(PackageLocation));
-	const [packageType, setPackageType] = useState<PackageType[]>(Object.values(PackageType));
-	const [packageStyle, setPackageStyle] = useState<PackageStyle[]>(Object.values(PackageStyle));
+	const [packageLocation] = useState<PackageLocation[]>(Object.values(PackageLocation));
+	const [packageType] = useState<PackageType[]>(Object.values(PackageType));
+	const [packageStyle] = useState<PackageStyle[]>(Object.values(PackageStyle));
 	const [searchText, setSearchText] = useState<string>('');
 	const [showMore, setShowMore] = useState<boolean>(false);
 

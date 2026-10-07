@@ -6,7 +6,6 @@
   "My Page": "마이 페이지",
   "CS": "고객센터",
   "Login": "로그인",
-  "Register": "가입",
   "Location": "위치",
   "Package type": "패키지 유형",
   "Style": "스타일",
@@ -21,5 +20,6 @@
   "Login/Signup": "로그인/가입",
   "Member Page": "멤버 페이지",
   "My Reservations": "내 예약",
-  "Reservations": "예약"
+  "Reservations": "예약",
+  "Help": "고객센터"
 }

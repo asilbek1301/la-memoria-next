@@ -1,130 +1,112 @@
 import React, { useState } from 'react';
-import { Stack, Box } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
+import { useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation, Pagination } from 'swiper';
-import WestIcon from '@mui/icons-material/West';
-import EastIcon from '@mui/icons-material/East';
+import { A11y, Navigation } from 'swiper';
+import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
+import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
 import PopularPackageCard from './PopularPackageCard';
 import { Package } from '../../types/package/package';
-import Link from 'next/link';
 import { PackagesInquiry } from '../../types/package/package.input';
+import { PackageStyle } from '../../enums/package.enum';
 import { GET_PACKAGES } from '../../../apollo/user/query';
-import { useQuery } from '@apollo/client';
-import { T } from '../../types/common';
+import { prettyEnum } from '../../utils';
+import HomeSection, { EmptyState, FilterTabs } from './HomeSection';
 
 interface PopularPackagesProps {
 	initialInput: PackagesInquiry;
 }
 
+type StyleTab = PackageStyle | 'ALL';
+
+const styleTabs: { value: StyleTab; label: string }[] = [
+	{ value: 'ALL', label: 'All' },
+	...Object.values(PackageStyle).map((value) => ({ value, label: prettyEnum(value) })),
+];
+
 const PopularPackages = (props: PopularPackagesProps) => {
 	const { initialInput } = props;
-	const device = useDeviceDetect();
-	const [popularPackages, setPopularPackages] = useState<Package[]>([]);
+	const [style, setStyle] = useState<StyleTab>('ALL');
+	const input: PackagesInquiry = {
+		...initialInput,
+		search: style === 'ALL' ? {} : { styleList: [style] },
+	};
 
 	/** APOLLO REQUESTS **/
-	
-	const {
-		loading: getPackagesLoading,
-		data: getPackagesData,
-		error: getPackagesError,
-		refetch: getPackagesRefetch,
-	} = useQuery(GET_PACKAGES, {
+
+	const { loading: getPackagesLoading, data: getPackagesData } = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'cache-and-network',
-		variables: { input: initialInput },
+		variables: { input },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setPopularPackages(data?.getPackages?.list);
-		},
 	});
-	
-	/** HANDLERS **/
+	const popularPackages: Package[] = getPackagesData?.getPackages?.list ?? [];
+	const showSkeleton = getPackagesLoading && popularPackages.length === 0;
 
-	if (!popularPackages) return null;
-
-	if (device === 'mobile') {
-		return (
-			<Stack className={'popular-packages'}>
-				<Stack className={'container'}>
-					<Stack className={'info-box'}>
-						<span>Popular packages</span>
-					</Stack>
-					<Stack className={'card-box'}>
-						<Swiper
-							className={'popular-package-swiper'}
-							slidesPerView={'auto'}
-							centeredSlides={true}
-							spaceBetween={25}
-							modules={[Autoplay]}
-						>
-							{popularPackages.map((pkg: Package) => {
-								return (
-									<SwiperSlide key={pkg._id} className={'popular-package-slide'}>
-										<PopularPackageCard pkg={pkg} />
-									</SwiperSlide>
-								);
-							})}
-						</Swiper>
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className={'popular-packages'}>
-				<Stack className={'container'}>
-					<Stack className={'info-box'}>
-						<Box component={'div'} className={'left'}>
-							<span>Popular packages</span>
-							<p>Popularity is based on views</p>
-						</Box>
-						<Box component={'div'} className={'right'}>
-							<div className={'more-box'}>
-								<Link href={'/package'}>
-									<span>See All Categories</span>
-								</Link>
-								<img src="/img/icons/rightup.svg" alt="" />
-							</div>
-						</Box>
-					</Stack>
-					<Stack className={'card-box'}>
-						<Swiper
-							className={'popular-package-swiper'}
-							slidesPerView={'auto'}
-							spaceBetween={25}
-							modules={[Autoplay, Navigation, Pagination]}
-							navigation={{
-								nextEl: '.swiper-popular-next',
-								prevEl: '.swiper-popular-prev',
-							}}
-							pagination={{
-								el: '.swiper-popular-pagination',
-							}}
-						>
-							{popularPackages.map((pkg: Package) => {
-								return (
-									<SwiperSlide key={pkg._id} className={'popular-package-slide'}>
-										<PopularPackageCard pkg={pkg} />
-									</SwiperSlide>
-								);
-							})}
-						</Swiper>
-					</Stack>
-					<Stack className={'pagination-box'}>
-						<WestIcon className={'swiper-popular-prev'} />
-						<div className={'swiper-popular-pagination'}></div>
-						<EastIcon className={'swiper-popular-next'} />
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+	return (
+		<HomeSection
+			id="popular"
+			title="Most Popular Packages"
+			aside={
+				<>
+					<FilterTabs label="Filter by style" options={styleTabs} value={style} onChange={setStyle} />
+					<div className={'arrow-box'}>
+						<button type="button" className={'arrow-btn popular-prev'} aria-label="Previous packages">
+							<ChevronLeftRoundedIcon />
+						</button>
+						<button type="button" className={'arrow-btn popular-next'} aria-label="Next packages">
+							<ChevronRightRoundedIcon />
+						</button>
+					</div>
+				</>
+			}
+		>
+			{showSkeleton ? (
+				<div className={'popular-skeleton'} aria-busy="true" aria-label="Loading popular packages">
+					{[0, 1, 2].map((i) => (
+						<div key={i}>
+							<Skeleton variant="rectangular" className={'skeleton portrait'} />
+							<Skeleton width="80%" />
+							<Skeleton width="60%" />
+						</div>
+					))}
+				</div>
+			) : popularPackages.length === 0 ? (
+				<EmptyState
+					message={
+						style === 'ALL'
+							? 'No packages have been published yet. Popular packages will appear here as couples start viewing them.'
+							: `No ${prettyEnum(style).toLowerCase()} style packages yet.`
+					}
+					href="/package"
+					linkLabel="Browse all packages"
+				/>
+			) : (
+				<Swiper
+					className={'popular-swiper'}
+					modules={[Navigation, A11y]}
+					navigation={{ prevEl: '.popular-prev', nextEl: '.popular-next' }}
+					slidesPerView={1.15}
+					spaceBetween={20}
+					breakpoints={{
+						768: { slidesPerView: 2, spaceBetween: 28 },
+						1024: { slidesPerView: 3, spaceBetween: 40 },
+					}}
+				>
+					{popularPackages.map((pkg: Package) => (
+						<SwiperSlide key={pkg._id}>
+							<PopularPackageCard pkg={pkg} />
+						</SwiperSlide>
+					))}
+				</Swiper>
+			)}
+		</HomeSection>
+	);
 };
 
 PopularPackages.defaultProps = {
 	initialInput: {
 		page: 1,
-		limit: 7,
+		limit: 8,
 		sort: 'packageViews',
 		direction: 'DESC',
 		search: {},

@@ -52,12 +52,7 @@ const StudioDetail: NextPage = ({ initialInput, initialComment, ...props }: any)
 	const [createComment] = useMutation(CREATE_COMMENT);
 	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
 
-	const {
-		loading: getMemberLoading,
-		data: getMemberData,
-		error: getMemberError,
-		refetch: getMemberRefetch,
-	} = useQuery(GET_MEMBER, {
+	useQuery(GET_MEMBER, {
 		fetchPolicy: 'network-only',
 		variables: { input: studioId },
 		skip: !studioId,
@@ -83,9 +78,6 @@ const StudioDetail: NextPage = ({ initialInput, initialComment, ...props }: any)
 	});
 
 	const {
-		loading: getPackagesLoading,
-		data: getPackagesData,
-		error: getPackagesError,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'network-only',
@@ -99,9 +91,6 @@ const StudioDetail: NextPage = ({ initialInput, initialComment, ...props }: any)
 	});
 
 	const {
-		loading: getCommentsLoading,
-		data: getCommentsData,
-		error: getCommentsError,
 		refetch: getCommentsRefetch,
 	} = useQuery(GET_COMMENTS, {
 		fetchPolicy: 'network-only',
@@ -334,7 +323,4 @@ StudioDetail.defaultProps = {
 };
 
 export default withLayoutBasic(StudioDetail);
-function getPackagesRefetch(arg0: { input: PackagesInquiry; }) {
-	throw new Error('Function not implemented.');
-}
 

@@ -1,28 +1,39 @@
 import React, { useState } from 'react';
-import { Stack, Box } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import WestIcon from '@mui/icons-material/West';
-import EastIcon from '@mui/icons-material/East';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Navigation, Pagination } from 'swiper';
+import { useMutation, useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
 import { Package } from '../../types/package/package';
 import { PackagesInquiry } from '../../types/package/package.input';
-import TrendPackageCard from './TrendPackageCard';
+import { PackageLocation } from '../../enums/package.enum';
 import { GET_PACKAGES } from '../../../apollo/user/query';
-import { T } from '../../types/common';
-import { useQuery, useMutation } from '@apollo/client';
 import { LIKE_TARGET_PACKAGE } from '../../../apollo/user/mutation';
+import { T } from '../../types/common';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
+import { prettyEnum } from '../../utils';
+import TrendPackageCard from './TrendPackageCard';
+import HomeSection, { EmptyState, FilterTabs, ViewAllLink } from './HomeSection';
 
 interface TrendPackagesProps {
 	initialInput: PackagesInquiry;
 }
 
+type LocationTab = PackageLocation | 'ALL';
+
+const locationTabs: { value: LocationTab; label: string }[] = [
+	{ value: 'ALL', label: 'All' },
+	...[PackageLocation.SEOUL, PackageLocation.BUSAN, PackageLocation.JEJU].map((value) => ({
+		value,
+		label: prettyEnum(value),
+	})),
+];
+
 const TrendPackages = (props: TrendPackagesProps) => {
 	const { initialInput } = props;
-	const device = useDeviceDetect();
-	const [trendPackages, setTrendPackages] = useState<Package[]>([]);
+	const [location, setLocation] = useState<LocationTab>('ALL');
+	const input: PackagesInquiry = {
+		...initialInput,
+		search: location === 'ALL' ? {} : { locationList: [location] },
+	};
 
 	/** APOLLO REQUESTS **/
 
@@ -31,16 +42,13 @@ const TrendPackages = (props: TrendPackagesProps) => {
 	const {
 		loading: getPackagesLoading,
 		data: getPackagesData,
-		error: getPackagesError,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'cache-and-network',
-		variables: { input: initialInput },
+		variables: { input },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setTrendPackages(data?.getPackages?.list);
-		},
 	});
+	const trendPackages: Package[] = getPackagesData?.getPackages?.list ?? [];
 
 	/** HANDLERS **/
 
@@ -55,7 +63,7 @@ const TrendPackages = (props: TrendPackagesProps) => {
 			});
 
 			//execute getPackagesRefetch
-			await getPackagesRefetch({ input: initialInput });
+			await getPackagesRefetch({ input });
 
 			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
@@ -64,98 +72,71 @@ const TrendPackages = (props: TrendPackagesProps) => {
 		}
 	};
 
-	if (trendPackages) console.log('trendPackages:', trendPackages);
-	if (!trendPackages) return null;
+	const [featured, ...rest] = trendPackages;
+	const showSkeleton = getPackagesLoading && trendPackages.length === 0;
 
-	if (device === 'mobile') {
-		return (
-			<Stack className={'trend-packages'}>
-				<Stack className={'container'}>
-					<Stack className={'info-box'}>
-						<span>Trend Packages</span>
-					</Stack>
-					<Stack className={'card-box'}>
-						{trendPackages.length === 0 ? (
-							<Box component={'div'} className={'empty-list'}>
-								Trends Empty
-							</Box>
-						) : (
-							<Swiper
-								className={'trend-package-swiper'}
-								slidesPerView={'auto'}
-								centeredSlides={true}
-								spaceBetween={15}
-								modules={[Autoplay]}
-							>
-								{trendPackages.map((pkg: Package) => {
-									return (
-										<SwiperSlide key={pkg._id} className={'trend-package-slide'}>
-											<TrendPackageCard pkg={pkg} likePackageHandler={likePackageHandler} />
-										</SwiperSlide>
-									);
-								})}
-							</Swiper>
-						)}
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	} else {
-		return (
-			<Stack className={'trend-packages'}>
-				<Stack className={'container'}>
-					<Stack className={'info-box'}>
-						<Box component={'div'} className={'left'}>
-							<span>Trend Packages</span>
-							<p>Trend is based on likes</p>
-						</Box>
-						<Box component={'div'} className={'right'}>
-							<div className={'pagination-box'}>
-								<WestIcon className={'swiper-trend-prev'} />
-								<div className={'swiper-trend-pagination'}></div>
-								<EastIcon className={'swiper-trend-next'} />
+	return (
+		<HomeSection
+			id="trending"
+			title="Trending Packages"
+			subtitle="Ranked by likes from couples"
+			aside={
+				<>
+					<FilterTabs label="Filter by location" options={locationTabs} value={location} onChange={setLocation} />
+					<ViewAllLink href={'/package'} label="View all" />
+				</>
+			}
+		>
+			{showSkeleton ? (
+				<div className={'trend-grid'} aria-busy="true" aria-label="Loading trending packages">
+					<Skeleton variant="rectangular" className={'skeleton feature-box'} />
+					<div className={'trend-list'}>
+						{[0, 1, 2, 3].map((i) => (
+							<div key={i}>
+								<Skeleton variant="rectangular" className={'skeleton media'} />
+								<Skeleton width="70%" />
+								<Skeleton width="40%" />
 							</div>
-						</Box>
-					</Stack>
-					<Stack className={'card-box'}>
-						{trendPackages.length === 0 ? (
-							<Box component={'div'} className={'empty-list'}>
-								Trends Empty
-							</Box>
-						) : (
-							<Swiper
-								className={'trend-package-swiper'}
-								slidesPerView={'auto'}
-								spaceBetween={15}
-								modules={[Autoplay, Navigation, Pagination]}
-								navigation={{
-									nextEl: '.swiper-trend-next',
-									prevEl: '.swiper-trend-prev',
-								}}
-								pagination={{
-									el: '.swiper-trend-pagination',
-								}}
-							>
-								{trendPackages.map((pkg: Package) => {
-									return (
-										<SwiperSlide key={pkg._id} className={'trend-package-slide'}>
-											<TrendPackageCard pkg={pkg} likePackageHandler={likePackageHandler} />
-										</SwiperSlide>
-									);
-								})}
-							</Swiper>
-						)}
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+						))}
+					</div>
+				</div>
+			) : trendPackages.length === 0 ? (
+				<EmptyState
+					message={
+						location === 'ALL'
+							? 'No packages have been published yet. Trending packages will appear here once couples start saving them.'
+							: `No packages in ${prettyEnum(location)} yet.`
+					}
+					href="/package"
+					linkLabel="Browse all packages"
+				/>
+			) : (
+				<div className={'trend-grid'}>
+					<div className={'feature-box'}>
+						<TrendPackageCard pkg={featured} rank={1} variant="featured" likePackageHandler={likePackageHandler} />
+					</div>
+					{rest.length > 0 && (
+						<div className={'trend-list'}>
+							{rest.map((pkg: Package, index: number) => (
+								<TrendPackageCard
+									key={pkg._id}
+									pkg={pkg}
+									rank={index + 2}
+									likePackageHandler={likePackageHandler}
+								/>
+							))}
+						</div>
+					)}
+				</div>
+			)}
+		</HomeSection>
+	);
 };
 
 TrendPackages.defaultProps = {
 	initialInput: {
 		page: 1,
-		limit: 8,
+		limit: 5,
 		sort: 'packageLikes',
 		direction: 'DESC',
 		search: {},

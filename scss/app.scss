@@ -1,8 +1,6 @@
 /** IMPORTS **/
 @import 'variables.scss';
 @import 'reset.scss';
-@import 'components/animatedLogo.scss';
-@import 'components/packageCard.scss';
 
 a {
 	white-space: nowrap;
@@ -16,9 +14,6 @@ button {
 }
 button.outline {
 	border: 1px solid #eee;
-}
-button.contain {
-	color: #fff;
 }
 span,
 p {
@@ -53,6 +48,7 @@ hr {
 #pc-wrap {
 	width: 100%;
 	height: 100%;
+	overflow-x: clip; // safety net: nothing may widen the page (clip keeps the fixed header and sticky children working)
 
 	.container {
 		position: relative;

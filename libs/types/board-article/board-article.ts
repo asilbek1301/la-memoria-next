@@ -1,6 +1,6 @@
 import { BoardArticleCategory, BoardArticleStatus } from '../../enums/board-article.enum';
 import { Member } from '../member/member';
-import { MeLiked, TotalCounter } from '../package/package';
+import { MeLiked } from '../package/package';
 
 export interface BoardArticle {
 	_id: string;
@@ -18,9 +18,4 @@ export interface BoardArticle {
 	/** from aggregation **/
 	meLiked?: MeLiked[];
 	memberData?: Member;
-}
-
-export interface BoardArticles {
-	list: BoardArticle[];
-	metaCounter: TotalCounter[];
 }

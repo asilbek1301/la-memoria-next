@@ -25,7 +25,7 @@ export const getStaticProps = async ({ locale }: any) => ({
 const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 	const device = useDeviceDetect();
 	const router = useRouter();
-	const [anchorEl2, setAnchorEl2] = useState<null | HTMLElement>(null);
+	const [, setAnchorEl2] = useState<null | HTMLElement>(null);
 	const [filterSortName, setFilterSortName] = useState('Recent');
 	const [sortingOpen, setSortingOpen] = useState(false);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -42,9 +42,6 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
 
 	const {
-		loading: getStudiosLoading,
-		data: getStudiosData,
-		error: getStudiosError,
 		refetch: getStudiosRefetch,
 	} = useQuery(GET_STUDIOS, {
 		fetchPolicy: 'network-only',

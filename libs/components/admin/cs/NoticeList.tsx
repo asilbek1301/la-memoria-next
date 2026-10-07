@@ -9,9 +9,6 @@ import {
 	Table,
 	TableContainer,
 	Button,
-	Menu,
-	Fade,
-	MenuItem,
 	Box,
 	Checkbox,
 	Toolbar,
@@ -86,14 +83,6 @@ const headCells: readonly HeadCell[] = [
 	},
 ];
 
-interface EnhancedTableProps {
-	numSelected: number;
-	onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Data) => void;
-	onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-	order: Order;
-	orderBy: string;
-	rowCount: number;
-}
 
 interface EnhancedTableToolbarProps {
 	numSelected: number;
@@ -105,8 +94,8 @@ interface EnhancedTableToolbarProps {
 }
 
 const EnhancedTableToolbar = (props: EnhancedTableToolbarProps) => {
-	const [select, setSelect] = useState('');
-	const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+	const [] = useState('');
+	const { onSelectAllClick, numSelected, rowCount } = props;
 
 	return (
 		<>
@@ -178,12 +167,6 @@ interface NoticeListType {
 export const NoticeList = (props: NoticeListType) => {
 	const {
 		dense,
-		membersData,
-		searchMembers,
-		anchorEl,
-		handleMenuIconClick,
-		handleMenuIconClose,
-		generateMentorTypeHandle,
 	} = props;
 	const router = useRouter();
 

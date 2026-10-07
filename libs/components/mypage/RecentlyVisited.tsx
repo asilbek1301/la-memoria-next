@@ -16,12 +16,7 @@ const RecentlyVisited: NextPage = () => {
 
 	/** APOLLO REQUESTS **/
 
-	const {
-		loading: getVisitedLoading,
-		data: getVisitedData,
-		error: getVisitedError,
-		refetch: getVisitedRefetch,
-	} = useQuery(GET_VISITED, {
+	useQuery(GET_VISITED, {
 		fetchPolicy: 'network-only',
 		variables: { input: searchVisited },
 		notifyOnNetworkStatusChange: true,

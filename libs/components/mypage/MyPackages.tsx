@@ -27,9 +27,6 @@ const MyPackages: NextPage = ({ initialInput, ...props }: any) => {
 	const [updatePackage] = useMutation(UPDATE_PACKAGE);
 
 	const {
-		loading: getStudioPackagesLoading,
-		data: getStudioPackagesData,
-		error: getStudioPackagesError,
 		refetch: getStudioPackagesRefetch,
 	} = useQuery(GET_STUDIO_PACKAGES, {
 		fetchPolicy: 'network-only',

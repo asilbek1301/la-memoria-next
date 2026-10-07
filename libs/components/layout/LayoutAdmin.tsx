@@ -24,11 +24,11 @@ const withAdminLayout = (Component: ComponentType) => {
 	return (props: object) => {
 		const router = useRouter();
 		const user = useReactiveVar(userVar);
-		const [settingsState, setSettingsStateState] = useState(false);
+		const [] = useState(false);
 		const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
-		const [openMenu, setOpenMenu] = useState(false);
-		const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-		const [title, setTitle] = useState('admin');
+		const [openMenu] = useState(false);
+		const [, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+		const [, setTitle] = useState('admin');
 		const [loading, setLoading] = useState(true);
 
 		/** LIFECYCLES **/

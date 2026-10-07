@@ -14,7 +14,7 @@ import CancelRoundedIcon from '@mui/icons-material/CancelRounded';
 import { InquiryList } from '../../../libs/components/admin/cs/InquiryList';
 
 const InquiryArticles: NextPage = (props: any) => {
-	const [anchorEl, setAnchorEl] = useState<[] | HTMLElement[]>([]);
+	const [anchorEl] = useState<[] | HTMLElement[]>([]);
 
 	/** APOLLO REQUESTS **/
 	/** LIFECYCLES **/
@@ -73,7 +73,6 @@ const InquiryArticles: NextPage = (props: any) => {
 									className={'search'}
 									placeholder="Search user name"
 									onKeyDown={(event) => {
-										// if (event.key == 'Enter') searchTargetHandler().then();
 									}}
 									endAdornment={
 										<>

@@ -4,7 +4,7 @@ import MuiAppBar from '@mui/material/AppBar';
 import TextField from '@mui/material/TextField';
 import MuiDrawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
-import Switch, { SwitchProps } from '@mui/material/Switch';
+import Switch from '@mui/material/Switch';
 
 export const RippleBadge = styled(Badge)(({ theme }) => ({
 	'& .MuiBadge-badge': {

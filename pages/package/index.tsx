@@ -41,9 +41,6 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
 
 	const {
-		loading: getPackagesLoading,
-		data: getPackagesData,
-		error: getPackagesError,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'network-only',
@@ -68,7 +65,6 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 
 	useEffect(() => {
 		console.log('searchFilter', searchFilter);
-		// getPackagesRefetch({ input: searchFilter }).then();
 	}, [searchFilter]);
 
 	/** HANDLERS **/

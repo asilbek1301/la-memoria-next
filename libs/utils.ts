@@ -1,6 +1,19 @@
 import numeral from 'numeral';
 import { sweetMixinErrorAlert } from './sweetAlert';
 
+/** Korean won price, e.g. ₩1,200,000 **/
+export const formatKRW = (value: number | undefined): string => `₩${numeral(value ?? 0).format('0,0')}`;
+
+/** enum value to display label, e.g. SEOUL -> Seoul **/
+export const prettyEnum = (value?: string): string =>
+	value ? value.charAt(0).toUpperCase() + value.slice(1).toLowerCase() : '';
+
+/** link to the package list with filters applied, e.g. { typeList: ['GOLD'] } **/
+export const packageSearchHref = (search: Record<string, unknown> = {}): string =>
+	`/package?input=${encodeURIComponent(
+		JSON.stringify({ page: 1, limit: 9, sort: 'createdAt', direction: 'DESC', search }),
+	)}`;
+
 export const formatterStr = (value: number | undefined): string => {
 	return numeral(value).format('0,0') != '0' ? numeral(value).format('0,0') : '';
 };

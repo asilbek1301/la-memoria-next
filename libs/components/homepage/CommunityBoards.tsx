@@ -1,95 +1,60 @@
-import React, { useState } from 'react';
-import Link from 'next/link';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Stack, Typography } from '@mui/material';
+import React from 'react';
+import { useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
 import CommunityCard from './CommunityCard';
 import { BoardArticle } from '../../types/board-article/board-article';
 import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
-import { BoardArticleCategory } from '../../enums/board-article.enum';
-import { useQuery } from '@apollo/client';
-import { T } from '../../types/common';
+import HomeSection, { EmptyState, ViewAllLink } from './HomeSection';
+
+const articlesInput = {
+	page: 1,
+	limit: 3,
+	sort: 'articleViews',
+	direction: 'DESC',
+	search: {},
+};
 
 const CommunityBoards = () => {
-	const device = useDeviceDetect();
-	const [searchCommunity, setSearchCommunity] = useState({
-		page: 1,
-		sort: 'articleViews',
-		direction: 'DESC',
-	});
-	const [newsArticles, setNewsArticles] = useState<BoardArticle[]>([]);
-	const [freeArticles, setFreeArticles] = useState<BoardArticle[]>([]);
-
 	/** APOLLO REQUESTS **/
-	
-	const {
-		loading: getNewsArticlesLoading,
-		data: getNewsArticlesData,
-		error: getNewsArticlesError,
-		refetch: getNewsArticlesRefetch,
-	} = useQuery(GET_BOARD_ARTICLES, {
-		fetchPolicy: 'network-only',
-		variables: { input: { ...searchCommunity, limit: 6, search: { articleCategory: BoardArticleCategory.NEWS } } },
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setNewsArticles(data?.getBoardArticles?.list);
-		},
-	});
 
-	const {
-		loading: getFreeArticlesLoading,
-		data: getFreeArticlesData,
-		error: getFreeArticlesError,
-		refetch: getFreeArticlesRefetch,
-	} = useQuery(GET_BOARD_ARTICLES, {
-		fetchPolicy: 'network-only',
-		variables: { input: { ...searchCommunity, limit: 3, search: { articleCategory: BoardArticleCategory.FREE } } },
+	const { loading: getArticlesLoading, data: getArticlesData } = useQuery(GET_BOARD_ARTICLES, {
+		fetchPolicy: 'cache-and-network',
+		variables: { input: articlesInput },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setFreeArticles(data?.getBoardArticles?.list);
-		},
 	});
+	const articles: BoardArticle[] = getArticlesData?.getBoardArticles?.list ?? [];
 
-	if (device === 'mobile') {
-		return <div>COMMUNITY BOARDS (MOBILE)</div>;
-	} else {
-		return (
-			<Stack className={'community-board'}>
-				<Stack className={'container'}>
-					<Stack>
-						<Typography variant={'h1'}>COMMUNITY BOARD HIGHLIGHTS</Typography>
-					</Stack>
-					<Stack className="community-main">
-						<Stack className={'community-left'}>
-							<Stack className={'content-top'}>
-								<Link href={'/community?articleCategory=NEWS'}>
-									<span>News</span>
-								</Link>
-								<img src="/img/icons/arrowBig.svg" alt="" />
-							</Stack>
-							<Stack className={'card-wrap'}>
-								{newsArticles.map((article, index) => {
-									return <CommunityCard vertical={true} article={article} index={index} key={article?._id} />;
-								})}
-							</Stack>
-						</Stack>
-						<Stack className={'community-right'}>
-							<Stack className={'content-top'}>
-								<Link href={'/community?articleCategory=FREE'}>
-									<span>Free</span>
-								</Link>
-								<img src="/img/icons/arrowBig.svg" alt="" />
-							</Stack>
-							<Stack className={'card-wrap vertical'}>
-								{freeArticles.map((article, index) => {
-									return <CommunityCard vertical={false} article={article} index={index} key={article?._id} />;
-								})}
-							</Stack>
-						</Stack>
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+	return (
+		<HomeSection
+			id="community"
+			title="From the Community"
+			aside={<ViewAllLink href={'/community?articleCategory=FREE'} label="Read all articles" />}
+		>
+			{getArticlesLoading && articles.length === 0 ? (
+				<div className={'article-grid'} aria-busy="true" aria-label="Loading articles">
+					{[0, 1, 2].map((i) => (
+						<div key={i}>
+							<Skeleton variant="rectangular" className={'skeleton wide'} />
+							<Skeleton width="40%" />
+							<Skeleton width="85%" />
+						</div>
+					))}
+				</div>
+			) : articles.length === 0 ? (
+				<EmptyState
+					message="No articles yet. Be the first to share your story."
+					href="/community?articleCategory=FREE"
+					linkLabel="Go to the community"
+				/>
+			) : (
+				<div className={`article-grid ${articles.length === 1 ? 'single' : ''}`}>
+					{articles.map((article: BoardArticle) => (
+						<CommunityCard article={article} key={article?._id} />
+					))}
+				</div>
+			)}
+		</HomeSection>
+	);
 };
 
 export default CommunityBoards;

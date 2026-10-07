@@ -73,9 +73,6 @@ const PackageDetail: NextPage = ({ initialComment, ...props }: any) => {
 	const [createReservation] = useMutation(CREATE_RESERVATION);
 
 	const {
-		loading: getPackageLoading,
-		data: getPackageData,
-		error: getPackageError,
 		refetch: getPackageRefetch,
 	} = useQuery(GET_PACKAGE, {
 		fetchPolicy: 'network-only',
@@ -90,8 +87,6 @@ const PackageDetail: NextPage = ({ initialComment, ...props }: any) => {
 
 	const {
 		loading: getPackagesLoading,
-		data: getPackagesData,
-		error: getPackagesError,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'cache-and-network',
@@ -114,9 +109,6 @@ const PackageDetail: NextPage = ({ initialComment, ...props }: any) => {
 	});
 
 	const {
-		loading: getCommentsLoading,
-		data: getCommentsData,
-		error: getCommentsError,
 		refetch: getCommentsRefetch,
 	} = useQuery(GET_COMMENTS, {
 		fetchPolicy: 'cache-and-network',

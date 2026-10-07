@@ -26,9 +26,6 @@ const MemberMenu = (props: MemberMenuProps) => {
 	/** APOLLO REQUESTS **/
 
 	const {
-		loading: getMemberLoading,
-		data: getMemberData,
-		error: getMemberError,
 		refetch: getMemberRefetch,
 	} = useQuery(GET_MEMBER, {
 		fetchPolicy: 'network-only',

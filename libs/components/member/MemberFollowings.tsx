@@ -33,9 +33,6 @@ const MemberFollowings = (props: MemberFollowingsProps) => {
 	/** APOLLO REQUESTS **/
 
 	const {
-		loading: getMemberFollowingsLoading,
-		data: getMemberFollowingsData,
-		error: getMemberFollowingsError,
 		refetch: getMemberFollowingsRefetch,
 	} = useQuery(GET_MEMBER_FOLLOWINGS, {
 		fetchPolicy: 'network-only',

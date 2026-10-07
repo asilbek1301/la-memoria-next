@@ -1,5 +1,4 @@
 import React from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import {
 	TableCell,
@@ -26,15 +25,6 @@ interface Data {
 	id?: string;
 }
 
-function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-	if (b[orderBy] < a[orderBy]) {
-		return -1;
-	}
-	if (b[orderBy] > a[orderBy]) {
-		return 1;
-	}
-	return 0;
-}
 
 type Order = 'asc' | 'desc';
 
@@ -89,7 +79,6 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
-	const { onSelectAllClick } = props;
 
 	return (
 		<TableHead>
@@ -121,14 +110,11 @@ interface FaqArticlesPanelListType {
 export const FaqArticlesPanelList = (props: FaqArticlesPanelListType) => {
 	const {
 		dense,
-		membersData,
-		searchMembers,
 		anchorEl,
 		handleMenuIconClick,
 		handleMenuIconClose,
 		generateMentorTypeHandle,
 	} = props;
-	const router = useRouter();
 
 	/** APOLLO REQUESTS **/
 	/** LIFECYCLES **/
@@ -144,7 +130,6 @@ export const FaqArticlesPanelList = (props: FaqArticlesPanelListType) => {
 						{[1, 2, 3, 4, 5].map((ele: any, index: number) => {
 							const member_image = '/img/profile/defaultUser.svg';
 
-							let status_class_name = '';
 
 							return (
 								<TableRow hover key={'member._id'} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
