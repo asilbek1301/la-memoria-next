@@ -1,20 +1,32 @@
-import React, { ChangeEvent, MouseEvent, useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
-import { Box, Button, Menu, MenuItem, Pagination, Stack, Typography } from '@mui/material';
-import PackageCard from '../../libs/components/package/PackageCard';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import Filter from '../../libs/components/package/Filter';
 import { useRouter } from 'next/router';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { NetworkStatus, useMutation, useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
+import { useReducedMotion } from 'framer-motion';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import PopularPackageCard from '../../libs/components/homepage/PopularPackageCard';
+import SentenceFilter, { SentenceBar } from '../../libs/components/package/SentenceFilter';
+import MoreFilters from '../../libs/components/package/MoreFilters';
+import ResultsToolbar, { ResultsPagination } from '../../libs/components/package/ResultsToolbar';
+import {
+	SearchPatch,
+	activeChips,
+	applySearch,
+	clearedSearch,
+	defaultPackagesInput,
+	emptySentence,
+	extraFilterCount,
+	packagesHref,
+	parsePackagesInput,
+} from '../../libs/components/package/packageSearch';
 import { PackagesInquiry } from '../../libs/types/package/package.input';
 import { Package } from '../../libs/types/package/package';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
-import { Direction, Message } from '../../libs/enums/common.enum';
+import { Message } from '../../libs/enums/common.enum';
 import { GET_PACKAGES } from '../../apollo/user/query';
-import { useMutation, useQuery } from '@apollo/client';
-import { T } from '../../libs/types/common';
 import { LIKE_TARGET_PACKAGE } from '../../apollo/user/mutation';
+import { T } from '../../libs/types/common';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
@@ -24,72 +36,82 @@ export const getStaticProps = async ({ locale }: any) => ({
 });
 
 const PackageList: NextPage = ({ initialInput, ...props }: any) => {
-	const device = useDeviceDetect();
 	const router = useRouter();
+	const reduceMotion = useReducedMotion();
 	const [searchFilter, setSearchFilter] = useState<PackagesInquiry>(
-		router?.query?.input ? JSON.parse(router?.query?.input as string) : initialInput,
+		router?.query?.input ? parsePackagesInput(router.query.input) : initialInput,
 	);
 	const [packages, setPackages] = useState<Package[]>([]);
 	const [total, setTotal] = useState<number>(0);
-	const [currentPage, setCurrentPage] = useState<number>(1);
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const [sortingOpen, setSortingOpen] = useState(false);
-	const [filterSortName, setFilterSortName] = useState('New');
+	const [moreOpen, setMoreOpen] = useState<boolean>(false);
+	const [barVisible, setBarVisible] = useState<boolean>(false);
+	const headerRef = useRef<HTMLElement>(null);
+	const resultsRef = useRef<HTMLElement>(null);
 
 	/** APOLLO REQUESTS **/
 
 	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
 
 	const {
+		loading: getPackagesLoading,
+		networkStatus,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'network-only',
 		variables: { input: searchFilter },
+		skip: !router.isReady,
 		notifyOnNetworkStatusChange: true,
 		onCompleted: (data: T) => {
-			setPackages(data?.getPackages?.list);
-			setTotal(data?.getPackages?.metaCounter[0]?.total);
+			setPackages(data?.getPackages?.list ?? []);
+			setTotal(data?.getPackages?.metaCounter[0]?.total ?? 0);
 		},
 	});
+	// a like refetches quietly; every other request shows the card skeletons
+	const loading = !router.isReady || (getPackagesLoading && networkStatus !== NetworkStatus.refetch);
 
 	/** LIFECYCLES **/
 
+	// the URL is the source of truth: filters, sort and page all live in ?input=
 	useEffect(() => {
-		if (router.query.input) {
-			const inputObj = JSON.parse(router?.query?.input as string);
-			setSearchFilter(inputObj);
-		}
+		if (!router.isReady) return;
+		setSearchFilter(router.query.input ? parsePackagesInput(router.query.input) : initialInput);
+	}, [router.isReady, router.query.input, initialInput]);
 
-		setCurrentPage(searchFilter.page === undefined ? 1 : searchFilter.page);
-	}, [router]);
-
+	// the slim filter bar appears once the sentence has scrolled under the navbar
 	useEffect(() => {
-		console.log('searchFilter', searchFilter);
-	}, [searchFilter]);
+		const el = headerRef.current;
+		if (!el || typeof IntersectionObserver === 'undefined') return;
+		const observer = new IntersectionObserver(
+			([entry]) => setBarVisible(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+			{ rootMargin: '-80px 0px 0px 0px' },
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, []);
 
 	/** HANDLERS **/
 
-	const handlePaginationChange = async (event: ChangeEvent<unknown>, value: number) => {
-		searchFilter.page = value;
-		await router.push(
-			`/package?input=${JSON.stringify(searchFilter)}`,
-			`/package?input=${JSON.stringify(searchFilter)}`,
-			{
-				scroll: false,
-			},
-		);
-		setCurrentPage(value);
+	const pushInput = async (next: PackagesInquiry) => {
+		await router.push(packagesHref(next), packagesHref(next), { scroll: false });
+	};
+
+	const searchHandler = (patch: SearchPatch) => pushInput(applySearch(searchFilter, patch));
+
+	const sortHandler = (sort: string, direction: PackagesInquiry['direction']) =>
+		pushInput({ ...searchFilter, sort, direction, page: 1 });
+
+	const handlePaginationChange = async (value: number) => {
+		await pushInput({ ...searchFilter, page: value });
+		resultsRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
 	};
 
 	const likePackageHandler = async (user: T, id: string) => {
 		try {
-			//execute likePackageHandler Mutation
 			if (!id) return;
 			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
 			await likeTargetPackage({
 				variables: { input: id },
 			});
-			//execute getPackagesRefetch
 			await getPackagesRefetch({ input: searchFilter });
 
 			await sweetTopSmallSuccessAlert('success', 800);
@@ -99,140 +121,110 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 		}
 	};
 
-	const sortingClickHandler = (e: MouseEvent<HTMLElement>) => {
-		setAnchorEl(e.currentTarget);
-		setSortingOpen(true);
-	};
+	const chips = activeChips(searchFilter);
+	const extraCount = extraFilterCount(searchFilter);
+	const page = searchFilter.page ?? 1;
+	const limit = searchFilter.limit ?? defaultPackagesInput.limit;
 
-	const sortingCloseHandler = () => {
-		setSortingOpen(false);
-		setAnchorEl(null);
-	};
-
-	const sortingHandler = (e: React.MouseEvent<HTMLLIElement>) => {
-		switch (e.currentTarget.id) {
-			case 'new':
-				setSearchFilter({ ...searchFilter, sort: 'createdAt', direction: Direction.ASC });
-				setFilterSortName('New');
-				break;
-			case 'lowest':
-				setSearchFilter({ ...searchFilter, sort: 'packagePrice', direction: Direction.ASC });
-				setFilterSortName('Lowest Price');
-				break;
-			case 'highest':
-				setSearchFilter({ ...searchFilter, sort: 'packagePrice', direction: Direction.DESC });
-				setFilterSortName('Highest Price');
-		}
-		setSortingOpen(false);
-		setAnchorEl(null);
-	};
-
-	if (device === 'mobile') {
-		return <h1>PACKAGES MOBILE</h1>;
-	} else {
-		return (
-			<div id="package-list-page" style={{ position: 'relative' }}>
-				<div className="container">
-					<Box component={'div'} className={'right'}>
-						<span>Sort by</span>
-						<div>
-							<Button onClick={sortingClickHandler} endIcon={<KeyboardArrowDownRoundedIcon />}>
-								{filterSortName}
-							</Button>
-							<Menu anchorEl={anchorEl} open={sortingOpen} onClose={sortingCloseHandler} sx={{ paddingTop: '5px' }}>
-								<MenuItem
-									onClick={sortingHandler}
-									id={'new'}
-									disableRipple
-									sx={{ boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px' }}
-								>
-									New
-								</MenuItem>
-								<MenuItem
-									onClick={sortingHandler}
-									id={'lowest'}
-									disableRipple
-									sx={{ boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px' }}
-								>
-									Lowest Price
-								</MenuItem>
-								<MenuItem
-									onClick={sortingHandler}
-									id={'highest'}
-									disableRipple
-									sx={{ boxShadow: 'rgba(149, 157, 165, 0.2) 0px 8px 24px' }}
-								>
-									Highest Price
-								</MenuItem>
-							</Menu>
-						</div>
-					</Box>
-					<Stack className={'package-page'}>
-						<Stack className={'filter-config'}>
-							{/* @ts-ignore */}
-							<Filter searchFilter={searchFilter} setSearchFilter={setSearchFilter} initialInput={initialInput} />
-						</Stack>
-						<Stack className="main-config" mb={'76px'}>
-							<Stack className={'list-config'}>
-								{packages?.length === 0 ? (
-									<div className={'no-data'}>
-										<img src="/img/icons/icoAlert.svg" alt="" />
-										<p>No Packages found!</p>
-									</div>
-								) : (
-									packages.map((pkg: Package) => {
-										return (
-											<PackageCard pkg={pkg} likePackageHandler={likePackageHandler} key={pkg?._id} />
-										);
-									})
-								)}
-							</Stack>
-							<Stack className="pagination-config">
-								{packages.length !== 0 && (
-									<Stack className="pagination-box">
-										<Pagination
-											page={currentPage}
-											count={Math.ceil(total / searchFilter.limit)}
-											onChange={handlePaginationChange}
-											shape="circular"
-											color="primary"
-										/>
-									</Stack>
-								)}
-
-								{packages.length !== 0 && (
-									<Stack className="total-result">
-										<Typography>
-											Total {total} package{total > 1 ? 's' : ''} available
-										</Typography>
-									</Stack>
-								)}
-							</Stack>
-						</Stack>
-					</Stack>
+	return (
+		<div id="package-list-page" className={'package-page'}>
+			<header className={'package-header'} ref={headerRef}>
+				<div className={'container'}>
+					<h1 className={'visually-hidden'}>Find your package</h1>
+					<SentenceFilter
+						input={searchFilter}
+						onSearch={searchHandler}
+						onOpenMore={() => setMoreOpen(true)}
+						extraCount={extraCount}
+					/>
 				</div>
-			</div>
-		);
-	}
+			</header>
+
+			<SentenceBar
+				input={searchFilter}
+				onSearch={searchHandler}
+				onOpenMore={() => setMoreOpen(true)}
+				extraCount={extraCount}
+				visible={barVisible}
+			/>
+
+			<section className={'package-results'} ref={resultsRef} aria-label="Packages">
+				<div className={'container'}>
+					<ResultsToolbar
+						input={searchFilter}
+						total={total}
+						loading={loading}
+						chips={chips}
+						onRemoveChip={(chip) => searchHandler(chip.patch)}
+						onClearAll={() => pushInput(clearedSearch(searchFilter))}
+						onSort={sortHandler}
+					/>
+
+					{loading ? (
+						<div className={'package-grid'} aria-busy="true" aria-label="Loading packages">
+							{Array.from({ length: limit }).map((_, i) => (
+								<div className={'card-skeleton'} key={i}>
+									<Skeleton variant="rectangular" className={'skeleton portrait'} />
+									<Skeleton width="70%" />
+									<Skeleton width="90%" height={32} />
+									<Skeleton width="55%" />
+								</div>
+							))}
+						</div>
+					) : packages.length === 0 ? (
+						<div className={'empty-box package-empty'}>
+							<p>{emptySentence(searchFilter)}</p>
+							{chips.length > 0 && (
+								<div className={'empty-actions'}>
+									{(searchFilter.search?.typeList?.length ?? 0) > 0 && (
+										<button
+											type="button"
+											className={'button-secondary'}
+											onClick={() => searchHandler({ typeList: [] })}
+										>
+											Show all tiers
+										</button>
+									)}
+									<button
+										type="button"
+										className={'button-primary'}
+										onClick={() => pushInput(clearedSearch(searchFilter))}
+									>
+										Clear filters
+									</button>
+								</div>
+							)}
+						</div>
+					) : (
+						<ul className={'package-grid'}>
+							{packages.map((pkg: Package) => (
+								<li key={pkg._id}>
+									<PopularPackageCard pkg={pkg} likePackageHandler={likePackageHandler} />
+								</li>
+							))}
+						</ul>
+					)}
+
+					{!loading && packages.length > 0 && (
+						<ResultsPagination page={page} limit={limit} total={total} onPage={handlePaginationChange} />
+					)}
+				</div>
+			</section>
+
+			<MoreFilters
+				open={moreOpen}
+				onClose={() => setMoreOpen(false)}
+				input={searchFilter}
+				onSearch={searchHandler}
+				total={total}
+				loading={loading}
+			/>
+		</div>
+	);
 };
 
 PackageList.defaultProps = {
-	initialInput: {
-		page: 1,
-		limit: 9,
-		sort: 'createdAt',
-		direction: 'DESC',
-		search: {
-			durationsRange: {
-				start: 0,
-				end: 12,
-			},
-			pricesRange: {
-				start: 0,
-				end: 10000000,
-			},
-		},
-	},
+	initialInput: defaultPackagesInput,
 };
 
-export default withLayoutBasic(PackageList);
+export default withLayoutFull(PackageList);

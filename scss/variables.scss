@@ -64,6 +64,14 @@ $container-pad: clamp(48px, 6.67vw, 96px); // inner padding of wide boxes (philo
 $container-pad-mobile: 24px;
 $section-space: 112px;
 $section-space-mobile: 72px;
+$nav-height: 80px; // fixed desktop navbar; sticky bars sit right under it
+$nav-height-mobile: 64px;
+
+/** PACKAGES PAGE: sentence filter and More filters panel **/
+$sentence-size: 54px; // the sentence is the page headline
+$sentence-size-mobile: 34px;
+$panel-width: 440px;
+$sticky-bar-height: 64px;
 
 /** SHAPES (Stitch "remaked sample"): rounded boxes, pill buttons and tags **/
 $radius-card: 24px; // boxes: hero photo, feature card, philosophy, tier rows, empty states

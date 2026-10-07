@@ -323,6 +323,9 @@
 .nav-menu,
 .home-hero,
 .home-page,
+.package-page,
+.filter-panel,
+.filter-sheet,
 .footer-container {
 	:where(p, span, a, li, ul, ol, h1, h2, h3, h4, label, small, strong, em, time, nav, header, article, section) {
 		font-family: inherit;
@@ -727,7 +730,11 @@
 /** HOMEPAGE FONTS (Stitch design system "Editorial Archive" v4): headings in Public Sans; body and labels stay DM Sans.
     $font-heading reads this variable, so every homepage heading follows; the navbar and footer keep the site fonts. **/
 .home-hero,
-.home-page {
+.home-page,
+.package-page,
+.filter-panel,
+.filter-sheet,
+.filter-menu {
 	--font-heading: var(--font-home-heading);
 }
 
@@ -887,8 +894,9 @@
 	}
 }
 
-/** HOMEPAGE SECTION LOOKS (pages/index.tsx); layout is in pc/homepage/homepage.scss and mobile/main.scss **/
-.home-page {
+/** HOMEPAGE SECTION LOOKS (pages/index.tsx; the package list reuses the cards, tags and states); layout is in pc/homepage/homepage.scss and mobile/main.scss **/
+.home-page,
+.package-page {
 	background: $ivory;
 	color: $espresso;
 	font-family: $font;
@@ -1360,13 +1368,23 @@
 		}
 		.card-details {
 			flex: 1;
-			margin: 10px 0 20px;
+			margin: 10px 0 0;
 			color: $muted;
 			font-size: 13px;
 			line-height: 1.6;
 		}
-		> .button-link {
-			align-self: flex-start;
+		// the text-link underline, drawn in from the left under the details when the card is hovered
+		.details-text {
+			padding-bottom: 3px;
+			background: linear-gradient(currentColor, currentColor) left bottom / 0% 1px no-repeat;
+			-webkit-box-decoration-break: clone;
+			box-decoration-break: clone;
+			transition: background-size 0.45s $ease-out, color 0.3s ease;
+		}
+		&:hover .details-text,
+		&:focus-within .details-text {
+			background-size: 100% 1px;
+			color: $espresso;
 		}
 	}
 
@@ -1548,7 +1566,8 @@
 		}
 	}
 }
-.home-page {
+.home-page,
+.package-page {
 	.filter-tabs {
 		gap: 8px;
 		button {
@@ -1606,6 +1625,666 @@
 }
 
 /** accessibility: honour reduced motion (not a breakpoint) **/
+/** PACKAGES PAGE LOOKS (pages/package/index.tsx, libs/components/package/*); layout is in pc/package/package.scss and mobile/main.scss **/
+.package-page {
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	/** header: no box; a small label on a hairline, then the sentence set large as the page headline **/
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.page-label {
+		@include eyebrow;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		&::after {
+			content: '';
+			flex: 1;
+			height: 1px;
+			background: $line;
+		}
+	}
+
+	/** sentence filter: "I'm looking for [All tiers] packages in [All locations] with [any style]." **/
+	.sentence {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.03em;
+		text-wrap: balance;
+	}
+	.sentence-select {
+		margin: 0;
+		padding: 0;
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.08em;
+		border: none;
+		background: transparent;
+		color: $mocha;
+		font: inherit;
+		letter-spacing: inherit;
+		white-space: nowrap;
+		cursor: pointer;
+		@include focus-ring;
+		.select-value {
+			text-decoration: underline;
+			text-decoration-thickness: 0.04em;
+			text-decoration-color: rgba(107, 78, 61, 0.3);
+			text-underline-offset: 0.14em;
+			transition: text-decoration-color 0.3s ease;
+		}
+		.select-chevron {
+			width: 0.72em;
+			height: 0.72em;
+			align-self: center;
+			color: $mocha;
+			transition: transform 0.3s $ease-out;
+		}
+		&:hover .select-value,
+		&.open .select-value {
+			text-decoration-color: $mocha;
+		}
+		&.open .select-chevron {
+			transform: rotate(180deg);
+		}
+	}
+	.sentence-tools {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 16px;
+	}
+	.search-field {
+		height: 48px;
+		margin: 0;
+		padding: 0 6px 0 18px;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: #ffffff;
+		transition: border-color 0.3s ease;
+		&:focus-within {
+			border-color: $espresso;
+		}
+		> svg {
+			color: $muted;
+			font-size: 20px;
+		}
+		input {
+			flex: 1;
+			min-width: 0;
+			height: 100%;
+			padding: 0;
+			border: none;
+			outline: none;
+			background: transparent;
+			color: $espresso;
+			font-family: $font;
+			font-size: 14px;
+			&::placeholder {
+				color: $muted;
+			}
+			&::-webkit-search-cancel-button {
+				display: none;
+			}
+		}
+		.clear-btn {
+			width: 36px;
+			height: 36px;
+			padding: 0;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border: none;
+			border-radius: 50%;
+			background: transparent;
+			color: $muted;
+			cursor: pointer;
+			@include focus-ring;
+			svg {
+				font-size: 18px;
+			}
+			&:hover {
+				color: $espresso;
+			}
+		}
+	}
+	.more-filters-btn {
+		gap: 10px;
+		svg {
+			font-size: 18px;
+		}
+		.filter-count {
+			min-width: 20px;
+			height: 20px;
+			padding: 0 6px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			box-sizing: border-box;
+			border-radius: $radius-pill;
+			background: $espresso;
+			color: $ivory;
+			font-size: 11px;
+			letter-spacing: 0;
+			transition: background-color 0.3s ease, color 0.3s ease;
+		}
+		&:hover .filter-count {
+			background: $ivory;
+			color: $espresso;
+		}
+	}
+
+	/** slim bar under the navbar once the sentence has scrolled away **/
+	.sentence-bar {
+		position: fixed;
+		left: 0;
+		right: 0;
+		z-index: 98;
+		border-bottom: 1px solid $line;
+		background: rgba(253, 249, 243, 0.96);
+		-webkit-backdrop-filter: blur(10px);
+		backdrop-filter: blur(10px);
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(-12px);
+		transition: opacity 0.35s ease, transform 0.35s $ease-out, visibility 0.35s;
+		&.visible {
+			opacity: 1;
+			visibility: visible;
+			transform: none;
+		}
+		.bar-summary {
+			margin: 0;
+			display: flex;
+			align-items: baseline;
+			gap: 10px;
+			color: $espresso;
+			font-family: $font-heading;
+		}
+		.bar-dot {
+			color: $muted;
+		}
+		.sentence-select .select-value {
+			text-decoration-thickness: 1px;
+		}
+	}
+
+	/** results toolbar **/
+	.results-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px 24px;
+	}
+	.result-count {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 22px;
+		font-weight: 400;
+		white-space: nowrap;
+	}
+	.active-chips {
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		list-style: none;
+	}
+	.filter-chip {
+		padding: 7px 10px 7px 14px;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: #ffffff;
+		color: $espresso;
+		font-family: $font;
+		font-size: 12px;
+		letter-spacing: 0.02em;
+		cursor: pointer;
+		transition: border-color 0.3s ease;
+		@include focus-ring;
+		svg {
+			color: $muted;
+			font-size: 15px;
+		}
+		&:hover {
+			border-color: $espresso;
+			svg {
+				color: $espresso;
+			}
+		}
+	}
+	.clear-all {
+		margin-left: 6px;
+	}
+	.sort-box {
+		margin-left: auto;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.sort-label {
+		@include eyebrow;
+	}
+	.sort-btn {
+		padding: 6px 0;
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		border: none;
+		border-bottom: 1px solid $line;
+		background: transparent;
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+		cursor: pointer;
+		transition: border-color 0.3s ease;
+		@include focus-ring;
+		svg {
+			font-size: 18px;
+			color: $mocha;
+		}
+		&:hover {
+			border-color: $espresso;
+		}
+	}
+
+	/** results grid: the homepage popular card **/
+	.package-grid {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
+	}
+	.popular-card {
+		position: relative; // anchors the save button on the photo
+		> .like-btn {
+			position: absolute;
+			top: 16px;
+			right: 16px;
+			z-index: 1;
+		}
+	}
+	.card-skeleton {
+		min-width: 0;
+		.skeleton.MuiSkeleton-root {
+			margin-bottom: 18px;
+		}
+		.MuiSkeleton-text {
+			background-color: rgba(239, 230, 218, 0.7);
+		}
+	}
+	.package-empty .empty-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 12px;
+	}
+
+	/** pagination **/
+	.results-pagination {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px 24px;
+	}
+	.showing {
+		margin: 0;
+		color: $muted;
+		font-size: 15px;
+	}
+	.page-list {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+	.page-num {
+		min-width: 40px;
+		height: 40px;
+		padding: 0 4px;
+		border: none;
+		background: transparent;
+		color: $muted;
+		font-family: $font-heading;
+		font-size: 16px;
+		cursor: pointer;
+		transition: color 0.3s ease;
+		@include focus-ring;
+		&:hover {
+			color: $espresso;
+		}
+		&.active {
+			color: $espresso;
+			text-decoration: underline;
+			text-decoration-thickness: 1.5px;
+			text-underline-offset: 8px;
+		}
+	}
+	.page-gap {
+		min-width: 24px;
+		color: $muted;
+		text-align: center;
+	}
+	.arrow-btn:disabled {
+		opacity: 0.4;
+		cursor: default;
+		&:hover {
+			background: #ffffff;
+		}
+	}
+}
+
+/** MUI portals opened from the package page (rendered outside #pc-wrap / #mobile-wrap) **/
+.filter-menu.MuiPaper-root {
+	margin-top: 10px;
+	min-width: 220px;
+	max-height: 360px;
+	border: 1px solid $line;
+	border-radius: $radius-menu;
+	background: $ivory;
+	box-shadow: $soft-shadow;
+	.MuiMenuItem-root {
+		min-height: 44px;
+		margin: 0 6px;
+		padding: 10px 14px;
+		display: flex;
+		justify-content: space-between;
+		gap: 24px;
+		border-radius: 8px;
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+	}
+	.MuiMenuItem-root.Mui-selected,
+	.MuiMenuItem-root.Mui-selected:hover {
+		background: $sand;
+	}
+	.menu-check {
+		color: $mocha;
+		font-size: 18px;
+	}
+}
+
+.filter-sheet.MuiPaper-root {
+	max-height: 80vh;
+	padding: 10px 24px calc(24px + env(safe-area-inset-bottom));
+	box-sizing: border-box;
+	border-radius: $radius-card $radius-card 0 0;
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	.sheet-handle {
+		width: 40px;
+		height: 4px;
+		margin: 0 auto 18px;
+		border-radius: $radius-pill;
+		background: $line;
+	}
+	.sheet-title {
+		@include eyebrow;
+		margin: 0 0 8px;
+	}
+	.sheet-options {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		button {
+			width: 100%;
+			padding: 14px 0;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			border: none;
+			border-bottom: 1px solid $line;
+			background: transparent;
+			color: $espresso;
+			font-family: $font-heading;
+			font-size: 20px;
+			text-align: left;
+			cursor: pointer;
+			@include focus-ring;
+			&.active {
+				color: $mocha;
+			}
+			svg {
+				font-size: 20px;
+			}
+		}
+	}
+}
+
+.filter-panel.MuiPaper-root {
+	width: min(#{$panel-width}, 100vw);
+	display: flex;
+	flex-direction: column;
+	box-sizing: border-box;
+	background: $ivory;
+	color: $espresso;
+	font-family: $font;
+	&.full {
+		width: 100%;
+		height: 100%;
+		max-height: 100%;
+	}
+	.panel-head {
+		padding: 22px 24px 22px 28px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		border-bottom: 1px solid $line;
+	}
+	.panel-title {
+		@include text-headline-sm;
+		margin: 0;
+		color: $espresso;
+		font-weight: 400;
+	}
+	.icon-btn {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: $espresso;
+		cursor: pointer;
+		@include focus-ring;
+		&:hover {
+			background: $sand;
+		}
+	}
+	.panel-body {
+		flex: 1;
+		padding: 0 28px;
+		overflow-y: auto;
+	}
+	.panel-group {
+		position: relative;
+		margin: 0;
+		padding: 28px 0;
+		border: none;
+		border-bottom: 1px solid $line;
+		&:last-child {
+			border-bottom: none;
+		}
+	}
+	.group-label {
+		@include eyebrow;
+		margin-bottom: 16px;
+		padding: 0;
+		float: left;
+		width: 100%;
+		+ * {
+			clear: both;
+		}
+	}
+	.range-value {
+		position: absolute;
+		top: 26px;
+		right: 0;
+		color: $espresso;
+		font-size: 14px;
+	}
+	.photo-chips {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 8px;
+	}
+	.chip {
+		height: 40px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: #ffffff;
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+		cursor: pointer;
+		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+		@include focus-ring;
+		&:hover {
+			border-color: $espresso;
+		}
+		&.active {
+			border-color: $espresso;
+			background: $espresso;
+			color: $ivory;
+		}
+	}
+	.include-list {
+		display: flex;
+		flex-direction: column;
+	}
+	.include-row {
+		position: relative;
+		padding: 10px 0;
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		color: $espresso;
+		font-size: 15px;
+		cursor: pointer;
+		input {
+			position: absolute;
+			opacity: 0;
+			width: 1px;
+			height: 1px;
+		}
+		.check-box {
+			width: 22px;
+			height: 22px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			box-sizing: border-box;
+			border: 1px solid $line;
+			border-radius: 6px;
+			background: #ffffff;
+			transition: background-color 0.3s ease, border-color 0.3s ease;
+			svg {
+				font-size: 16px;
+			}
+		}
+		input:focus-visible + .check-box {
+			outline: 2px solid $mocha;
+			outline-offset: 2px;
+		}
+		&:hover .check-box {
+			border-color: $espresso;
+		}
+		&.active .check-box {
+			border-color: $espresso;
+			background: $espresso;
+			color: $ivory;
+		}
+	}
+	.price-value {
+		margin: 0 0 8px;
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 22px;
+		span {
+			color: $muted;
+		}
+	}
+	.range-slider.MuiSlider-root {
+		height: 2px;
+		margin: 6px 10px 0;
+		width: calc(100% - 20px);
+		padding: 16px 0;
+		color: $espresso;
+		.MuiSlider-rail {
+			background: $line;
+			opacity: 1;
+		}
+		.MuiSlider-track {
+			border: none;
+		}
+		.MuiSlider-thumb {
+			width: 20px;
+			height: 20px;
+			border: 2px solid $espresso;
+			background: $ivory;
+			box-shadow: none;
+			&:hover,
+			&.Mui-focusVisible {
+				box-shadow: 0 0 0 6px rgba(107, 78, 61, 0.14);
+			}
+		}
+		.MuiSlider-mark {
+			width: 3px;
+			height: 3px;
+			border-radius: 50%;
+			background: $muted;
+		}
+		.MuiSlider-markActive {
+			background: $ivory;
+		}
+	}
+	.range-ends {
+		display: flex;
+		justify-content: space-between;
+		color: $muted;
+		font-size: 12px;
+	}
+	.panel-foot {
+		padding: 18px 28px calc(18px + env(safe-area-inset-bottom));
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		border-top: 1px solid $line;
+		background: $ivory;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.animated-logo {
 		.monogram {
@@ -1654,7 +2333,21 @@
 			transform: none;
 		}
 	}
+	.package-page,
 	.home-page {
+		.popular-card .details-text {
+			transition: none;
+		}
+	}
+	.package-page {
+		.sentence-bar,
+		.sentence-select .select-chevron,
+		.sentence-select .select-value {
+			transition: none;
+		}
+	}
+	.home-page,
+	.package-page {
 		.trend-card,
 		.popular-card,
 		.studio-card,
