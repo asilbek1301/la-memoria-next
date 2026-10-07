@@ -2,6 +2,7 @@ import { PackagesInquiry } from '../../types/package/package.input';
 import { PackageLocation, PackageStyle, PackageType } from '../../enums/package.enum';
 import { Direction } from '../../enums/common.enum';
 import { formatKRW, prettyEnum } from '../../utils';
+import { SortOption } from '../common/ListControls';
 
 /** full ranges: a range equal to these means "any" **/
 export const DURATION_MAX = 12;
@@ -19,7 +20,7 @@ export const defaultPackagesInput: PackagesInquiry = {
 	},
 };
 
-export const sortOptions = [
+export const sortOptions: SortOption[] = [
 	{ id: 'newest', label: 'Newest', sort: 'createdAt', direction: Direction.DESC },
 	{ id: 'price-asc', label: 'Price low to high', sort: 'packagePrice', direction: Direction.ASC },
 	{ id: 'price-desc', label: 'Price high to low', sort: 'packagePrice', direction: Direction.DESC },

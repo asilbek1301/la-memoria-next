@@ -9,7 +9,8 @@ import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import PopularPackageCard from '../../libs/components/homepage/PopularPackageCard';
 import SentenceFilter, { SentenceBar } from '../../libs/components/package/SentenceFilter';
 import MoreFilters from '../../libs/components/package/MoreFilters';
-import ResultsToolbar, { ResultsPagination } from '../../libs/components/package/ResultsToolbar';
+import ResultsToolbar from '../../libs/components/package/ResultsToolbar';
+import { ResultsPagination } from '../../libs/components/common/ListControls';
 import {
 	SearchPatch,
 	activeChips,

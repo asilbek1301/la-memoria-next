@@ -157,78 +157,6 @@
 		}
 	}
 }
-.studio-general-card {
-	position: relative;
-	margin-right: 27px;
-	margin-bottom: 34px;
-	display: flex;
-	flex-direction: column;
-	.studio-img {
-		border-radius: 12px;
-		width: 233px;
-		height: 273px;
-		background-size: 100% 100%;
-		background-repeat: no-repeat;
-		cursor: pointer;
-		div {
-			position: absolute;
-			padding: 12px;
-			top: 12px;
-			left: 12px;
-			border-radius: 6px;
-			background: #eb6753;
-			color: #fff;
-			font-family: $font;
-			font-size: 12px;
-			font-style: normal;
-			font-weight: 600;
-			line-height: normal;
-		}
-	}
-	.studio-desc {
-		margin-top: 23px;
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between;
-		align-items: center;
-		.studio-info {
-			display: flex;
-			flex-direction: column;
-			strong {
-				color: #181a20;
-				font-family: $font;
-				font-size: 15px;
-				font-style: normal;
-				font-weight: 600;
-				line-height: normal;
-				cursor: pointer;
-			}
-			span {
-				color: #181a20;
-				font-family: $font;
-				font-size: 15px;
-				font-style: normal;
-				font-weight: 400;
-				line-height: 28px;
-			}
-		}
-		.buttons {
-			width: auto;
-			display: flex;
-			flex-direction: row;
-			justify-content: center;
-			align-items: center;
-			svg {
-				width: 24px;
-				height: 24px;
-				cursor: pointer;
-			}
-			.view-cnt {
-				font-size: 13px;
-			}
-		}
-	}
-}
 .community-general-card-config {
 	position: relative;
 	height: auto;
@@ -324,6 +252,7 @@
 .home-hero,
 .home-page,
 .package-page,
+.studio-page,
 .filter-panel,
 .filter-sheet,
 .footer-container {
@@ -732,6 +661,7 @@
 .home-hero,
 .home-page,
 .package-page,
+.studio-page,
 .filter-panel,
 .filter-sheet,
 .filter-menu {
@@ -896,7 +826,8 @@
 
 /** HOMEPAGE SECTION LOOKS (pages/index.tsx; the package list reuses the cards, tags and states); layout is in pc/homepage/homepage.scss and mobile/main.scss **/
 .home-page,
-.package-page {
+.package-page,
+.studio-page {
 	background: $ivory;
 	color: $espresso;
 	font-family: $font;
@@ -1567,7 +1498,8 @@
 	}
 }
 .home-page,
-.package-page {
+.package-page,
+.studio-page {
 	.filter-tabs {
 		gap: 8px;
 		button {
@@ -1626,7 +1558,8 @@
 
 /** accessibility: honour reduced motion (not a breakpoint) **/
 /** PACKAGES PAGE LOOKS (pages/package/index.tsx, libs/components/package/*); layout is in pc/package/package.scss and mobile/main.scss **/
-.package-page {
+.package-page,
+.studio-page {
 	background: $ivory;
 	color: $espresso;
 	font-family: $font;
@@ -1999,6 +1932,318 @@
 	}
 }
 
+/** STUDIOS PAGE LOOKS (pages/studio/index.tsx, libs/components/studio/*); layout is in pc/studio/studio.scss and mobile/main.scss **/
+.studio-page {
+	.header-label {
+		@include eyebrow;
+	}
+	.page-title {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+	}
+	.page-intro {
+		margin: 0;
+		color: $muted;
+		font-size: 15px;
+		line-height: 1.6;
+	}
+	.studio-count {
+		@include text-label-uppercase;
+		margin: 0;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		color: $muted;
+		white-space: nowrap;
+		.count-dot {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: $mocha;
+		}
+	}
+	// hairline - monogram - hairline
+	.monogram-rule {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		&::before,
+		&::after {
+			content: '';
+			flex: 1;
+			height: 1px;
+			background: $line;
+		}
+		img {
+			width: 30px;
+			height: auto;
+			opacity: 0.7;
+		}
+	}
+
+	/** arch portrait in a white frame: black and white, colour on hover **/
+	.arch-frame {
+		position: relative;
+		padding: 10px;
+		box-sizing: border-box;
+		border-radius: 999px 999px $radius-tile $radius-tile;
+		background: #ffffff;
+		box-shadow: $studio-frame-shadow;
+	}
+	.arch-media {
+		display: block;
+		aspect-ratio: 3 / 4;
+		overflow: hidden;
+		border-radius: 999px 999px 10px 10px;
+		background: $sand;
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			filter: grayscale(1);
+			transition: filter 0.6s ease, transform 0.8s $ease-out;
+		}
+	}
+	.arch-initial {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $mocha;
+		font-family: $font-heading;
+		font-size: 72px;
+	}
+	.studio-spotlight:hover .arch-media img,
+	.studio-tile:hover .arch-media img {
+		filter: grayscale(0);
+		transform: scale(1.03);
+	}
+	.skeleton.arch-skeleton {
+		aspect-ratio: 3 / 4;
+		border-radius: 999px 999px $radius-tile $radius-tile;
+	}
+
+	/** spotlight **/
+	.studio-spotlight {
+		border-radius: $radius-card;
+		background: $ivory-deep;
+	}
+	.spotlight-label {
+		@include text-label-uppercase;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		color: $mocha;
+		&::before {
+			content: '';
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: $mocha;
+		}
+	}
+	.spotlight-name {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.02em;
+	}
+	.spotlight-desc {
+		margin: 0;
+		color: $muted;
+		font-size: 16px;
+		line-height: 1.7;
+	}
+	.spotlight-stats {
+		@include text-label-uppercase;
+		margin: 0;
+		padding: 14px 0;
+		border-top: 1px solid $line;
+		border-bottom: 1px solid $line;
+		color: $muted;
+	}
+	.mini-label {
+		@include eyebrow;
+		margin: 0 0 12px;
+	}
+	.mini-grid {
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+		list-style: none;
+	}
+	.mini-link {
+		display: block;
+		color: $espresso;
+		text-decoration: none;
+		@include focus-ring;
+		&:hover .mini-media img {
+			transform: scale(1.05);
+		}
+	}
+	.mini-media {
+		display: block;
+		aspect-ratio: 4 / 5;
+		overflow: hidden;
+		border-radius: $radius-tile;
+		background: $sand;
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			transition: transform 0.6s $ease-out;
+		}
+		&.skeleton.MuiSkeleton-root {
+			height: auto;
+			margin: 0;
+		}
+	}
+	.mini-title {
+		margin-top: 8px;
+		display: block;
+		overflow: hidden;
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		text-overflow: ellipsis;
+		text-transform: uppercase;
+		white-space: nowrap;
+	}
+
+	/** toolbar: the shared pill search (Packages page looks), sort on the right **/
+	.studio-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px 24px;
+	}
+
+	/** grid tiles **/
+	.studio-grid {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
+	}
+	.studio-tile {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		.arch-frame {
+			width: 100%;
+		}
+		.like-btn {
+			position: absolute;
+			top: 18px;
+			right: 18px;
+			z-index: 1;
+		}
+		.button-link {
+			margin-top: auto; // every "View studio" sits on the same line across a row
+		}
+		.tile-stats {
+			margin-bottom: 12px;
+		}
+		&:hover {
+			.tile-name a {
+				color: $mocha;
+			}
+			.button-link {
+				background-size: 100% 1px;
+				color: $mocha;
+			}
+		}
+	}
+	.tile-location {
+		@include eyebrow;
+		margin: 24px 0 0;
+	}
+	.tile-name {
+		margin: 6px 0 0;
+		font-family: $font-heading;
+		font-size: 22px;
+		font-weight: 400;
+		a {
+			color: $espresso;
+			text-decoration: none;
+			white-space: normal;
+			transition: color 0.3s ease;
+			@include focus-ring;
+		}
+	}
+	.tile-desc {
+		max-width: 240px;
+		margin: 6px 0 0;
+		overflow: hidden;
+		color: $muted;
+		font-size: 13px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.tile-stats {
+		margin: 8px 0 0;
+		color: $muted;
+		font-size: 11px;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+	}
+	.tile-skeleton {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		.skeleton.arch-skeleton {
+			width: 100%;
+			margin-bottom: 18px;
+		}
+		.MuiSkeleton-text {
+			background-color: rgba(239, 230, 218, 0.7);
+		}
+	}
+	.studio-empty {
+		margin-top: 32px;
+	}
+
+	/** help banner **/
+	.studio-help {
+		border-radius: $radius-card;
+		background: $ivory-deep;
+	}
+	.help-label {
+		@include eyebrow;
+	}
+	.help-title {
+		@include text-headline-sm;
+		margin: 8px 0 0;
+		color: $espresso;
+		font-weight: 400;
+	}
+	.help-desc {
+		max-width: 520px;
+		margin: 8px 0 0;
+		color: $muted;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+	.help-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px 28px;
+	}
+}
+
 /** MUI portals opened from the package page (rendered outside #pc-wrap / #mobile-wrap) **/
 .filter-menu.MuiPaper-root {
 	margin-top: 10px;
@@ -2334,12 +2579,26 @@
 		}
 	}
 	.package-page,
+	.studio-page,
 	.home-page {
 		.popular-card .details-text {
 			transition: none;
 		}
 	}
-	.package-page {
+	.studio-page {
+		.arch-media img,
+		.mini-media img,
+		.tile-name a {
+			transition: none;
+		}
+		.studio-spotlight:hover .arch-media img,
+		.studio-tile:hover .arch-media img,
+		.mini-link:hover .mini-media img {
+			transform: none;
+		}
+	}
+	.package-page,
+	.studio-page {
 		.sentence-bar,
 		.sentence-select .select-chevron,
 		.sentence-select .select-value {
@@ -2347,7 +2606,8 @@
 		}
 	}
 	.home-page,
-	.package-page {
+	.package-page,
+	.studio-page {
 		.trend-card,
 		.popular-card,
 		.studio-card,

@@ -1,80 +1,97 @@
+/** STUDIOS PAGE LAYOUT (desktop); looks are in pc/general.scss under .studio-page **/
 #pc-wrap {
-	.studio-list-page {
-		position: relative;
-		padding: 147px 0 75px;
+	#studio-list-page {
 		width: 100%;
-		height: auto;
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
 		.container {
-			display: flex;
-			flex-direction: column;
-			.filter {
+			@include page-container;
+			display: block;
+		}
+		.studio-header {
+			padding-top: calc(#{$nav-height} + 64px);
+			.header-row {
 				display: flex;
-				flex-direction: row;
+				align-items: flex-end;
 				justify-content: space-between;
-				align-items: center;
-				.left {
-					display: flex;
-					flex-direction: row;
-					input {
-						padding: 22px 10px;
-						width: 333px;
-						height: 50px;
-						border-radius: 40px;
-						border: 1px solid #ddd;
-						background: #fff;
-						color: #181a20;
-						font-family: $font;
-						font-size: 14px;
-						font-style: normal;
-						font-weight: 400;
-						line-height: 26px;
-						box-sizing: border-box;
-					}
-				}
-				.right {
-					display: flex;
-					flex-direction: row;
-					align-items: center;
-					button {
-						margin-left: 10px;
-						color: #181a20;
-						font-family: $font;
-						font-size: 14px;
-						font-style: normal;
-						font-weight: bold;
-						line-height: 26px;
-						&:hover {
-							background: none;
-						}
-					}
-				}
+				gap: 48px;
 			}
-			.card-wrap {
-				position: relative;
-				margin-top: 35px;
-				width: 100%;
-				min-height: 500px;
-				height: auto;
-				display: flex;
-				flex-direction: row;
-				flex-wrap: wrap;
-			}
-			.pagination {
+			.header-text {
 				display: flex;
 				flex-direction: column;
+				gap: 10px;
+			}
+			.page-title {
+				@include text-headline-lg;
+			}
+			.page-intro {
+				max-width: 560px;
+			}
+			.studio-count {
+				padding-bottom: 6px;
+			}
+			.monogram-rule {
+				margin-top: 40px;
+			}
+		}
+		.studio-spotlight {
+			margin-top: 56px;
+			padding: 56px;
+			display: grid;
+			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+			align-items: center;
+			gap: 72px;
+			.spotlight-portrait {
+				width: 100%;
+				max-width: $studio-spotlight-portrait;
+			}
+			.spotlight-body {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 24px;
+			}
+			.spotlight-name {
+				@include text-display-hero;
+			}
+			.spotlight-desc {
+				max-width: 560px;
+			}
+			.spotlight-stats {
+				align-self: stretch;
+			}
+			.spotlight-packages {
+				width: 100%;
+				max-width: 440px;
+			}
+			.button-primary {
+				margin-top: 8px;
+			}
+		}
+		.studio-results {
+			padding: 96px 0 $section-space;
+			.studio-toolbar {
+				margin-bottom: 56px;
+			}
+			.search-field {
+				width: 420px;
+			}
+			// four 260px tiles fit the 1300px container, three on tablets: no breakpoints
+			.studio-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+				gap: 72px 32px;
+			}
+			.results-pagination {
+				margin-top: 80px;
+				padding-top: 32px;
+				border-top: 1px solid $line;
+			}
+			.studio-help {
+				margin-top: 96px;
+				padding: 48px 56px;
+				display: flex;
 				align-items: center;
-				span {
-					margin-top: 20px;
-					color: #181a20;
-					font-family: $font;
-					font-size: 14px;
-					font-style: normal;
-					font-weight: 400;
-					line-height: 26px; /* 185.714% */
-				}
+				justify-content: space-between;
+				gap: 48px;
 			}
 		}
 	}

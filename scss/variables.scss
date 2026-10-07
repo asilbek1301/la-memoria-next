@@ -73,6 +73,10 @@ $sentence-size-mobile: 34px;
 $panel-width: 440px;
 $sticky-bar-height: 64px;
 
+/** STUDIOS PAGE: editorial rows **/
+$studio-frame-shadow: 0 12px 32px -20px rgba(62, 44, 35, 0.4); // white frame around the arch portraits
+$studio-spotlight-portrait: 380px;
+
 /** SHAPES (Stitch "remaked sample"): rounded boxes, pill buttons and tags **/
 $radius-card: 24px; // boxes: hero photo, feature card, philosophy, tier rows, empty states
 $radius-tile: 16px; // photos inside cards, search panel, panels on photos

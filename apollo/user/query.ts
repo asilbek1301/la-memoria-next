@@ -21,6 +21,7 @@ export const GET_STUDIOS = gql`
 				memberWarnings
 				memberBlocks
 				memberPackages
+				memberFollowers
 				memberRank
 				memberPoints
 				memberLikes

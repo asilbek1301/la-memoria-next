@@ -364,4 +364,117 @@
       }
     }
   }
+
+  /** STUDIOS PAGE LAYOUT (phone); looks are in pc/general.scss under .studio-page **/
+  #studio-list-page {
+    width: 100%;
+    .container {
+      @include page-container-mobile;
+    }
+    .studio-header {
+      padding-top: calc(#{$nav-height-mobile} + 36px);
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .page-title {
+        @include text-headline-lg-mobile;
+      }
+      .page-intro {
+        font-size: 14px;
+      }
+      .studio-count {
+        margin-top: 18px;
+      }
+      .monogram-rule {
+        margin-top: 28px;
+      }
+    }
+    .studio-spotlight {
+      margin-top: 32px;
+      padding: 28px 20px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      .spotlight-portrait {
+        width: 72%;
+        margin: 0 auto;
+      }
+      .spotlight-body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 18px;
+      }
+      .spotlight-name {
+        @include text-display-hero-mobile;
+      }
+      .spotlight-desc {
+        font-size: 15px;
+      }
+      .spotlight-stats {
+        align-self: stretch;
+      }
+      .spotlight-packages {
+        width: 100%;
+      }
+    }
+    .studio-results {
+      padding: 56px 0 $section-space-mobile;
+      .studio-toolbar {
+        margin-bottom: 32px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .search-field {
+        width: 100%;
+      }
+      .sort-box {
+        margin-left: 0;
+      }
+      .studio-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 40px 16px;
+      }
+      .studio-tile {
+        .arch-frame {
+          padding: 6px;
+        }
+        .like-btn {
+          top: 10px;
+          right: 10px;
+          width: 32px;
+          height: 32px;
+          svg {
+            font-size: 16px;
+          }
+        }
+      }
+      .tile-location {
+        margin-top: 16px;
+      }
+      .tile-name {
+        font-size: 18px;
+      }
+      .tile-desc {
+        max-width: 100%;
+      }
+      .results-pagination {
+        margin-top: 48px;
+        padding-top: 24px;
+        flex-direction: column-reverse;
+        border-top: 1px solid $line;
+      }
+      .studio-help {
+        margin-top: 56px;
+        padding: 28px 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+      }
+    }
+  }
 }
