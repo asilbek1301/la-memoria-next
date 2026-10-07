@@ -1,162 +1,3 @@
-.package-big-card-box {
-	position: relative;
-	margin-right: 8px;
-	margin-left: 8px;
-	margin-bottom: 35px;
-	width: 410px;
-	height: 455px;
-	display: flex;
-	flex-direction: column;
-	.card-img {
-		position: relative;
-		width: 100%;
-		height: 264px;
-		background-size: cover;
-		border-radius: 12px 12px 0px 0px;
-		cursor: pointer;
-		div.status {
-			position: absolute;
-			padding: 6px 34px;
-			left: 20px;
-			top: 20px;
-			display: flex;
-			align-items: center;
-			border-radius: 6px;
-			background: #eb6753;
-			img {
-				width: 14px;
-				height: 14px;
-			}
-			span {
-				margin-left: 5px;
-				color: #fff;
-				font-family: $font;
-				font-size: 12px;
-				font-style: normal;
-				font-weight: 600;
-				line-height: normal;
-				text-transform: uppercase;
-			}
-		}
-		div.price {
-			position: absolute;
-			padding: 8px 12px;
-			left: 20px;
-			bottom: 20px;
-			border-radius: 6px;
-			background: #fff;
-			color: #181a20;
-			font-family: $font;
-			font-size: 15px;
-			font-style: normal;
-			font-weight: 600;
-			line-height: normal;
-		}
-	}
-	.info {
-		padding: 20px 22px 17px;
-		display: flex;
-		flex-direction: column;
-		box-sizing: border-box;
-		border-radius: 0px 0px 12px 12px;
-		border: 1px solid #ddd;
-		border-top: none;
-		background: #fff;
-		.title {
-			overflow: hidden;
-			color: #181a20;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-			font-family: $font;
-			font-size: 15px;
-			font-style: normal;
-			font-weight: 600;
-			line-height: normal;
-			text-transform: capitalize;
-			cursor: pointer;
-		}
-		.desc {
-			margin-top: 5px;
-			overflow: hidden;
-			color: #717171;
-			font-family: $font;
-			font-size: 13px;
-			font-style: normal;
-			font-weight: 400;
-			line-height: normal;
-			text-overflow: ellipsis;
-			white-space: nowrap;
-		}
-		.options {
-			margin-top: 15px;
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			div {
-				display: flex;
-				flex-direction: row;
-				img {
-					margin-right: 5px;
-					width: 17px;
-					height: 17px;
-				}
-				span {
-					color: #181a20;
-					font-family: $font;
-					font-size: 13px;
-					font-style: normal;
-					font-weight: 400;
-					line-height: normal;
-				}
-			}
-		}
-		.bott {
-			display: flex;
-			flex-direction: row;
-			justify-content: space-between;
-			align-items: center;
-			div {
-				width: 65px;
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-				justify-content: space-between;
-			}
-			p {
-				color: #181a20;
-				font-family: $font;
-				font-size: 13px;
-				font-style: normal;
-				font-weight: 500;
-				line-height: normal;
-				text-transform: capitalize;
-			}
-			span {
-				margin-left: 6px;
-				color: rgba(143, 143, 143, 0.54);
-				font-family: $font;
-				font-size: 15px;
-				font-style: normal;
-				font-weight: 500;
-				line-height: normal;
-				text-transform: capitalize;
-			}
-			button {
-				margin-left: 15px;
-				width: 16px;
-				height: 16px;
-				box-sizing: border-box;
-			}
-			.buttons-box {
-				width: auto;
-				height: auto;
-				display: flex;
-				flex-direction: row;
-				gap: 7px;
-			}
-		}
-	}
-}
 .community-general-card-config {
 	position: relative;
 	height: auto;
@@ -1376,12 +1217,10 @@
 	.studio-card {
 		.card-media {
 			aspect-ratio: 1 / 1;
-			img {
-				filter: grayscale(1);
-			}
+			@include portrait-light($radius: 0, $line: false);
 		}
-		&:hover .card-media img {
-			filter: grayscale(0);
+		&:hover .card-media {
+			@include portrait-light-on;
 		}
 		.initial {
 			display: flex;
@@ -1581,19 +1420,6 @@
 		clip: rect(0 0 0 0);
 		white-space: nowrap;
 		border: 0;
-	}
-	.page-label {
-		@include eyebrow;
-		margin: 0;
-		display: flex;
-		align-items: center;
-		gap: 20px;
-		&::after {
-			content: '';
-			flex: 1;
-			height: 1px;
-			background: $line;
-		}
 	}
 
 	/** sentence filter: "I'm looking for [All tiers] packages in [All locations] with [any style]." **/
@@ -1939,8 +1765,10 @@
 	}
 }
 
-/** STUDIOS PAGE LOOKS (pages/studio/index.tsx, libs/components/studio/*); layout is in pc/studio/studio.scss and mobile/main.scss **/
-.studio-page {
+/** STUDIOS PAGE LOOKS (pages/studio/index.tsx, libs/components/studio/*); layout is in pc/studio/studio.scss and mobile/main.scss.
+    .studio-detail reuses them for its arch portrait and the "More studios" tiles **/
+.studio-page,
+.studio-detail {
 	.header-label {
 		@include eyebrow;
 	}
@@ -2010,9 +1838,8 @@
 			height: 100%;
 			display: block;
 			object-fit: cover;
-			filter: grayscale(1);
-			transition: filter 0.6s ease, transform 0.8s $ease-out;
 		}
+		@include portrait-light;
 	}
 	.arch-initial {
 		height: 100%;
@@ -2023,10 +1850,9 @@
 		font-family: $font-heading;
 		font-size: 72px;
 	}
-	.studio-spotlight:hover .arch-media img,
-	.studio-tile:hover .arch-media img {
-		filter: grayscale(0);
-		transform: scale(1.03);
+	.studio-spotlight:hover .arch-media,
+	.studio-tile:hover .arch-media {
+		@include portrait-light-on;
 	}
 	.skeleton.arch-skeleton {
 		aspect-ratio: 3 / 4;
@@ -2587,8 +2413,8 @@
 	/** the studio **/
 	.studio-block {
 		align-items: center;
-		&:hover .block-portrait img {
-			filter: grayscale(0);
+		&:hover .block-portrait {
+			@include portrait-light-on($zoom: 1);
 		}
 	}
 	.block-portrait {
@@ -2606,9 +2432,8 @@
 			display: block;
 			object-fit: cover;
 			border-radius: 999px 999px 10px 10px;
-			filter: grayscale(1);
-			transition: filter 0.6s ease;
 		}
+		@include portrait-light($line-inset: 14px, $sheen-inset: 6px);
 		.arch-initial {
 			display: flex;
 			align-items: center;
@@ -2999,6 +2824,227 @@
 	}
 }
 
+/** STUDIO DETAIL LOOKS (pages/studio/detail.tsx, libs/components/studio/detail/*); the page also uses the .detail-page
+    looks (breadcrumb, sections, comments, icon buttons) and the studio looks (arch portrait, tiles).
+    Layout is in pc/studio/detail.scss and mobile/main.scss **/
+.studio-detail {
+	.hero-portrait {
+		padding: 10px;
+		box-sizing: border-box;
+		border-radius: 999px 999px $radius-tile $radius-tile;
+		background: #ffffff;
+		box-shadow: $studio-frame-shadow;
+		img,
+		.arch-initial {
+			width: 100%;
+			aspect-ratio: 3 / 4;
+			display: flex;
+			border-radius: 999px 999px 10px 10px;
+			object-fit: cover;
+		}
+		.arch-initial {
+			height: auto;
+			background: $sand;
+		}
+		@include portrait-light($line-inset: 22px, $sheen-inset: 10px);
+		&:hover {
+			@include portrait-light-on($zoom: 1);
+		}
+	}
+	.hero-location {
+		@include eyebrow;
+		margin: 0;
+	}
+	.hero-name {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		overflow-wrap: anywhere;
+	}
+	.hero-desc {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		margin: 0;
+		color: $muted;
+		font-size: 16px;
+		line-height: 1.7;
+	}
+	.hero-stats {
+		@include text-label-uppercase;
+		margin: 0;
+		color: $muted;
+	}
+	.hero-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		.button-secondary.following {
+			background: transparent;
+		}
+		// Follow is a toggle, not a way forward: no arrow
+		.button-primary::after {
+			content: none;
+		}
+	}
+
+	/** packages by tier **/
+	.studio-tiers {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.tier-card {
+		width: 100%;
+		height: 100%;
+		padding: 28px;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-card;
+		background: #ffffff;
+		color: $espresso;
+		font-family: $font;
+		text-align: left;
+		cursor: pointer;
+		transition: border-color 0.3s ease, background-color 0.3s ease;
+		@include focus-ring;
+		&:hover:not(:disabled) {
+			border-color: $espresso;
+		}
+		&.active {
+			border-color: $espresso;
+			background: $ivory-deep;
+		}
+		// not offered: an honest, quiet card that cannot be selected
+		&.off {
+			border-style: dashed;
+			background: transparent;
+			color: $muted;
+			cursor: default;
+		}
+	}
+	.tier-name {
+		font-family: $font-heading;
+		font-size: 26px;
+	}
+	.tier-from {
+		color: $muted;
+		font-size: 14px;
+		.price {
+			margin-left: 4px;
+			font-weight: 400;
+		}
+	}
+	.tier-count,
+	.tier-off {
+		@include text-label-uppercase;
+		color: $muted;
+	}
+
+	/** packages **/
+	.section-row {
+		margin-bottom: 28px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px 32px;
+		.detail-title {
+			margin: 0;
+		}
+	}
+	.section-tools {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px 28px;
+	}
+	.studio-package-grid,
+	.more-studios {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
+	}
+	.show-more {
+		margin-top: 48px;
+		display: flex;
+		justify-content: center;
+	}
+
+	/** portfolio wall: masonry of package photos, caption on hover **/
+	.portfolio-wall {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			break-inside: avoid;
+		}
+	}
+	.wall-tile {
+		position: relative;
+		display: block;
+		overflow: hidden;
+		border-radius: $radius-tile;
+		background: $sand;
+		@include focus-ring;
+		img {
+			width: 100%;
+			display: block;
+			transition: transform 0.8s $ease-out;
+		}
+		&:hover img {
+			transform: scale(1.03);
+		}
+		&:hover .wall-caption,
+		&:focus-visible .wall-caption {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	.wall-caption {
+		position: absolute;
+		left: 12px;
+		right: 12px;
+		bottom: 12px;
+		padding: 8px 14px;
+		overflow: hidden;
+		border-radius: $radius-pill;
+		background: rgba(20, 14, 10, 0.45);
+		-webkit-backdrop-filter: blur(8px);
+		backdrop-filter: blur(8px);
+		color: $ivory;
+		font-size: 11px;
+		letter-spacing: 0.12em;
+		text-overflow: ellipsis;
+		text-transform: uppercase;
+		white-space: nowrap;
+		opacity: 0;
+		transform: translateY(6px);
+		transition: opacity 0.4s ease, transform 0.4s $ease-out;
+	}
+	.portfolio .button-link svg {
+		font-size: 16px;
+	}
+
+	/** states **/
+	.skeleton.tiers-skeleton {
+		height: 180px;
+		margin: 56px 0 0;
+		border-radius: $radius-card;
+	}
+}
+
 /** MUI portals opened from the package page (rendered outside #pc-wrap / #mobile-wrap) **/
 .filter-menu.MuiPaper-root {
 	margin-top: 10px;
@@ -3286,6 +3332,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.studio-card .card-media,
+	.arch-media,
+	.block-portrait,
+	.hero-portrait {
+		&::before,
+		&::after,
+		img {
+			transition: none;
+		}
+	}
 	.animated-logo {
 		.monogram {
 			transition: none;
@@ -3341,6 +3397,17 @@
 			transition: none;
 		}
 	}
+	.studio-detail {
+		.hero-portrait img,
+		.wall-tile img,
+		.wall-caption,
+		.tier-card {
+			transition: none;
+		}
+		.wall-tile:hover img {
+			transform: none;
+		}
+	}
 	.detail-page {
 		.gallery-tile img,
 		.block-portrait img,
@@ -3352,7 +3419,8 @@
 			transform: none;
 		}
 	}
-	.studio-page {
+	.studio-page,
+	.studio-detail {
 		.arch-media img,
 		.mini-media img,
 		.tile-name a {

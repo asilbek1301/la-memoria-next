@@ -1,11 +1,8 @@
-import React, { useRef, useState } from 'react';
-import { Dialog } from '@mui/material';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
-import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
+import React from 'react';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import { REACT_APP_API_URL } from '../../../config';
+import PhotoLightbox, { usePhotoLightbox } from '../../common/PhotoLightbox';
 
 interface PackageGalleryProps {
 	images: string[];
@@ -18,23 +15,13 @@ interface PackageGalleryProps {
 const PackageGallery = (props: PackageGalleryProps) => {
 	const { images, title, caption } = props;
 	const urls = (images ?? []).filter(Boolean).map((image) => `${REACT_APP_API_URL}/${image}`);
-	const [openIndex, setOpenIndex] = useState<number | null>(null);
-	const touchX = useRef<number | null>(null);
-	// the button that opened the viewer gets focus back when it closes
-	const opener = useRef<HTMLElement | null>(null);
+	const lightbox = usePhotoLightbox(urls.length);
 
 	if (urls.length === 0) return <div className={'package-gallery single empty'} aria-hidden="true" />;
 
 	const layout = urls.length === 1 ? 'single' : urls.length < 5 ? 'trio' : 'five';
 	const tiles = urls.slice(0, layout === 'single' ? 1 : layout === 'trio' ? 3 : 5);
 	const alt = (index: number) => (urls.length === 1 ? title : `${title}, photo ${index + 1} of ${urls.length}`);
-
-	const show = (index: number) => setOpenIndex((index + urls.length) % urls.length);
-	const open = (index: number, e: React.MouseEvent<HTMLElement>) => {
-		opener.current = e.currentTarget;
-		show(index);
-	};
-	const close = () => setOpenIndex(null);
 
 	return (
 		<>
@@ -49,7 +36,7 @@ const PackageGallery = (props: PackageGalleryProps) => {
 						key={url + index}
 						className={`gallery-tile ${index === 0 ? 'lead' : ''}`}
 						aria-label={`Open photo ${index + 1} of ${urls.length}`}
-						onClick={(e) => open(index, e)}
+						onClick={(e) => lightbox.open(index, e)}
 					>
 						<img
 							src={url}
@@ -66,70 +53,19 @@ const PackageGallery = (props: PackageGalleryProps) => {
 					</p>
 				)}
 				{urls.length > 1 && (
-					<button type="button" className={'gallery-all'} onClick={(e) => open(0, e)}>
+					<button type="button" className={'gallery-all'} onClick={(e) => lightbox.open(0, e)}>
 						<GridViewRoundedIcon aria-hidden="true" />
 						View all {urls.length} photos
 					</button>
 				)}
 			</div>
 
-			<Dialog
-				open={openIndex !== null}
-				onClose={close}
-				fullScreen
-				classes={{ paper: 'lightbox' }}
-				disableRestoreFocus
-				TransitionProps={{ onExited: () => opener.current?.focus() }}
-				aria-label={`${title} photos`}
-				onKeyDown={(e) => {
-					if (openIndex === null) return;
-					if (e.key === 'ArrowRight') show(openIndex + 1);
-					if (e.key === 'ArrowLeft') show(openIndex - 1);
-				}}
-			>
-				{openIndex !== null && (
-					<div
-						className={'lightbox-stage'}
-						onTouchStart={(e) => (touchX.current = e.touches[0].clientX)}
-						onTouchEnd={(e) => {
-							if (touchX.current === null) return;
-							const delta = e.changedTouches[0].clientX - touchX.current;
-							if (Math.abs(delta) > 50) show(openIndex + (delta < 0 ? 1 : -1));
-							touchX.current = null;
-						}}
-					>
-						<div className={'lightbox-top'}>
-							<p className={'lightbox-count'} aria-live="polite">
-								{openIndex + 1} / {urls.length}
-							</p>
-							<button type="button" className={'lightbox-btn'} aria-label="Close photos" onClick={close}>
-								<CloseRoundedIcon />
-							</button>
-						</div>
-						<img className={'lightbox-image'} src={urls[openIndex]} alt={alt(openIndex)} />
-						{urls.length > 1 && (
-							<>
-								<button
-									type="button"
-									className={'lightbox-btn prev'}
-									aria-label="Previous photo"
-									onClick={() => show(openIndex - 1)}
-								>
-									<ChevronLeftRoundedIcon />
-								</button>
-								<button
-									type="button"
-									className={'lightbox-btn next'}
-									aria-label="Next photo"
-									onClick={() => show(openIndex + 1)}
-								>
-									<ChevronRightRoundedIcon />
-								</button>
-							</>
-						)}
-					</div>
-				)}
-			</Dialog>
+			<PhotoLightbox
+				urls={urls}
+				alts={urls.map((_, index) => alt(index))}
+				label={`${title} photos`}
+				lightbox={lightbox}
+			/>
 		</>
 	);
 };

@@ -4,30 +4,34 @@ import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import moment from 'moment';
-import { Comment } from '../../../types/comment/comment';
-import { CommentsInquiry } from '../../../types/comment/comment.input';
-import { CommentGroup } from '../../../enums/comment.enum';
-import { Direction, Message } from '../../../enums/common.enum';
-import { GET_COMMENTS } from '../../../../apollo/user/query';
-import { CREATE_COMMENT } from '../../../../apollo/user/mutation';
-import { REACT_APP_API_URL } from '../../../config';
-import { sweetErrorHandling } from '../../../sweetAlert';
-import { ResultsPagination } from '../../common/ListControls';
+import { Comment } from '../../types/comment/comment';
+import { CommentsInquiry } from '../../types/comment/comment.input';
+import { CommentGroup } from '../../enums/comment.enum';
+import { Direction, Message } from '../../enums/common.enum';
+import { GET_COMMENTS } from '../../../apollo/user/query';
+import { CREATE_COMMENT } from '../../../apollo/user/mutation';
+import { REACT_APP_API_URL } from '../../config';
+import { sweetErrorHandling } from '../../sweetAlert';
+import { ResultsPagination } from './ListControls';
 
 /** the backend accepts 1-100 characters (CommentInput) **/
 const COMMENT_MAX = 100;
 const PAGE_SIZE = 5;
 
-interface PackageCommentsProps {
-	packageId: string;
+interface CommentsSectionProps {
+	/** the package or studio the comments belong to */
+	refId: string;
+	group: CommentGroup;
 	user: any;
+	/** shown instead of the form, e.g. on your own studio */
+	formNote?: string;
 	/** called after a new comment, so the page can refresh its count */
 	onCommented?: () => void;
 }
 
-/** comments (not reviews): list, pagination and a form for logged-in members **/
-const PackageComments = (props: PackageCommentsProps) => {
-	const { packageId, user, onCommented } = props;
+/** comments (not reviews) for a package or a studio: list, pagination and a form for logged-in members **/
+const CommentsSection = (props: CommentsSectionProps) => {
+	const { refId, group, user, formNote, onCommented } = props;
 	const router = useRouter();
 	const [page, setPage] = useState<number>(1);
 	const [content, setContent] = useState<string>('');
@@ -38,14 +42,14 @@ const PackageComments = (props: PackageCommentsProps) => {
 		limit: PAGE_SIZE,
 		sort: 'createdAt',
 		direction: Direction.DESC,
-		search: { commentRefId: packageId },
+		search: { commentRefId: refId },
 	};
 
 	/** APOLLO REQUESTS **/
 
 	const { data, loading, refetch } = useQuery(GET_COMMENTS, {
 		variables: { input: inquiry },
-		skip: !packageId,
+		skip: !refId,
 		fetchPolicy: 'cache-and-network',
 		notifyOnNetworkStatusChange: true,
 	});
@@ -62,7 +66,7 @@ const PackageComments = (props: PackageCommentsProps) => {
 			if (!user?._id) throw new Error(Message.NOT_AUTHENTICATED);
 			setSending(true);
 			await createComment({
-				variables: { input: { commentGroup: CommentGroup.PACKAGE, commentContent: text, commentRefId: packageId } },
+				variables: { input: { commentGroup: group, commentContent: text, commentRefId: refId } },
 			});
 			setContent('');
 			setPage(1);
@@ -79,12 +83,14 @@ const PackageComments = (props: PackageCommentsProps) => {
 		comment?.memberData?._id === user?._id ? '/mypage' : `/member?memberId=${comment?.memberData?._id}`;
 
 	return (
-		<section className={'detail-section package-comments'} aria-labelledby="comments-title">
+		<section className={'detail-section comments-section'} aria-labelledby="comments-title">
 			<h2 id="comments-title" className={'detail-title'}>
 				Comments{total > 0 ? ` (${total})` : ''}
 			</h2>
 
-			{user?._id ? (
+			{formNote ? (
+				<p className={'comment-login'}>{formNote}</p>
+			) : user?._id ? (
 				<form className={'comment-form'} onSubmit={submit}>
 					<label className={'visually-hidden'} htmlFor="comment-text">
 						Write a comment
@@ -163,4 +169,4 @@ const PackageComments = (props: PackageCommentsProps) => {
 	);
 };
 
-export default PackageComments;
+export default CommentsSection;

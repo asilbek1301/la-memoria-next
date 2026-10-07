@@ -1,27 +1,39 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { NextPage } from 'next';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import PackageBigCard from '../../libs/components/common/PackageBigCard';
-import ReviewCard from '../../libs/components/studio/ReviewCard';
-import { Box, Button, Pagination, Stack, Typography } from '@mui/material';
-import StarIcon from '@mui/icons-material/Star';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Package } from '../../libs/types/package/package';
-import { Member } from '../../libs/types/member/member';
-import { sweetErrorHandling, sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
-import { userVar } from '../../apollo/store';
-import { PackagesInquiry } from '../../libs/types/package/package.input';
-import { CommentInput, CommentsInquiry } from '../../libs/types/comment/comment.input';
-import { Comment } from '../../libs/types/comment/comment';
-import { CommentGroup } from '../../libs/enums/comment.enum';
-import { Messages, REACT_APP_API_URL } from '../../libs/config';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { CREATE_COMMENT, LIKE_TARGET_PACKAGE } from '../../apollo/user/mutation';
-import { GET_COMMENTS, GET_MEMBER, GET_PACKAGES } from '../../apollo/user/query';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import { Skeleton } from '@mui/material';
+import { useReducedMotion } from 'framer-motion';
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import PopularPackageCard from '../../libs/components/homepage/PopularPackageCard';
+import { FilterTabs } from '../../libs/components/homepage/HomeSection';
+import StudioCard from '../../libs/components/studio/StudioCard';
+import StudioTiers, { TierFilter } from '../../libs/components/studio/detail/StudioTiers';
+import PortfolioWall from '../../libs/components/studio/detail/PortfolioWall';
+import CommentsSection from '../../libs/components/common/CommentsSection';
+import { SortMenu, SortOption } from '../../libs/components/common/ListControls';
+import {
+	plural,
+	studioImage,
+	studioLocation,
+	studioName,
+	studioStats,
+} from '../../libs/components/studio/studioSearch';
+import { Member } from '../../libs/types/member/member';
+import { Package } from '../../libs/types/package/package';
 import { T } from '../../libs/types/common';
-import { Message } from '../../libs/enums/common.enum';
+import { CommentGroup } from '../../libs/enums/comment.enum';
+import { Direction, Message } from '../../libs/enums/common.enum';
+import { PackageType } from '../../libs/enums/package.enum';
+import { prettyEnum } from '../../libs/utils';
+import { userVar } from '../../apollo/store';
+import { GET_MEMBER, GET_PACKAGES, GET_STUDIOS } from '../../apollo/user/query';
+import { LIKE_TARGET_MEMBER, LIKE_TARGET_PACKAGE, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
+import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -29,298 +41,325 @@ export const getStaticProps = async ({ locale }: any) => ({
 	},
 });
 
-const StudioDetail: NextPage = ({ initialInput, initialComment, ...props }: any) => {
-	const device = useDeviceDetect();
+const PAGE_STEP = 6;
+const ALL_PACKAGES = 100;
+const MORE_STUDIOS = 4;
+
+const packageSorts: SortOption[] = [
+	{ id: 'newest', label: 'Newest', sort: 'createdAt', direction: Direction.DESC },
+	{ id: 'price-asc', label: 'Price low to high', sort: 'packagePrice', direction: Direction.ASC },
+	{ id: 'liked', label: 'Most liked', sort: 'packageLikes', direction: Direction.DESC },
+];
+
+const tierTabs: { value: TierFilter; label: string }[] = [
+	{ value: 'ALL', label: 'All' },
+	...Object.values(PackageType).map((value) => ({ value, label: prettyEnum(value) })),
+];
+
+/** the city is the last part of the address: "35, Gunam-ro, Haeundae-gu, Busan" -> "Busan" **/
+const cityOf = (studio?: Member) => studio?.memberAddress?.split(',').pop()?.trim().toLowerCase() ?? '';
+
+const StudioDetail: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const [studioId, setStudioId] = useState<string | null>(null);
-	const [studio, setStudio] = useState<Member | null>(null);
-	const [searchFilter, setSearchFilter] = useState<PackagesInquiry>(initialInput);
-	const [studioPackages, setStudioPackages] = useState<Package[]>([]);
-	const [packageTotal, setPackageTotal] = useState<number>(0);
-	const [commentInquiry, setCommentInquiry] = useState<CommentsInquiry>(initialComment);
-	const [studioComments, setStudioComments] = useState<Comment[]>([]);
-	const [commentTotal, setCommentTotal] = useState<number>(0);
-	const [insertCommentData, setInsertCommentData] = useState<CommentInput>({
-		commentGroup: CommentGroup.MEMBER,
-		commentContent: '',
-		commentRefId: '',
-	});
+	const reduceMotion = useReducedMotion();
+	const studioId = typeof router.query.studioId === 'string' ? router.query.studioId : '';
+	const [tier, setTier] = useState<TierFilter>('ALL');
+	const [sort, setSort] = useState<SortOption>(packageSorts[0]);
+	const [visible, setVisible] = useState<number>(PAGE_STEP);
+	const packagesRef = useRef<HTMLElement>(null);
 
 	/** APOLLO REQUESTS **/
 
-	const [createComment] = useMutation(CREATE_COMMENT);
 	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
+	const [likeTargetMember] = useMutation(LIKE_TARGET_MEMBER);
+	const [subscribe] = useMutation(SUBSCRIBE);
+	const [unsubscribe] = useMutation(UNSUBSCRIBE);
 
-	useQuery(GET_MEMBER, {
+	// getMember also records the view on the backend
+	const {
+		data: memberData,
+		loading: memberLoading,
+		error: memberError,
+		refetch: getMemberRefetch,
+	} = useQuery(GET_MEMBER, {
 		fetchPolicy: 'network-only',
 		variables: { input: studioId },
 		skip: !studioId,
-		onCompleted: (data: T) => {
-			setStudio(data?.getMember);
-			setSearchFilter({
-				...searchFilter,
-				search: {
-					memberId: data?.getMember?._id
-				},
-			});
-			setCommentInquiry({
-				...commentInquiry,
-				search: {
-					commentRefId: data?.getMember?._id
-				},
-			});
-			setInsertCommentData({
-				...insertCommentData,
-				commentRefId: data?.getMember?._id,
-			});
-		},
+		notifyOnNetworkStatusChange: true,
 	});
+	const studio: Member | undefined = memberData?.getMember;
 
+	// every package of this studio at once: the tier cards, filters, sort and portfolio all read this list
 	const {
+		data: packagesData,
+		loading: packagesLoading,
 		refetch: getPackagesRefetch,
 	} = useQuery(GET_PACKAGES, {
-		fetchPolicy: 'network-only',
-		variables: { input: searchFilter },
-		skip: !searchFilter.search.memberId,
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setStudioPackages(data?.getPackages?.list);
-			setPackageTotal(data?.getPackages?.metaCounter[0]?.total ?? 0);
+		fetchPolicy: 'cache-and-network',
+		variables: {
+			input: { page: 1, limit: ALL_PACKAGES, sort: 'createdAt', direction: Direction.DESC, search: { memberId: studioId } },
 		},
+		skip: !studioId,
 	});
+	const packages: Package[] = packagesData?.getPackages?.list ?? [];
 
-	const {
-		refetch: getCommentsRefetch,
-	} = useQuery(GET_COMMENTS, {
-		fetchPolicy: 'network-only',
-		variables: { input: commentInquiry },
-		skip: !commentInquiry.search.commentRefId,
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setStudioComments(data?.getComments?.list);
-			setCommentTotal(data?.getComments?.metaCounter[0]?.total ?? 0);
-		},
+	// studios in the same city (no city filter on the backend: read the address of the top studios)
+	const { data: studiosData, refetch: getStudiosRefetch } = useQuery(GET_STUDIOS, {
+		variables: { input: { page: 1, limit: 50, sort: 'memberRank', direction: Direction.DESC, search: {} } },
+		skip: !studio,
 	});
-
-	/** LIFECYCLES **/
-
-	useEffect(() => {
-		if (router.query.studioId) setStudioId(router.query.studioId as string);
-	}, [router]);
-
-	useEffect(() => {
-		if (searchFilter.search.memberId) {
-			getPackagesRefetch({ variables: { input: searchFilter } }).then();
-		}
-	}, [searchFilter]);
-	useEffect(() => {
-		if (commentInquiry.search.commentRefId) {
-			getCommentsRefetch({ variables: { input: commentInquiry } }).then();
-		}
-	}, [commentInquiry]);
+	const sameCity: Member[] = (studiosData?.getStudios?.list ?? [])
+		.filter((item: Member) => item._id !== studio?._id && cityOf(item) && cityOf(item) === cityOf(studio))
+		.slice(0, MORE_STUDIOS);
 
 	/** HANDLERS **/
 
-	const redirectToMemberPageHandler = async (memberId: string) => {
+	const requireLogin = () => {
+		if (!user?._id) throw new Error(Message.NOT_AUTHENTICATED);
+	};
+
+	const followHandler = async () => {
 		try {
-			if (memberId === user?._id) await router.push(`/mypage?memberId=${memberId}`);
-			else await router.push(`/member?memberId=${memberId}`);
-		} catch (error) {
-			await sweetErrorHandling(error);
-		}
-	};
-
-	const packagePaginationChangeHandler = async (event: ChangeEvent<unknown>, value: number) => {
-		searchFilter.page = value;
-		setSearchFilter({ ...searchFilter });
-	};
-
-	const commentPaginationChangeHandler = async (event: ChangeEvent<unknown>, value: number) => {
-		commentInquiry.page = value;
-		setCommentInquiry({ ...commentInquiry });
-	};
-
-	const createCommentHandler = async () => {
-		try {
-			console.log('pressed');
-			if (!user._id) throw new Error(Messages.error2);
-			if (user._id === studioId) throw new Error('Cannot write review for yourself');
-
-			await createComment({
-				variables: {
-					input: insertCommentData,
-				},
-			});
-
-			setInsertCommentData({ ...insertCommentData, commentContent: '' });
-			await getCommentsRefetch({ input: commentInquiry });
+			requireLogin();
+			const following = Boolean(studio?.meFollowed?.[0]?.myFollowing);
+			if (following) await unsubscribe({ variables: { input: studioId } });
+			else await subscribe({ variables: { input: studioId } });
+			await getMemberRefetch({ input: studioId });
+			await sweetTopSmallSuccessAlert(following ? 'Unfollowed' : 'Following', 800);
 		} catch (err: any) {
-			sweetErrorHandling(err).then();
-		}
-	};
-
-	const likePackageHandler = async (user: any, id: string) => {
-		try {
-			if (!id) return;
-			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-
-			await likeTargetPackage({
-				variables: {
-					input: id,
-				},
-			});
-
-			await getPackagesRefetch({ input: searchFilter });
-			await sweetTopSmallSuccessAlert('success', 800);
-		} catch (err: any) {
-			console.log('error,likePackageHandler', err.Message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
-	if (device === 'mobile') {
-		return <div>STUDIO DETAIL PAGE MOBILE</div>;
-	} else {
-		return (
-			<Stack className={'studio-detail-page'}>
-				<Stack className={'container'}>
-					<Stack className={'studio-info'}>
-						<img
-							src={studio?.memberImage ? `${REACT_APP_API_URL}/${studio?.memberImage}` : '/img/profile/defaultUser.svg'}
-							alt=""
-						/>
-						<Box component={'div'} className={'info'} onClick={() => redirectToMemberPageHandler(studio?._id as string)}>
-							<strong>{studio?.memberFullName ?? studio?.memberNick}</strong>
-							<div>
-								<img src="/img/icons/call.svg" alt="" />
-								<span>{studio?.memberPhone}</span>
-							</div>
-						</Box>
-					</Stack>
-					<Stack className={'studio-home-list'}>
-						<Stack className={'card-wrap'}>
-							{studioPackages.map((pkg: Package) => {
-								return (
-									<div className={'wrap-main'} key={pkg?._id}>
-										<PackageBigCard
-											pkg={pkg}
-											key={pkg?._id}
-											likePackageHandler={likePackageHandler}
-										/>
-									</div>
-								);
-							})}
-						</Stack>
-						<Stack className={'pagination'}>
-							{packageTotal ? (
-								<>
-									<Stack className="pagination-box">
-										<Pagination
-											page={searchFilter.page}
-											count={Math.ceil(packageTotal / searchFilter.limit) || 1}
-											onChange={packagePaginationChangeHandler}
-											shape="circular"
-											color="primary"
-										/>
-									</Stack>
-									<span>
-										Total {packageTotal} package{packageTotal > 1 ? 's' : ''} available
-									</span>
-								</>
-							) : (
-								<div className={'no-data'}>
-									<img src="/img/icons/icoAlert.svg" alt="" />
-									<p>No packages found!</p>
-								</div>
-							)}
-						</Stack>
-					</Stack>
-					<Stack className={'review-box'}>
-						<Stack className={'main-intro'}>
-							<span>Reviews</span>
-							<p>we are glad to see you again</p>
-						</Stack>
-						{commentTotal !== 0 && (
-							<Stack className={'review-wrap'}>
-								<Box component={'div'} className={'title-box'}>
-									<StarIcon />
-									<span>
-										{commentTotal} review{commentTotal > 1 ? 's' : ''}
-									</span>
-								</Box>
-								{studioComments?.map((comment: Comment) => {
-									return <ReviewCard comment={comment} key={comment?._id} />;
-								})}
-								<Box component={'div'} className={'pagination-box'}>
-									<Pagination
-										page={commentInquiry.page}
-										count={Math.ceil(commentTotal / commentInquiry.limit) || 1}
-										onChange={commentPaginationChangeHandler}
-										shape="circular"
-										color="primary"
-									/>
-								</Box>
-							</Stack>
-						)}
+	const likeStudioHandler = async (likeUser: T, id: string) => {
+		try {
+			if (!id) return;
+			if (!likeUser?._id) throw new Error(Message.NOT_AUTHENTICATED);
+			await likeTargetMember({ variables: { input: id } });
+			if (id === studioId) await getMemberRefetch({ input: studioId });
+			else await getStudiosRefetch();
+			await sweetTopSmallSuccessAlert('success', 800);
+		} catch (err: any) {
+			sweetMixinErrorAlert(err.message).then();
+		}
+	};
 
-						<Stack className={'leave-review-config'}>
-							<Typography className={'main-title'}>Leave A Review</Typography>
-							<Typography className={'review-title'}>Review</Typography>
-							<textarea
-								onChange={({ target: { value } }: any) => {
-									setInsertCommentData({ ...insertCommentData, commentContent: value });
-								}}
-								value={insertCommentData.commentContent}
-							></textarea>
-							<Box className={'submit-btn'} component={'div'}>
-								<Button
-									className={'submit-review'}
-									disabled={insertCommentData.commentContent === '' || user?._id === ''}
-									onClick={createCommentHandler}
-								>
-									<Typography className={'title'}>Submit Review</Typography>
-									<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 17 17" fill="none">
-										<g clipPath="url(#clip0_6975_3642)">
-											<path
-												d="M16.1571 0.5H6.37936C6.1337 0.5 5.93491 0.698792 5.93491 0.944458C5.93491 1.19012 6.1337 1.38892 6.37936 1.38892H15.0842L0.731781 15.7413C0.558156 15.915 0.558156 16.1962 0.731781 16.3698C0.818573 16.4566 0.932323 16.5 1.04603 16.5C1.15974 16.5 1.27345 16.4566 1.36028 16.3698L15.7127 2.01737V10.7222C15.7127 10.9679 15.9115 11.1667 16.1572 11.1667C16.4028 11.1667 16.6016 10.9679 16.6016 10.7222V0.944458C16.6016 0.698792 16.4028 0.5 16.1571 0.5Z"
-												fill="#181A20"
-											/>
-										</g>
-										<defs>
-											<clipPath id="clip0_6975_3642">
-												<rect width="16" height="16" fill="white" transform="translate(0.601562 0.5)" />
-											</clipPath>
-										</defs>
-									</svg>
-								</Button>
-							</Box>
-						</Stack>
-					</Stack>
-				</Stack>
-			</Stack>
+	const likePackageHandler = async (likeUser: T, id: string) => {
+		try {
+			if (!id) return;
+			if (!likeUser?._id) throw new Error(Message.NOT_AUTHENTICATED);
+			await likeTargetPackage({ variables: { input: id } });
+			await getPackagesRefetch();
+			await sweetTopSmallSuccessAlert('success', 800);
+		} catch (err: any) {
+			console.log('Error:likePackageHandler', err.message);
+			sweetMixinErrorAlert(err.message).then();
+		}
+	};
+
+	const selectTier = (next: TierFilter, scroll = false) => {
+		setTier(next);
+		setVisible(PAGE_STEP);
+		if (scroll) packagesRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+	};
+
+	/** STATES **/
+
+	const notFound = router.isReady && (!studioId || Boolean(memberError) || (!memberLoading && !studio));
+
+	if (notFound) {
+		return (
+			<div id="studio-detail-page" className={'detail-page studio-detail'}>
+				<div className={'container'}>
+					<div className={'empty-box detail-missing'}>
+						<p>Studio not found.</p>
+						<Link href={'/studio'} className={'button-primary'}>
+							Back to studios
+						</Link>
+					</div>
+				</div>
+			</div>
 		);
 	}
+
+	if (!studio) {
+		return (
+			<div id="studio-detail-page" className={'detail-page studio-detail'} aria-busy="true" aria-label="Loading studio">
+				<div className={'container'}>
+					<Skeleton width={220} className={'crumb-skeleton'} />
+					<div className={'studio-hero'}>
+						<Skeleton variant="rectangular" className={'skeleton arch-skeleton'} />
+						<div className={'hero-info'}>
+							<Skeleton width="30%" />
+							<Skeleton width="60%" height={80} />
+							<Skeleton width="45%" />
+						</div>
+					</div>
+					<Skeleton variant="rectangular" className={'skeleton tiers-skeleton'} />
+				</div>
+			</div>
+		);
+	}
+
+	const name = studioName(studio);
+	const image = studioImage(studio);
+	const location = studioLocation(studio.memberAddress);
+	const city = studio.memberAddress?.split(',').pop()?.trim() ?? '';
+	const likes = studio.memberLikes ?? 0;
+	const stats = [studioStats(studio), likes > 0 && plural(likes, 'like')].filter(Boolean).join(' · ');
+	const following = Boolean(studio.meFollowed?.[0]?.myFollowing);
+	const liked = Boolean(studio.meLiked?.[0]?.myFavorite);
+	const isSelf = Boolean(user?._id) && user._id === studio._id;
+	const hasPackages = packages.length > 0;
+
+	const shown = packages
+		.filter((pkg) => tier === 'ALL' || pkg.packageType === tier)
+		.slice()
+		.sort((a: any, b: any) => {
+			const key = sort.sort;
+			const av = key === 'createdAt' ? new Date(a[key]).getTime() : a[key] ?? 0;
+			const bv = key === 'createdAt' ? new Date(b[key]).getTime() : b[key] ?? 0;
+			return sort.direction === Direction.ASC ? av - bv : bv - av;
+		});
+
+	return (
+		<div id="studio-detail-page" className={'detail-page studio-detail'}>
+			<div className={'container'}>
+				<nav className={'breadcrumb'} aria-label="Breadcrumb">
+					<ol>
+						<li>
+							<Link href={'/studio'}>Studios</Link>
+						</li>
+						{city && <li>{city}</li>}
+						<li aria-current="page">{name}</li>
+					</ol>
+				</nav>
+
+				<header className={'studio-hero'}>
+					<div className={'hero-portrait'}>
+						{image ? (
+							<img src={image} alt={`${name} studio`} />
+						) : (
+							<span className={'arch-initial'} aria-hidden="true">
+								{name.charAt(0)}
+							</span>
+						)}
+					</div>
+					<div className={'hero-info'}>
+						{location && <p className={'hero-location'}>{location}</p>}
+						<h1 className={'hero-name'}>{name}</h1>
+						{studio.memberDesc && <p className={'hero-desc'}>{studio.memberDesc}</p>}
+						{stats && <p className={'hero-stats'}>{stats}</p>}
+						{!isSelf && (
+							<div className={'hero-actions'}>
+								<button
+									type="button"
+									className={following ? 'button-secondary following' : 'button-primary'}
+									aria-pressed={following}
+									onClick={followHandler}
+								>
+									{following ? 'Following' : 'Follow'}
+								</button>
+								<button
+									type="button"
+									className={`icon-action ${liked ? 'liked' : ''}`}
+									aria-label={liked ? `Remove ${name} from saved studios` : `Save ${name}`}
+									aria-pressed={liked}
+									onClick={() => likeStudioHandler(user, studio._id)}
+								>
+									{liked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
+									{likes > 0 && <span className={'action-count'}>{likes}</span>}
+								</button>
+							</div>
+						)}
+					</div>
+				</header>
+
+				{packagesLoading && !hasPackages ? (
+					<Skeleton variant="rectangular" className={'skeleton tiers-skeleton'} />
+				) : !hasPackages ? (
+					<div className={'empty-box studio-no-packages'}>
+						<p>{name} hasn&apos;t published any packages yet.</p>
+						<Link href={'/studio'} className={'button-secondary'}>
+							Back to studios
+						</Link>
+					</div>
+				) : (
+					<>
+						<section className={'detail-section tiers-section'} aria-labelledby="tiers-title">
+							<h2 id="tiers-title" className={'detail-title'}>
+								Packages by tier
+							</h2>
+							<StudioTiers packages={packages} active={tier} onSelect={(next) => selectTier(next, true)} />
+						</section>
+
+						<section className={'detail-section'} ref={packagesRef} aria-labelledby="packages-title">
+							<div className={'section-row'}>
+								<h2 id="packages-title" className={'detail-title'}>
+									Packages ({shown.length})
+								</h2>
+								<div className={'section-tools'}>
+									<FilterTabs label="Filter by tier" options={tierTabs} value={tier} onChange={(next) => selectTier(next)} />
+									<SortMenu
+										options={packageSorts}
+										sort={sort.sort}
+										direction={sort.direction}
+										onSort={(nextSort, nextDirection) => {
+											setSort(packageSorts.find((o) => o.sort === nextSort && o.direction === nextDirection) ?? packageSorts[0]);
+											setVisible(PAGE_STEP);
+										}}
+									/>
+								</div>
+							</div>
+							{shown.length === 0 ? (
+								<p className={'comment-empty'}>No {prettyEnum(tier as string)} packages from this studio.</p>
+							) : (
+								<ul className={'studio-package-grid'}>
+									{shown.slice(0, visible).map((pkg) => (
+										<li key={pkg._id}>
+											<PopularPackageCard pkg={pkg} likePackageHandler={likePackageHandler} />
+										</li>
+									))}
+								</ul>
+							)}
+							{shown.length > visible && (
+								<div className={'show-more'}>
+									<button type="button" className={'button-secondary'} onClick={() => setVisible(visible + PAGE_STEP)}>
+										Show more ({shown.length - visible})
+									</button>
+								</div>
+							)}
+						</section>
+
+						<PortfolioWall packages={packages} studioName={name} />
+					</>
+				)}
+
+				<CommentsSection
+					refId={studio._id}
+					group={CommentGroup.MEMBER}
+					user={user}
+					formNote={isSelf ? 'This is your studio, so you can read comments here but not post them.' : undefined}
+				/>
+
+				{sameCity.length > 0 && (
+					<section className={'detail-section similar'} aria-labelledby="more-studios-title">
+						<h2 id="more-studios-title" className={'detail-title'}>
+							More studios in {city}
+						</h2>
+						<ul className={'more-studios'}>
+							{sameCity.map((item) => (
+								<li key={item._id}>
+									<StudioCard studio={item} likeMemberHandler={likeStudioHandler} />
+								</li>
+							))}
+						</ul>
+					</section>
+				)}
+			</div>
+		</div>
+	);
 };
 
-StudioDetail.defaultProps = {
-	initialInput: {
-		page: 1,
-		limit: 9,
-		search: {
-			memberId: '',
-		},
-	},
-	initialComment: {
-		page: 1,
-		limit: 5,
-		sort: 'createdAt',
-		direction: 'ASC',
-		search: {
-			commentRefId: '',
-		},
-	},
-};
-
-export default withLayoutBasic(StudioDetail);
-
+export default withLayoutFull(StudioDetail);

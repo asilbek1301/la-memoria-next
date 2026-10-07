@@ -124,7 +124,7 @@ Reuse these before writing anything new. Looks live in `scss/pc/general.scss`; e
 
 **Page heading**
 
-- An `eyebrow` label, either with a hairline (`.page-label` on /package) or alone (`.header-label` on /studio).
+- An `eyebrow` label (`.header-label` on /studio). /package has no visible label; its sentence is the headline.
 - The headline uses `text-headline-lg` / `-mobile` (or a large sentence, as on /package).
 - One muted intro line of 15px `$muted`.
 - An optional count on the right in `text-label-uppercase` with a mocha dot.
@@ -135,13 +135,20 @@ Reuse these before writing anything new. Looks live in `scss/pc/general.scss`; e
 - Buttons: `.button-primary` (main action, with a CSS arrow), `.button-secondary` (outline), `.button-link` (quiet text link; also used for "View studio →" with an arrow icon). Use one primary per area.
 - Icon buttons: `.like-btn` is a round white button with a heart; `.like-btn.outlined` adds a hairline border on ivory.
 - Package card: `PopularPackageCard` (tier tag, location and style, price, 2-line title, details line that underlines on card hover). Pass `likePackageHandler` to show the save button.
-- Studio tile: `libs/components/studio/StudioCard` (framed black-and-white arch portrait that turns to colour on hover, location, name, counts, "View studio").
+- Studio tile: `libs/components/studio/StudioCard` (framed arch portrait in full colour, location, name, counts, "View studio").
+- Studio photos everywhere use `@include portrait-light` and, on hover, `portrait-light-on`: a champagne arch line rises inside the photo, a light sweep crosses it and it zooms slightly. Use `$line: false` for square photos. Never grey them out.
 - Lists:
   - search: `.search-field` (pill)
   - sort: `SortMenu` from `libs/components/common/ListControls`, styled by `.filter-menu`
   - pagination: `ResultsPagination` ("Showing 1–9 of 12")
   - filter chips: `.filter-chip`, plus `.button-link.clear-all`
   - sheets and panels: MUI `Drawer` with `.filter-sheet` (bottom) or `.filter-panel` (side; full screen on phones)
+- Detail pages (`/package/detail`, `/studio/detail`): root class `detail-page` (plus `studio-detail` on the studio page) for the breadcrumb, `.detail-section` and `.detail-title`, outlined round `.icon-action` (like and share) and the comments.
+  - `PhotoLightbox` + `usePhotoLightbox` (`libs/components/common`): full-screen viewer with arrows, swipe, Esc and a focus trap; focus returns to the opener.
+  - `CommentsSection` (`libs/components/common`): comments for a package or a studio (`group` prop); `formNote` replaces the form, e.g. on your own studio.
+  - `StudioTiers`: Pearl / Gold / Diamond cards with count and "From ₩…", or a dashed "Not offered"; a card filters the list below.
+  - `PortfolioWall`: CSS-columns masonry of package photos linking to their packages; hidden under 3 photos.
+  - Follow is `.button-primary` without the arrow (a toggle, not a way forward). It becomes an outlined "Following".
 - States:
   - loading: MUI `Skeleton` in the real shape (`.skeleton.portrait`, `.arch-skeleton`)
   - empty: `.empty-box`, with a sentence that says what is missing and one or two buttons

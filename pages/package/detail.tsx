@@ -19,7 +19,8 @@ import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import PackageGallery from '../../libs/components/package/detail/PackageGallery';
 import BookingPanel from '../../libs/components/package/detail/BookingPanel';
 import StudioBlock from '../../libs/components/package/detail/StudioBlock';
-import PackageComments from '../../libs/components/package/detail/PackageComments';
+import CommentsSection from '../../libs/components/common/CommentsSection';
+import { CommentGroup } from '../../libs/enums/comment.enum';
 import PopularPackageCard from '../../libs/components/homepage/PopularPackageCard';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { formatHours } from '../../libs/components/package/packageSearch';
@@ -314,7 +315,7 @@ const PackageDetail: NextPage = () => {
 							</section>
 						)}
 
-						<PackageComments packageId={pkg._id} user={user} />
+						<CommentsSection refId={pkg._id} group={CommentGroup.PACKAGE} user={user} />
 					</div>
 
 					{device !== 'mobile' && <aside className={'detail-aside'}>{booking}</aside>}

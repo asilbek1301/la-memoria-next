@@ -83,6 +83,62 @@ $detail-gallery-height-mobile: 300px;
 $booking-panel-width: clamp(320px, 28vw, 380px); // narrower on tablets so the content keeps room
 $detail-column-gap: clamp(40px, 5vw, 80px);
 $fact-min-width: 190px; // a fact column never gets narrower: 4 across on desktop, 2x2 when space is short
+
+/** STUDIO PORTRAIT LIGHT: studio photos stay in full colour. On hover a thin champagne arch line rises
+    inside the photo (light filling a doorway), a soft light sweeps across, and the photo zooms a little. **/
+$portrait-line: rgba(201, 168, 124, 0.95);
+$portrait-sheen: linear-gradient(110deg, transparent 28%, rgba(255, 250, 240, 0.18) 42%, rgba(255, 250, 240, 0.55) 50%, rgba(255, 250, 240, 0.18) 58%, transparent 72%);
+$portrait-arch: 999px 999px 8px 8px;
+
+// $line-inset: where the arch line sits; $sheen-inset: keeps the light off a white frame; $line: false for square photos
+@mixin portrait-light($line-inset: 12px, $sheen-inset: 0, $radius: $portrait-arch, $line: true) {
+	position: relative;
+	overflow: hidden;
+	@if $line {
+		&::before {
+			content: '';
+			position: absolute;
+			inset: $line-inset;
+			z-index: 1;
+			border: 1px solid $portrait-line;
+			border-radius: $radius;
+			clip-path: inset(100% 0 0 0);
+			transition: clip-path 0.9s $ease-out;
+			pointer-events: none;
+		}
+	}
+	&::after {
+		content: '';
+		position: absolute;
+		inset: $sheen-inset;
+		z-index: 1;
+		border-radius: $radius;
+		background: $portrait-sheen;
+		transform: translateX(-130%);
+		// transition: transform 1.2s cubic-bezier(0.45, 0, 0.25, 1); // even speed, so the light visibly crosses the photo
+		pointer-events: none;
+	}
+	img {
+		transition: transform 0.9s $ease-out;
+	}
+}
+// $zoom: 1 for photos inside a white frame, so the photo never covers the frame
+@mixin portrait-light-on($zoom: 1.04) {
+	&::before {
+		clip-path: inset(0);
+	}
+	&::after {
+		transform: translateX(130%);
+	}
+	@if $zoom != 1 {
+		img {
+			transform: scale($zoom);
+		}
+	}
+}
+
+/** STUDIO DETAIL **/
+$studio-hero-portrait: 300px;
 $lightbox-bg: rgba(20, 14, 10, 0.96);
 $gallery-print-frame: 6px; // ivory border around a single photo
 $gallery-print-shadow: 0 30px 60px -28px rgba(20, 14, 10, 0.6);
