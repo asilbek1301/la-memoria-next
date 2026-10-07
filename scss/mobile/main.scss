@@ -477,4 +477,120 @@
       }
     }
   }
+
+  /** PACKAGE DETAIL LAYOUT (phone); looks are in pc/general.scss under .detail-page **/
+  #package-detail-page {
+    width: 100%;
+    padding: calc(#{$nav-height-mobile} + 16px) 0 120px; // room for the fixed booking bar
+    .container {
+      @include page-container-mobile;
+    }
+    .breadcrumb {
+      margin-bottom: 16px;
+    }
+    // phones show the lead photo; "View all photos" opens the swipeable viewer
+    .package-gallery {
+      height: $detail-gallery-height-mobile;
+      grid-template-columns: minmax(0, 1fr);
+      .gallery-tile:not(.lead) {
+        display: none;
+      }
+      .gallery-tile.lead {
+        border-radius: $radius-tile;
+      }
+      &.single {
+        border-radius: $radius-tile;
+        .gallery-tile {
+          padding-bottom: 36px; // room for the caption
+          box-sizing: border-box;
+        }
+        .gallery-tile img {
+          max-width: calc(100% - 32px);
+          max-height: calc(#{$detail-gallery-height-mobile} - 68px); // band minus caption room and margin
+          border-width: 4px;
+        }
+      }
+      .single-caption {
+        left: 12px;
+        bottom: 12px;
+        max-width: calc(100% - 24px);
+        font-size: 11px;
+      }
+      .gallery-all {
+        right: 12px;
+        bottom: 12px;
+      }
+    }
+    .skeleton.gallery-skeleton {
+      height: $detail-gallery-height-mobile;
+    }
+    .detail-layout {
+      margin-top: 28px;
+    }
+    .detail-head {
+      flex-direction: column;
+      gap: 20px;
+    }
+    .head-text {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .head-title {
+      @include text-headline-lg-mobile;
+    }
+    .fact-list {
+      margin-top: 32px;
+      padding: 20px 0;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      row-gap: 24px;
+    }
+    .fact {
+      padding: 2px 14px;
+    }
+    .fact-value {
+      font-size: 20px;
+    }
+    .skeleton.facts-skeleton {
+      height: 160px;
+    }
+    .detail-section {
+      margin-top: 40px;
+      padding-top: 36px;
+    }
+    .fact-list + .detail-section {
+      padding-top: 0;
+    }
+    .studio-block {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 20px;
+      .block-actions {
+        grid-column: 1 / -1;
+        justify-content: space-between;
+      }
+    }
+    .block-name {
+      font-size: 24px;
+    }
+    .similar {
+      margin-top: 64px;
+      padding-top: 0;
+    }
+    .similar-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+      .popular-card .card-title {
+        height: auto;
+        max-height: 2lh;
+      }
+    }
+    .booking-bar {
+      padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
+    }
+    .detail-missing {
+      margin-top: 32px;
+    }
+  }
 }

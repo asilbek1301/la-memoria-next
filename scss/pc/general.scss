@@ -253,8 +253,10 @@
 .home-page,
 .package-page,
 .studio-page,
+.detail-page,
 .filter-panel,
 .filter-sheet,
+.booking-sheet,
 .footer-container {
 	:where(p, span, a, li, ul, ol, h1, h2, h3, h4, label, small, strong, em, time, nav, header, article, section) {
 		font-family: inherit;
@@ -662,9 +664,11 @@
 .home-page,
 .package-page,
 .studio-page,
+.detail-page,
 .filter-panel,
 .filter-sheet,
-.filter-menu {
+.filter-menu,
+.booking-sheet {
 	--font-heading: var(--font-home-heading);
 }
 
@@ -827,7 +831,8 @@
 /** HOMEPAGE SECTION LOOKS (pages/index.tsx; the package list reuses the cards, tags and states); layout is in pc/homepage/homepage.scss and mobile/main.scss **/
 .home-page,
 .package-page,
-.studio-page {
+.studio-page,
+.detail-page {
 	background: $ivory;
 	color: $espresso;
 	font-family: $font;
@@ -1499,7 +1504,8 @@
 }
 .home-page,
 .package-page,
-.studio-page {
+.studio-page,
+.detail-page {
 	.filter-tabs {
 		gap: 8px;
 		button {
@@ -1559,7 +1565,8 @@
 /** accessibility: honour reduced motion (not a breakpoint) **/
 /** PACKAGES PAGE LOOKS (pages/package/index.tsx, libs/components/package/*); layout is in pc/package/package.scss and mobile/main.scss **/
 .package-page,
-.studio-page {
+.studio-page,
+.detail-page {
 	background: $ivory;
 	color: $espresso;
 	font-family: $font;
@@ -2244,6 +2251,754 @@
 	}
 }
 
+/** PACKAGE DETAIL LOOKS (pages/package/detail.tsx, libs/components/package/detail/*); layout is in pc/package/detail.scss and mobile/main.scss **/
+.detail-page {
+	.breadcrumb ol {
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		list-style: none;
+		li {
+			color: $muted;
+			font-size: 13px;
+			& + li::before {
+				content: '/';
+				margin-right: 8px;
+				color: $line;
+			}
+			&[aria-current='page'] {
+				color: $espresso;
+			}
+		}
+		a {
+			color: $muted;
+			text-decoration: none;
+			transition: color 0.3s ease;
+			@include focus-ring;
+			&:hover {
+				color: $espresso;
+			}
+		}
+	}
+
+	/** gallery mosaic **/
+	.package-gallery {
+		position: relative;
+		display: grid;
+		gap: 12px;
+		&.empty {
+			border-radius: $radius-card;
+			background: $sand;
+		}
+	}
+	.gallery-tile {
+		padding: 0;
+		overflow: hidden;
+		border: none;
+		border-radius: $radius-tile;
+		background: $sand;
+		cursor: zoom-in;
+		@include focus-ring;
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			transition: transform 0.8s $ease-out;
+		}
+		&:hover img {
+			transform: scale(1.03);
+		}
+	}
+	// one photo: the whole print in an ivory frame, centred on a blurred copy of itself
+	.package-gallery.single {
+		overflow: hidden;
+		place-items: center;
+		border-radius: $radius-card;
+		background: $espresso;
+		&:hover .single-backdrop {
+			transform: scale(1.18);
+		}
+		.gallery-tile {
+			position: relative;
+			z-index: 1;
+			width: 100%;
+			height: 100%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			overflow: visible;
+			border-radius: 0;
+			background: transparent;
+			img {
+				width: auto;
+				height: auto;
+				max-width: 100%;
+				box-sizing: border-box;
+				border: $gallery-print-frame solid $ivory;
+				border-radius: $radius-tile;
+				box-shadow: $gallery-print-shadow;
+				object-fit: contain;
+			}
+			&:hover img {
+				transform: scale(1.015);
+			}
+		}
+	}
+	.single-backdrop {
+		position: absolute;
+		inset: -48px;
+		background-position: center;
+		background-size: cover;
+		filter: blur(40px) saturate(1.15) brightness(0.78);
+		transform: scale(1.1);
+		transition: transform 1.6s $ease-out;
+	}
+	.single-caption {
+		position: absolute;
+		left: 20px;
+		bottom: 20px;
+		z-index: 2;
+		max-width: calc(100% - 40px);
+		margin: 0;
+		padding: 8px 14px;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		box-sizing: border-box;
+		border-radius: $radius-pill;
+		background: rgba(20, 14, 10, 0.42);
+		-webkit-backdrop-filter: blur(8px);
+		backdrop-filter: blur(8px);
+		color: $ivory;
+		font-size: 12px;
+		letter-spacing: 0.06em;
+		svg {
+			flex-shrink: 0;
+			font-size: 16px;
+		}
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+	.gallery-all {
+		@include text-label-uppercase;
+		position: absolute;
+		right: 20px;
+		bottom: 20px;
+		z-index: 1;
+		height: 44px;
+		padding: 0 18px;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		border: none;
+		border-radius: $radius-pill;
+		background: rgba(253, 249, 243, 0.94);
+		color: $espresso;
+		cursor: pointer;
+		box-shadow: $soft-shadow;
+		@include focus-ring;
+		svg {
+			font-size: 18px;
+		}
+	}
+
+	/** title block **/
+	.detail-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 32px;
+	}
+	.head-meta {
+		@include eyebrow;
+		margin: 0;
+	}
+	.head-title {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.02em;
+	}
+	.head-sub {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 18px;
+	}
+	.head-studio {
+		color: $muted;
+		font-size: 14px;
+		a {
+			color: $espresso;
+			text-decoration: none;
+			border-bottom: 1px solid $line;
+			transition: border-color 0.3s ease;
+			@include focus-ring;
+			&:hover {
+				border-color: $espresso;
+			}
+		}
+	}
+	.head-actions {
+		flex-shrink: 0;
+		display: flex;
+		gap: 10px;
+	}
+	.icon-action {
+		min-width: 48px;
+		height: 48px;
+		padding: 0 14px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: transparent;
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+		cursor: pointer;
+		transition: border-color 0.3s ease, color 0.3s ease;
+		@include focus-ring;
+		svg {
+			font-size: 20px;
+		}
+		&:hover {
+			border-color: $espresso;
+		}
+		&.liked {
+			color: $mocha;
+		}
+	}
+
+	/** key facts **/
+	.fact-list {
+		margin: 0;
+		padding: 0;
+		display: grid;
+		list-style: none;
+		border-top: 1px solid $line;
+		border-bottom: 1px solid $line;
+	}
+	// each fact carries its own left rule, so the dividers stay right however the grid wraps
+	.fact {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		border-left: 1px solid $line;
+	}
+	.fact-icon {
+		margin-bottom: 6px;
+		color: $mocha;
+		svg {
+			font-size: 24px;
+		}
+	}
+	.fact-label {
+		@include eyebrow;
+	}
+	.fact-value {
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 22px;
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+	.fact-note {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+		color: $muted;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+
+	/** sections **/
+	.detail-section {
+		border-top: 1px solid $line;
+	}
+	// the facts already end on a hairline: no second line before "What's included"
+	.fact-list + .detail-section {
+		border-top: none;
+	}
+	.detail-title {
+		@include text-headline-sm;
+		margin: 0 0 24px;
+		color: $espresso;
+		font-weight: 400;
+	}
+	.include-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.include-item {
+		padding: 16px 0;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		border-bottom: 1px solid $line;
+		svg {
+			font-size: 22px;
+		}
+		&.yes {
+			color: $espresso;
+		}
+		&.no {
+			color: $muted;
+		}
+	}
+	.include-name {
+		font-size: 16px;
+	}
+	.include-state {
+		@include text-label-uppercase;
+		margin-left: auto;
+	}
+	.about-text {
+		max-width: 640px;
+		margin: 0;
+		color: $espresso;
+		font-size: 16px;
+		line-height: 1.8;
+		white-space: pre-line;
+		&.clamped {
+			display: -webkit-box;
+			-webkit-line-clamp: 6;
+			-webkit-box-orient: vertical;
+			overflow: hidden;
+		}
+		+ .button-link {
+			margin-top: 12px;
+		}
+	}
+
+	/** the studio **/
+	.studio-block {
+		align-items: center;
+		&:hover .block-portrait img {
+			filter: grayscale(0);
+		}
+	}
+	.block-portrait {
+		display: block;
+		aspect-ratio: 3 / 4;
+		padding: 6px;
+		box-sizing: border-box;
+		border-radius: 999px 999px $radius-tile $radius-tile;
+		background: #ffffff;
+		box-shadow: $studio-frame-shadow;
+		img,
+		.arch-initial {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			border-radius: 999px 999px 10px 10px;
+			filter: grayscale(1);
+			transition: filter 0.6s ease;
+		}
+		.arch-initial {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: $sand;
+			color: $mocha;
+			font-family: $font-heading;
+			font-size: 40px;
+			filter: none;
+		}
+	}
+	.block-location {
+		@include eyebrow;
+		margin: 0;
+	}
+	.block-name {
+		margin: 6px 0 0;
+		font-family: $font-heading;
+		font-size: 28px;
+		font-weight: 400;
+		a {
+			color: $espresso;
+			text-decoration: none;
+			white-space: normal;
+			@include focus-ring;
+		}
+	}
+	.block-stats {
+		margin: 6px 0 0;
+		color: $muted;
+		font-size: 13px;
+	}
+	.block-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 24px;
+	}
+	.follow-btn.following {
+		background: $espresso;
+		color: $ivory;
+	}
+
+	/** comments **/
+	.comment-form textarea {
+		width: 100%;
+		padding: 16px;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-tile;
+		background: #ffffff;
+		color: $espresso;
+		font-family: $font;
+		font-size: 15px;
+		line-height: 1.6;
+		resize: vertical;
+		&:focus {
+			border-color: $espresso;
+			outline: none;
+		}
+	}
+	.comment-form-foot {
+		margin-top: 12px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+	}
+	.field-count {
+		color: $muted;
+		font-size: 12px;
+	}
+	.comment-login,
+	.comment-empty {
+		margin: 0;
+		color: $muted;
+		font-size: 15px;
+	}
+	.comment-login + .comment-empty {
+		margin-top: 16px;
+	}
+	.comment-list {
+		margin: 24px 0 0;
+		padding: 0;
+		list-style: none;
+	}
+	.comment {
+		padding: 24px 0;
+		display: flex;
+		gap: 16px;
+		border-top: 1px solid $line;
+	}
+	.comment-avatar {
+		width: 44px;
+		height: 44px;
+		flex-shrink: 0;
+		border-radius: 50%;
+		background: $sand;
+		object-fit: cover;
+	}
+	.comment-body {
+		flex: 1;
+		min-width: 0;
+	}
+	.comment-meta {
+		margin: 0;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 4px 12px;
+		time {
+			color: $muted;
+			font-size: 12px;
+		}
+	}
+	.comment-author {
+		color: $espresso;
+		font-size: 15px;
+		font-weight: 500;
+		text-decoration: none;
+		@include focus-ring;
+	}
+	.comment-text {
+		margin: 8px 0 0;
+		color: $espresso;
+		font-size: 15px;
+		line-height: 1.7;
+		overflow-wrap: anywhere;
+	}
+
+	/** similar packages **/
+	.similar {
+		border-top: none;
+	}
+	.similar-grid {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
+		.popular-card .card-title {
+			@include text-title-editorial;
+			height: 2lh;
+		}
+	}
+
+	/** phone booking bar **/
+	.booking-bar {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 90;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		border-top: 1px solid $line;
+		background: rgba(253, 249, 243, 0.97);
+		-webkit-backdrop-filter: blur(10px);
+		backdrop-filter: blur(10px);
+		.bar-price {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+		}
+	}
+
+	/** states **/
+	.skeleton.gallery-skeleton,
+	.skeleton.panel-skeleton {
+		margin: 0;
+		border-radius: $radius-card;
+	}
+	.skeleton.facts-skeleton {
+		margin-top: 32px;
+		border-radius: $radius-tile;
+	}
+}
+
+/** booking form: in the sticky side panel and in the phone sheet (a portal, so it is not nested) **/
+.booking-panel {
+	color: $espresso;
+	font-family: $font;
+	.booking-price {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 12px;
+		.price {
+			color: $espresso;
+			font-family: $font-heading;
+			font-size: 34px;
+			white-space: nowrap;
+		}
+	}
+	.booking-form {
+		margin-top: 24px;
+		display: flex;
+		flex-direction: column;
+		gap: 18px;
+	}
+	.field {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.field-label {
+		@include text-label-uppercase;
+		color: $muted;
+	}
+	.field-optional {
+		letter-spacing: 0.04em;
+		text-transform: none;
+	}
+	input,
+	textarea {
+		width: 100%;
+		padding: 13px 16px;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-tile;
+		background: $ivory;
+		color: $espresso;
+		font-family: $font;
+		font-size: 15px;
+		&:focus {
+			border-color: $espresso;
+			outline: none;
+		}
+		&:disabled {
+			opacity: 0.55;
+		}
+	}
+	textarea {
+		line-height: 1.6;
+		resize: vertical;
+	}
+	.field-count {
+		align-self: flex-end;
+		color: $muted;
+		font-size: 12px;
+	}
+	.booking-btn {
+		width: 100%;
+	}
+	.booking-hint {
+		margin: 0;
+		color: $muted;
+		font-size: 13px;
+		line-height: 1.5;
+		text-align: center;
+	}
+	.booking-sent {
+		margin-top: 24px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10px;
+		text-align: center;
+		> svg {
+			color: $mocha;
+			font-size: 40px;
+		}
+	}
+	.sent-title {
+		margin: 0;
+		font-family: $font-heading;
+		font-size: 22px;
+	}
+	.sent-desc {
+		max-width: 280px;
+		margin: 0;
+		color: $muted;
+		font-size: 14px;
+		line-height: 1.6;
+	}
+}
+.booking-tier {
+	@include text-label-uppercase;
+	color: $muted;
+}
+.detail-page .booking-bar .price {
+	font-size: 22px;
+}
+
+.booking-sheet.MuiPaper-root {
+	max-height: 92vh;
+	padding: 12px 24px calc(24px + env(safe-area-inset-bottom));
+	box-sizing: border-box;
+	border-radius: $radius-card $radius-card 0 0;
+	background: $ivory;
+	.sheet-head {
+		margin-bottom: 16px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.sheet-title {
+		@include text-label-uppercase;
+		margin: 0;
+		color: $muted;
+	}
+	.icon-btn {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: $espresso;
+		cursor: pointer;
+		@include focus-ring;
+	}
+}
+
+/** full-screen photo viewer **/
+.lightbox.MuiPaper-root {
+	background: $lightbox-bg;
+	.lightbox-stage {
+		position: relative;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		touch-action: pan-y;
+	}
+	.lightbox-image {
+		max-width: 88vw;
+		max-height: 82vh;
+		display: block;
+		border-radius: $radius-tile;
+		object-fit: contain;
+	}
+	.lightbox-top {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		padding: 20px 24px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
+	.lightbox-count {
+		margin: 0;
+		color: $ivory;
+		font-family: $font;
+		font-size: 13px;
+		letter-spacing: 0.14em;
+	}
+	.lightbox-btn {
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: rgba(253, 249, 243, 0.12);
+		color: $ivory;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+		&:hover {
+			background: rgba(253, 249, 243, 0.22);
+		}
+		&:focus-visible {
+			outline: 2px solid $ivory;
+			outline-offset: 2px;
+		}
+		&.prev,
+		&.next {
+			position: absolute;
+			top: 50%;
+			transform: translateY(-50%);
+		}
+		&.prev {
+			left: 24px;
+		}
+		&.next {
+			right: 24px;
+		}
+	}
+}
+
 /** MUI portals opened from the package page (rendered outside #pc-wrap / #mobile-wrap) **/
 .filter-menu.MuiPaper-root {
 	margin-top: 10px;
@@ -2580,9 +3335,21 @@
 	}
 	.package-page,
 	.studio-page,
+	.detail-page,
 	.home-page {
 		.popular-card .details-text {
 			transition: none;
+		}
+	}
+	.detail-page {
+		.gallery-tile img,
+		.block-portrait img,
+		.single-backdrop {
+			transition: none;
+		}
+		.gallery-tile:hover img,
+		.package-gallery.single:hover .single-backdrop {
+			transform: none;
 		}
 	}
 	.studio-page {
@@ -2598,7 +3365,8 @@
 		}
 	}
 	.package-page,
-	.studio-page {
+	.studio-page,
+	.detail-page {
 		.sentence-bar,
 		.sentence-select .select-chevron,
 		.sentence-select .select-value {
@@ -2607,7 +3375,8 @@
 	}
 	.home-page,
 	.package-page,
-	.studio-page {
+	.studio-page,
+	.detail-page {
 		.trend-card,
 		.popular-card,
 		.studio-card,

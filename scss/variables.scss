@@ -77,6 +77,17 @@ $sticky-bar-height: 64px;
 $studio-frame-shadow: 0 12px 32px -20px rgba(62, 44, 35, 0.4); // white frame around the arch portraits
 $studio-spotlight-portrait: 380px;
 
+/** PACKAGE DETAIL **/
+$detail-gallery-height: 560px;
+$detail-gallery-height-mobile: 300px;
+$booking-panel-width: clamp(320px, 28vw, 380px); // narrower on tablets so the content keeps room
+$detail-column-gap: clamp(40px, 5vw, 80px);
+$fact-min-width: 190px; // a fact column never gets narrower: 4 across on desktop, 2x2 when space is short
+$lightbox-bg: rgba(20, 14, 10, 0.96);
+$gallery-print-frame: 6px; // ivory border around a single photo
+$gallery-print-shadow: 0 30px 60px -28px rgba(20, 14, 10, 0.6);
+$gallery-print-inset: 64px; // space between the single photo and the band edges
+
 /** SHAPES (Stitch "remaked sample"): rounded boxes, pill buttons and tags **/
 $radius-card: 24px; // boxes: hero photo, feature card, philosophy, tier rows, empty states
 $radius-tile: 16px; // photos inside cards, search panel, panels on photos

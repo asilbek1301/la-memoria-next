@@ -102,3 +102,51 @@ yarn install
 3. Put the desktop layout under `#pc-wrap` in the page's pc file, and the phone layout under `#mobile-wrap` in `scss/mobile/main.scss`.
 4. Use the variables and mixins. Respect `prefers-reduced-motion`. Keep text at 11px or larger.
 5. Run `yarn tsc --noEmit`, `yarn lint` and `yarn build`.
+
+## Design system (homepage, /package, /studio)
+
+Reuse these before writing anything new. Looks live in `scss/pc/general.scss`; each page adds only its layout.
+
+**Page shell**
+
+- Use `withLayoutFull` (shared header, chat and footer, with no banner). The page root gets an `id` for layout and a class for looks, e.g. `id="package-list-page" className="package-page"`.
+- To reuse the shared looks, add the page's root class next to `.package-page` / `.studio-page` in the scopes of `pc/general.scss`:
+  - the font-inherit list
+  - the `--font-heading` override, so headings use Public Sans like the homepage
+  - the section looks, the rounded block and reduced motion
+- All content sits in `.container` with `@include page-container` (1300px). Section rhythm is `$section-space` and `$section-space-mobile`. The fixed navbar is `$nav-height` (80px) and `$nav-height-mobile` (64px), so page headers start at `calc(#{$nav-height} + 64px)`.
+
+**Tokens**
+
+- Colours: ivory page `$ivory`; tinted boxes `$ivory-deep`; placeholders `$sand`; hairlines `$line`; text `$espresso`; secondary text `$muted`; accent `$mocha`; warm detail `$champagne`.
+- Shapes: `$radius-card` (24px) for boxes, `$radius-tile` (16px) for photos, `$radius-menu` (12px) for menus, and `$radius-pill` for buttons, chips and search fields. The studio portrait is an arch: `border-radius: 999px 999px $radius-tile $radius-tile`.
+- Motion: `$ease-out`; photos zoom about 1.03 and cards lift 4px on hover; reveals go through `useReveal` (visible by default). Always add a `prefers-reduced-motion` rule.
+
+**Page heading**
+
+- An `eyebrow` label, either with a hairline (`.page-label` on /package) or alone (`.header-label` on /studio).
+- The headline uses `text-headline-lg` / `-mobile` (or a large sentence, as on /package).
+- One muted intro line of 15px `$muted`.
+- An optional count on the right in `text-label-uppercase` with a mocha dot.
+- Divider: hairline, LM monogram (`/img/logo/monogram.svg`), hairline (`.monogram-rule`).
+
+**Components**
+
+- Buttons: `.button-primary` (main action, with a CSS arrow), `.button-secondary` (outline), `.button-link` (quiet text link; also used for "View studio →" with an arrow icon). Use one primary per area.
+- Icon buttons: `.like-btn` is a round white button with a heart; `.like-btn.outlined` adds a hairline border on ivory.
+- Package card: `PopularPackageCard` (tier tag, location and style, price, 2-line title, details line that underlines on card hover). Pass `likePackageHandler` to show the save button.
+- Studio tile: `libs/components/studio/StudioCard` (framed black-and-white arch portrait that turns to colour on hover, location, name, counts, "View studio").
+- Lists:
+  - search: `.search-field` (pill)
+  - sort: `SortMenu` from `libs/components/common/ListControls`, styled by `.filter-menu`
+  - pagination: `ResultsPagination` ("Showing 1–9 of 12")
+  - filter chips: `.filter-chip`, plus `.button-link.clear-all`
+  - sheets and panels: MUI `Drawer` with `.filter-sheet` (bottom) or `.filter-panel` (side; full screen on phones)
+- States:
+  - loading: MUI `Skeleton` in the real shape (`.skeleton.portrait`, `.arch-skeleton`)
+  - empty: `.empty-box`, with a sentence that says what is missing and one or two buttons
+- Data rules:
+  - URL state lives in `?input=<JSON>`, and the UI is drawn from it, so pasted links work
+  - real backend fields only; prices through `formatKRW`
+  - tiers are Pearl, Gold and Diamond
+  - show counts only when they are above 0
