@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import { ThemeProvider, createTheme, useTheme } from '@mui/material/styles';
 import MenuList from '../admin/AdminMenuList';
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -20,10 +21,19 @@ import { REACT_APP_API_URL } from '../../config';
 import { MemberType } from '../../enums/member.enum';
 const drawerWidth = 280;
 
+// the admin area uses the brand colours instead of the template red; mirrors $espresso, $mocha and $ivory in scss/variables.scss
+const brandPalette = {
+	primary: { main: '#3e2c23', contrastText: '#fdf9f3' },
+	secondary: { main: '#6b4e3d', contrastText: '#fdf9f3' },
+	background: { default: '#fdf9f3', paper: '#ffffff' },
+};
+
 const withAdminLayout = (Component: ComponentType) => {
-	return (props: object) => {
+	const AdminLayout = (props: object) => {
 		const router = useRouter();
 		const user = useReactiveVar(userVar);
+		const outerTheme = useTheme();
+		const adminTheme = React.useMemo(() => createTheme(outerTheme, { palette: brandPalette }), [outerTheme]);
 		const [] = useState(false);
 		const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 		const [openMenu] = useState(false);
@@ -61,6 +71,7 @@ const withAdminLayout = (Component: ComponentType) => {
 		if (!user || user?.memberType !== MemberType.ADMIN) return null;
 
 		return (
+			<ThemeProvider theme={adminTheme}>
 			<main id="pc-wrap" className="admin">
 				<Box component={'div'} sx={{ display: 'flex' }}>
 					<AppBar
@@ -177,8 +188,10 @@ const withAdminLayout = (Component: ComponentType) => {
 					</Box>
 				</Box>
 			</main>
+			</ThemeProvider>
 		);
 	};
+	return AdminLayout;
 };
 
 export default withAdminLayout;

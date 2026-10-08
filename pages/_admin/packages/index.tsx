@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { prettyEnum } from '../../../libs/utils';
 import type { NextPage } from 'next';
 import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
 import { Box, List, ListItem, Stack } from '@mui/material';
@@ -144,7 +145,6 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 
 	const updatePackageHandler = async (updateData: PackageUpdate) => {
 		try {
-			console.log('+updateData: ', updateData);
 			await updatePackageByAdmin({
 				variables: {
 					input: updateData,
@@ -162,7 +162,7 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 	return (
 		<Box component={'div'} className={'content'}>
 			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Package List
+				Packages
 			</Typography>
 			<Box component={'div'} className={'table-wrap'}>
 				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
@@ -202,18 +202,18 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 									value="DELETE"
 									className={value === 'DELETE' ? 'li on' : 'li'}
 								>
-									Delete
+									Deleted
 								</ListItem>
 							</List>
 							<Divider />
 							<Stack className={'search-area'} sx={{ m: '24px' }}>
-								<Select sx={{ width: '160px', mr: '20px' }} value={searchType}>
+								<Select sx={{ width: '160px', mr: '20px' }} value={searchType} inputProps={{ 'aria-label': 'Filter by location' }}>
 									<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
-										ALL
+										All
 									</MenuItem>
 									{Object.values(PackageLocation).map((location: string) => (
 										<MenuItem value={location} onClick={() => searchTypeHandler(location)} key={location}>
-											{location}
+											{prettyEnum(location)}
 										</MenuItem>
 									))}
 								</Select>

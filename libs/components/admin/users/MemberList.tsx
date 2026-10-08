@@ -1,4 +1,6 @@
 import React from 'react';
+import { memberHref, memberTypeLabel, statusBadge, statusLabel } from '../adminLabels';
+import { memberPhoto } from '../../studio/studioSearch';
 import Link from 'next/link';
 import {
 	TableCell,
@@ -45,49 +47,49 @@ const headCells: readonly HeadCell[] = [
 		id: 'id',
 		numeric: true,
 		disablePadding: false,
-		label: 'MB ID',
+		label: 'Member ID',
 	},
 	{
 		id: 'nickname',
 		numeric: true,
 		disablePadding: false,
-		label: 'NICK NAME',
+		label: 'Nickname',
 	},
 	{
 		id: 'fullname',
 		numeric: false,
 		disablePadding: false,
-		label: 'FULL NAME',
+		label: 'Full name',
 	},
 	{
 		id: 'phone',
 		numeric: true,
 		disablePadding: false,
-		label: 'PHONE NUM',
+		label: 'Phone',
 	},
 	{
 		id: 'type',
 		numeric: false,
 		disablePadding: false,
-		label: 'MEMBER TYPE',
+		label: 'Type',
 	},
 	{
 		id: 'warning',
 		numeric: false,
 		disablePadding: false,
-		label: 'WARNING',
+		label: 'Warnings',
 	},
 	{
 		id: 'block',
 		numeric: false,
 		disablePadding: false,
-		label: 'BLOCK CRIMES',
+		label: 'Blocks',
 	},
 	{
 		id: 'state',
 		numeric: false,
 		disablePadding: false,
-		label: 'STATE',
+		label: 'Status',
 	},
 ];
 
@@ -140,28 +142,27 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 						{members.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>data not found!</span>
+									<span className={'no-data'}>No members here.</span>
 								</TableCell>
 							</TableRow>
 						)}
 
 						{members.length !== 0 &&
 							members.map((member: Member, index: number) => {
-								const member_image = member.memberImage
-									? `${REACT_APP_API_URL}/${member.memberImage}`
-									: '/img/profile/defaultUser.svg';
+								// the login placeholder path is not an uploaded photo
+								const member_image = memberPhoto(member.memberImage) || '/img/profile/defaultUser.svg';
 								return (
 									<TableRow hover key={member?._id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
 										<TableCell align="left">{member._id}</TableCell>
 
 										<TableCell align="left" className={'name'}>
 											<Stack direction={'row'}>
-												<Link href={`/member?memberId=${member._id}`}>
+												<Link href={memberHref(member)}>
 													<div>
-														<Avatar alt="Remy Sharp" src={member_image} sx={{ ml: '2px', mr: '10px' }} />
+														<Avatar alt="" src={member_image} sx={{ ml: '2px', mr: '10px' }} />
 													</div>
 												</Link>
-												<Link href={`/member?memberId=${member._id}`}>
+												<Link href={memberHref(member)}>
 													<div>{member.memberNick}</div>
 												</Link>
 											</Stack>
@@ -172,7 +173,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 
 										<TableCell align="center">
 											<Button onClick={(e: any) => menuIconClickHandler(e, index)} className={'badge success'}>
-												{member.memberType}
+												{memberTypeLabel(member.memberType)}
 											</Button>
 
 											<Menu
@@ -194,7 +195,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 															key={type}
 														>
 															<Typography variant={'subtitle1'} component={'span'}>
-																{type}
+																{memberTypeLabel(type)}
 															</Typography>
 														</MenuItem>
 													))}
@@ -204,8 +205,8 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 										<TableCell align="center">{member.memberWarnings}</TableCell>
 										<TableCell align="center">{member.memberBlocks}</TableCell>
 										<TableCell align="center">
-											<Button onClick={(e: any) => menuIconClickHandler(e, member._id)} className={'badge success'}>
-												{member.memberStatus}
+											<Button onClick={(e: any) => menuIconClickHandler(e, member._id)} className={statusBadge(member.memberStatus)}>
+												{statusLabel(member.memberStatus)}
 											</Button>
 
 											<Menu
@@ -227,7 +228,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 															key={status}
 														>
 															<Typography variant={'subtitle1'} component={'span'}>
-																{status}
+																{statusLabel(status)}
 															</Typography>
 														</MenuItem>
 													))}

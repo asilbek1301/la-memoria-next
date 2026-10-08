@@ -19,17 +19,20 @@ const SeeAll = ({ category, label }: { category: string; label: string }) => (
 );
 
 /** short previews of each part of My Page; empty parts are left out **/
-const MyOverview = ({ user, isStudio, onChanged }: { user: any; isStudio: boolean; onChanged: () => void }) => {
+const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; onChanged: () => void }) => {
+	const { user, isStudio, isAdmin = false, onChanged } = props;
 	/** APOLLO REQUESTS **/
 
 	const reservations = useQuery(isStudio ? GET_STUDIO_RESERVATIONS : GET_MY_RESERVATIONS, {
 		fetchPolicy: 'network-only',
 		variables: { input: { page: 1, limit: 2, sort: 'createdAt', direction: Direction.DESC, search: {} } },
+		// the admin has no reservations of its own; the backend refuses both queries for ADMIN
+		skip: isAdmin,
 	});
 	const visited = useQuery(GET_VISITED, {
 		fetchPolicy: 'network-only',
 		variables: { input: { page: 1, limit: 4 } },
-		skip: isStudio,
+		skip: isStudio || isAdmin,
 	});
 	const articles = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'network-only',
@@ -43,6 +46,21 @@ const MyOverview = ({ user, isStudio, onChanged }: { user: any; isStudio: boolea
 	const postList: BoardArticle[] = articles.data?.getBoardArticles?.list ?? [];
 	const loading = reservations.loading || visited.loading || articles.loading;
 	const nothing = !loading && !resList.length && !visitedList.length && !postList.length;
+
+	// the admin's work happens in the admin area; My Page only keeps its posts and profile
+	const adminNote = isAdmin && (
+		<aside className={'admin-note'}>
+			<div>
+				<p className={'note-title'}>You are signed in as the admin.</p>
+				<p className={'note-text'}>Members, packages, reservations, posts and messages are managed in the admin area.</p>
+			</div>
+			<Link href={'/_admin'} className={'button-primary'}>
+				Open the admin area
+			</Link>
+		</aside>
+	);
+
+	if (nothing && isAdmin) return <div className={'my-overview'}>{adminNote}</div>;
 
 	if (nothing) {
 		return (
@@ -61,6 +79,7 @@ const MyOverview = ({ user, isStudio, onChanged }: { user: any; isStudio: boolea
 
 	return (
 		<div className={'my-overview'}>
+			{adminNote}
 			{resList.length > 0 && (
 				<section className={'my-section'} aria-labelledby="ov-res-title">
 					<div className={'section-row'}>

@@ -1,4 +1,6 @@
 import React from 'react';
+import { statusBadge, statusLabel } from '../adminLabels';
+import { formatKRW, prettyEnum } from '../../../utils';
 import Link from 'next/link';
 import {
 	TableCell,
@@ -44,43 +46,43 @@ const headCells: readonly HeadCell[] = [
 		id: 'id',
 		numeric: true,
 		disablePadding: false,
-		label: 'MB ID',
+		label: 'Package ID',
 	},
 	{
 		id: 'title',
 		numeric: true,
 		disablePadding: false,
-		label: 'TITLE',
+		label: 'Title',
 	},
 	{
 		id: 'price',
 		numeric: false,
 		disablePadding: false,
-		label: 'PRICE',
+		label: 'Price',
 	},
 	{
 		id: 'studio',
 		numeric: false,
 		disablePadding: false,
-		label: 'STUDIO',
+		label: 'Studio',
 	},
 	{
 		id: 'location',
 		numeric: false,
 		disablePadding: false,
-		label: 'LOCATION',
+		label: 'Location',
 	},
 	{
 		id: 'type',
 		numeric: false,
 		disablePadding: false,
-		label: 'TYPE',
+		label: 'Tier',
 	},
 	{
 		id: 'status',
 		numeric: false,
 		disablePadding: false,
-		label: 'STATUS',
+		label: 'Status',
 	},
 ];
 
@@ -141,7 +143,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 						{packages.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>data not found!</span>
+									<span className={'no-data'}>No packages here.</span>
 								</TableCell>
 							</TableRow>
 						)}
@@ -158,7 +160,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 												<Stack direction={'row'}>
 													<Link href={`/package/detail?id=${pkg?._id}`}>
 														<div>
-															<Avatar alt="Remy Sharp" src={packageImage} sx={{ ml: '2px', mr: '10px' }} />
+															<Avatar alt="" src={packageImage} sx={{ ml: '2px', mr: '10px' }} />
 														</div>
 													</Link>
 													<Link href={`/package/detail?id=${pkg?._id}`}>
@@ -168,17 +170,17 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 											) : (
 												<Stack direction={'row'}>
 													<div>
-														<Avatar alt="Remy Sharp" src={packageImage} sx={{ ml: '2px', mr: '10px' }} />
+														<Avatar alt="" src={packageImage} sx={{ ml: '2px', mr: '10px' }} />
 													</div>
 													<div style={{ marginTop: "10px" }}>{pkg.packageTitle}</div>
 												</Stack>
 											)}
 
 										</TableCell>
-										<TableCell align="center">{pkg.packagePrice}</TableCell>
+										<TableCell align="center">{formatKRW(pkg.packagePrice)}</TableCell>
 										<TableCell align="center">{pkg.memberData?.memberNick}</TableCell>
-										<TableCell align="center">{pkg.packageLocation}</TableCell>
-										<TableCell align="center">{pkg.packageType}</TableCell>
+										<TableCell align="center">{prettyEnum(pkg.packageLocation)}</TableCell>
+										<TableCell align="center">{prettyEnum(pkg.packageType)}</TableCell>
 										<TableCell align="center">
 											{pkg.packageStatus === PackageStatus.DELETE && (
 												<Button
@@ -194,9 +196,9 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 												<>
 													<Button
 														onClick={(e: any) => menuIconClickHandler(e, index)}
-														className={pkg.packageStatus === PackageStatus.ACTIVE ? 'badge success' : 'badge warning'}
+														className={statusBadge(pkg.packageStatus)}
 													>
-														{pkg.packageStatus}
+														{statusLabel(pkg.packageStatus)}
 													</Button>
 
 													<Menu
@@ -218,7 +220,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 																	key={status}
 																>
 																	<Typography variant={'subtitle1'} component={'span'}>
-																		{status}
+																		{statusLabel(status)}
 																	</Typography>
 																</MenuItem>
 															))}

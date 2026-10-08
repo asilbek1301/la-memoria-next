@@ -4357,6 +4357,29 @@
 	}
 }
 
+/** My Page for the admin account: a pointer to the admin area **/
+.my-page .admin-note {
+	padding: 28px 32px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px 40px;
+	border: 1px solid $line;
+	border-radius: $radius-card;
+	background: $ivory-deep;
+	.note-title {
+		@include text-title-editorial;
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+	}
+	.note-text {
+		margin: 6px 0 0;
+		color: $muted;
+		font-size: 15px;
+	}
+}
 /** MY PAGE, PHASE 2 LOOKS: follow lists, forms (profile, add package), editor frame.
     .follow-panel is the Following / Followers side panel (a portal outside .my-page) **/
 .my-page,
@@ -5040,6 +5063,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.admin .dashboard .stat-tile {
+		transition: none;
+		&:hover {
+			transform: none;
+		}
+	}
 	.contact-form input,
 	.contact-form textarea {
 		transition: none;

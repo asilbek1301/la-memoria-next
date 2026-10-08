@@ -1,4 +1,7 @@
 import React from 'react';
+import { memberHref, statusBadge, statusLabel } from '../adminLabels';
+import { memberPhoto } from '../../studio/studioSearch';
+import { categoryLabel } from '../../community/communitySearch';
 import Link from 'next/link';
 import {
 	Box,
@@ -48,49 +51,49 @@ const headCells: readonly HeadCell[] = [
 		id: 'article_id',
 		numeric: true,
 		disablePadding: false,
-		label: 'ARTICLE ID',
+		label: 'Post ID',
 	},
 	{
 		id: 'title',
 		numeric: true,
 		disablePadding: false,
-		label: 'TITLE',
+		label: 'Title',
 	},
 	{
 		id: 'category',
 		numeric: true,
 		disablePadding: false,
-		label: 'CATEGORY',
+		label: 'Category',
 	},
 	{
 		id: 'writer',
 		numeric: true,
 		disablePadding: false,
-		label: 'WRITER',
+		label: 'Author',
 	},
 	{
 		id: 'view',
 		numeric: false,
 		disablePadding: false,
-		label: 'VIEW',
+		label: 'Views',
 	},
 	{
 		id: 'like',
 		numeric: false,
 		disablePadding: false,
-		label: 'LIKE',
+		label: 'Likes',
 	},
 	{
 		id: 'register',
 		numeric: true,
 		disablePadding: false,
-		label: 'REGISTER DATE',
+		label: 'Posted',
 	},
 	{
 		id: 'status',
 		numeric: false,
 		disablePadding: false,
-		label: 'STATUS',
+		label: 'Status',
 	},
 ];
 
@@ -142,7 +145,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 						{articles.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>data not found!</span>
+									<span className={'no-data'}>No posts here.</span>
 								</TableCell>
 							</TableRow>
 						)}
@@ -168,16 +171,12 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 											)}
 										</Box>
 									</TableCell>
-									<TableCell align="left">{article.articleCategory}</TableCell>
+									<TableCell align="left">{categoryLabel(article.articleCategory)}</TableCell>
 									<TableCell align="left" className={'name'}>
-										<Link href={`/member?memberId=${article?.memberData?._id}`}>
+										<Link href={memberHref(article?.memberData)}>
 											<Avatar
-												alt="Remy Sharp"
-												src={
-													article?.memberData?.memberImage
-														? `${REACT_APP_API_URL}/${article?.memberData?.memberImage}`
-														: `/img/profile/defaultUser.svg`
-												}
+												alt=""
+												src={memberPhoto(article?.memberData?.memberImage) || '/img/profile/defaultUser.svg'}
 												sx={{ ml: '2px', mr: '10px' }}
 											/>
 											{article?.memberData?.memberNick}
@@ -186,7 +185,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 									<TableCell align="center">{article?.articleViews}</TableCell>
 									<TableCell align="center">{article?.articleLikes}</TableCell>
 									<TableCell align="left">
-										<Moment format={'DD.MM.YY HH:mm'}>{article?.createdAt}</Moment>
+										<Moment format={'YYYY-MM-DD HH:mm'}>{article?.createdAt}</Moment>
 									</TableCell>
 									<TableCell align="center">
 										{article.articleStatus === BoardArticleStatus.DELETE ? (
@@ -199,8 +198,8 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 											</Button>
 										) : (
 											<>
-												<Button onClick={(e: any) => menuIconClickHandler(e, index)} className={'badge success'}>
-													{article.articleStatus}
+												<Button onClick={(e: any) => menuIconClickHandler(e, index)} className={statusBadge(article.articleStatus)}>
+													{statusLabel(article.articleStatus)}
 												</Button>
 
 												<Menu
@@ -222,7 +221,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 																key={status}
 															>
 																<Typography variant={'subtitle1'} component={'span'}>
-																	{status}
+																	{statusLabel(status)}
 																</Typography>
 															</MenuItem>
 														))}

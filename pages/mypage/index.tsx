@@ -48,8 +48,12 @@ const MyPage: NextPage = () => {
 	const isStudio = user?.memberType === MemberType.STUDIO;
 	const isAdmin = user?.memberType === MemberType.ADMIN;
 	const requested: string = (router.query?.category as string) ?? 'overview';
-	// studio-only sections fall back to the overview for other accounts
-	const category = !isStudio && ['myPackages', 'addPackage'].includes(requested) ? 'overview' : requested;
+	// sections another account type cannot use fall back to the overview: studio-only ones for couples and the admin,
+	// couple-only ones for the admin (the backend refuses those queries for ADMIN)
+	const studioOnly = ['myPackages', 'addPackage'];
+	const coupleOnly = ['myReservations', 'myFavorites', 'recentlyVisited'];
+	const category =
+		(!isStudio && studioOnly.includes(requested)) || (isAdmin && coupleOnly.includes(requested)) ? 'overview' : requested;
 	// Following / Followers open as a side panel over the overview (old ?category= links still work)
 	const followMode = category === 'followings' || category === 'followers' ? category : null;
 	const view = followMode ? 'overview' : category;
@@ -190,7 +194,7 @@ const MyPage: NextPage = () => {
 					{view === 'overview' && (
 						<>
 							{!isAdmin && <NextShoot isStudio={isStudio} onChanged={refreshCounts} />}
-							<MyOverview user={user} isStudio={isStudio} onChanged={refreshCounts} />
+							<MyOverview user={user} isStudio={isStudio} isAdmin={isAdmin} onChanged={refreshCounts} />
 						</>
 					)}
 					{view === 'myReservations' && <MyReservations />}

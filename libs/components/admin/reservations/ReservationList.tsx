@@ -3,17 +3,10 @@ import Link from 'next/link';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import Moment from 'react-moment';
 import { Reservation } from '../../../types/reservation/reservation';
-import { ReservationStatus } from '../../../enums/reservation.enum';
-import { formatterStr } from '../../../utils';
+import { formatKRW } from '../../../utils';
+import { statusBadge, statusLabel } from '../adminLabels';
 
-const headCells = ['RESERVATION ID', 'PACKAGE', 'COUPLE', 'SHOOT DATE', 'PRICE', 'CREATED', 'STATUS'];
-
-const statusClass: Record<ReservationStatus, string> = {
-	[ReservationStatus.PENDING]: 'badge warning',
-	[ReservationStatus.CONFIRMED]: 'badge success',
-	[ReservationStatus.COMPLETED]: 'badge success',
-	[ReservationStatus.CANCELLED]: 'badge error',
-};
+const headCells = ['Reservation ID', 'Package', 'Couple', 'Shoot date', 'Price', 'Requested', 'Status'];
 
 interface ReservationPanelListType {
 	reservations: Reservation[];
@@ -28,7 +21,7 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 				<TableHead>
 					<TableRow>
 						{headCells.map((cell) => (
-							<TableCell key={cell} align={cell === 'RESERVATION ID' ? 'left' : 'center'}>
+							<TableCell key={cell} align={cell === 'Reservation ID' ? 'left' : 'center'}>
 								{cell}
 							</TableCell>
 						))}
@@ -38,7 +31,7 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 					{reservations.length === 0 && (
 						<TableRow>
 							<TableCell align="center" colSpan={headCells.length}>
-								<span className={'no-data'}>data not found!</span>
+								<span className={'no-data'}>No reservations here.</span>
 							</TableCell>
 						</TableRow>
 					)}
@@ -58,12 +51,12 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 							<TableCell align="center">
 								<Moment format="YYYY.MM.DD">{reservation.reservationDate}</Moment>
 							</TableCell>
-							<TableCell align="center">${formatterStr(reservation.reservationPrice)}</TableCell>
+							<TableCell align="center">{formatKRW(reservation.reservationPrice)}</TableCell>
 							<TableCell align="center">
 								<Moment format="YYYY.MM.DD">{reservation.createdAt}</Moment>
 							</TableCell>
 							<TableCell align="center">
-								<span className={statusClass[reservation.reservationStatus]}>{reservation.reservationStatus}</span>
+								<span className={statusBadge(reservation.reservationStatus)}>{statusLabel(reservation.reservationStatus)}</span>
 							</TableCell>
 						</TableRow>
 					))}

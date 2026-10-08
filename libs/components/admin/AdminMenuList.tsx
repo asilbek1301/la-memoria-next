@@ -6,7 +6,7 @@ import Collapse from '@mui/material/Collapse';
 import Typography from '@mui/material/Typography';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
-import { CalendarCheck, ChatsCircle, Headset, User, UserCircleGear } from 'phosphor-react';
+import { CalendarCheck, ChatsCircle, Headset, SquaresFour, User, UserCircleGear } from 'phosphor-react';
 import cookies from 'js-cookie';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
@@ -39,10 +39,13 @@ const AdminMenuList = (props: any) => {
 				setClickMenu(['Community']);
 				break;
 			case 'cs':
-				setClickMenu(['Cs']);
+				setClickMenu(['Help']);
+				break;
+			case 'users':
+				setClickMenu(['Users']);
 				break;
 			default:
-				setClickMenu(['Users']);
+				setClickMenu([]); // the dashboard
 				break;
 		}
 
@@ -80,28 +83,28 @@ const AdminMenuList = (props: any) => {
 	const menu_set = [
 		{
 			title: 'Users',
-			icon: <User size={20} color="#bdbdbd" weight="fill" />,
+			icon: <User size={20} color="currentColor" weight="fill" />,
 			on_click: () => subMenuChangeHandler('Users'),
 		},
 		{
 			title: 'Packages',
-			icon: <UserCircleGear size={20} color="#bdbdbd" weight="fill" />,
+			icon: <UserCircleGear size={20} color="currentColor" weight="fill" />,
 			on_click: () => subMenuChangeHandler('Packages'),
 		},
 		{
 			title: 'Reservations',
-			icon: <CalendarCheck size={20} color="#bdbdbd" weight="fill" />,
+			icon: <CalendarCheck size={20} color="currentColor" weight="fill" />,
 			on_click: () => subMenuChangeHandler('Reservations'),
 		},
 		{
 			title: 'Community',
-			icon: <ChatsCircle size={20} color="#bdbdbd" weight="fill" />,
+			icon: <ChatsCircle size={20} color="currentColor" weight="fill" />,
 			on_click: () => subMenuChangeHandler('Community'),
 		},
 		{
-			title: 'Cs',
-			icon: <Headset size={20} color="#bdbdbd" weight="fill" />,
-			on_click: () => subMenuChangeHandler('Cs'),
+			title: 'Help',
+			icon: <Headset size={20} color="currentColor" weight="fill" />,
+			on_click: () => subMenuChangeHandler('Help'),
 		},
 	];
 
@@ -110,14 +113,32 @@ const AdminMenuList = (props: any) => {
 		Packages: [{ title: 'List', url: '/_admin/packages' }],
 		Reservations: [{ title: 'List', url: '/_admin/reservations' }],
 		Community: [{ title: 'List', url: '/_admin/community' }],
-		Cs: [
+		Help: [
 			{ title: 'FAQ', url: '/_admin/cs/faq' },
 			{ title: 'Notice', url: '/_admin/cs/notice' },
+			{ title: '1:1 Inquiry', url: '/_admin/cs/inquiry' },
 		],
 	};
 
+	const onDashboard = pathnames.length === 1;
+
 	return (
 		<>
+			{/* the overview: counts and the latest activity */}
+			<List className={'menu_wrap'} disablePadding>
+				<Link href={'/_admin'}>
+					<ListItemButton
+						component={'li'}
+						className={onDashboard ? 'menu on dashboard' : 'menu dashboard'}
+						sx={{ minHeight: 48, justifyContent: openMenu ? 'initial' : 'center', px: 2.5 }}
+					>
+						<ListItemIcon sx={{ minWidth: 0, mr: openMenu ? 3 : 'auto', justifyContent: 'center' }}>
+							<SquaresFour size={20} color="currentColor" weight="fill" />
+						</ListItemIcon>
+						<ListItemText>Dashboard</ListItemText>
+					</ListItemButton>
+				</Link>
+			</List>
 			{menu_set.map((item, index) => (
 				<List className={'menu_wrap'} key={index} disablePadding>
 					<ListItemButton
@@ -157,7 +178,7 @@ const AdminMenuList = (props: any) => {
 											component="li"
 											className={clickMenu[0] === item.title && clickSubMenu === sub.title ? 'li on' : 'li'}
 										>
-											<Typography variant={sub.title} component={'span'}>
+											<Typography variant={'body2'} component={'span'}>
 												{sub.title}
 											</Typography>
 										</ListItemButton>

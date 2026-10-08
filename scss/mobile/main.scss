@@ -388,6 +388,15 @@
       gap: 10px;
     }
   }
+  #my-page .admin-note {
+    padding: 24px 20px;
+    + .my-section {
+      margin-top: 40px;
+    }
+    .button-primary {
+      width: 100%;
+    }
+  }
   #help-page {
     width: 100%;
     .container {

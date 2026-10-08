@@ -22,7 +22,7 @@
       }
     }
     .user {
-      background: #f5f5f5;
+      background: $ivory-deep;
     }
     hr {
       margin: 24px 0;
@@ -32,7 +32,18 @@
     }
   }
   .user {
-    background: #f5f5f5;
+    background: $ivory-deep;
+  }
+  // brand colours instead of the template red; the icons follow the text colour
+  .menu_wrap .menu {
+    color: $muted;
+    .MuiListItemIcon-root {
+      color: inherit;
+    }
+    &.on {
+      color: $espresso;
+      font-weight: 600;
+    }
   }
   .menu-list {
     padding: 8px 24px 8px 32px;
@@ -43,14 +54,16 @@
     }
     li.on {
       font-weight: 600;
-      background: #FDF4F4;
-      color: #F54D56;
+      background: $ivory-deep;
+      color: $espresso;
       span {
-        color: #212121;
+        color: $espresso;
       }
     }
   }
   #bunker {
+    min-height: 100vh;
+    background: $ivory;
     width: calc(100% - 280px);
     margin-left: auto;
     padding: 116px 24px;
@@ -135,13 +148,13 @@
           height: 48px;
           cursor: pointer;
           padding: 12px 16px;
-          color: #bdbdbd;
+          color: $muted;
           font-size: 14px;
         }
         li.on {
           font-weight: 500;
-          color: #e92c28;
-          border-bottom: 2px solid #e92c28;
+          color: $espresso;
+          border-bottom: 2px solid $espresso;
         }
       }
       thead {
@@ -192,7 +205,7 @@
       }
       .flex-box {
         button {
-          color: #e92c28;
+          color: $espresso;
           font-weight: 500;
           margin-right: 8px;
         }
@@ -204,6 +217,146 @@
       font-size: 28px;
       font-weight: bold;
     }
+    /** dashboard (/_admin): counts that link to their lists, then the latest activity **/
+    .dashboard {
+      .dashboard-head {
+        margin-bottom: 28px;
+      }
+      .tit {
+        margin: 0;
+      }
+      .dashboard-intro {
+        margin: 6px 0 0;
+        color: $muted;
+        font-size: 15px;
+      }
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .stat-tile {
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        border: 1px solid $line;
+        border-radius: 12px;
+        background: #ffffff;
+        color: $espresso;
+        text-decoration: none;
+        transition: border-color 0.3s ease, transform 0.3s ease;
+        &:hover {
+          border-color: $espresso;
+          transform: translateY(-2px);
+        }
+        &:focus-visible {
+          outline: 2px solid $mocha;
+          outline-offset: 2px;
+        }
+        // new messages waiting
+        &.highlight {
+          border-color: $espresso;
+          background: $ivory-deep;
+        }
+      }
+      .stat-label {
+        color: $muted;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .stat-value {
+        font-family: $font-heading;
+        font-size: 36px;
+        line-height: 1.2;
+      }
+      .stat-note {
+        color: $muted;
+        font-size: 13px;
+      }
+      .panel-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .dash-panel {
+        min-width: 0;
+        padding: 22px 24px;
+        border: 1px solid $line;
+        border-radius: 12px;
+        background: #ffffff;
+      }
+      .panel-head {
+        margin-bottom: 8px;
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        h3 {
+          margin: 0;
+          color: $espresso;
+          font-family: $font-heading;
+          font-size: 19px;
+          font-weight: 400;
+        }
+      }
+      .panel-link {
+        color: $espresso;
+        font-size: 13px;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .panel-empty {
+        margin: 16px 0 4px;
+        color: $muted;
+        font-size: 14px;
+      }
+      .dash-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        li {
+          padding: 12px 0;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          border-bottom: 1px solid $line;
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+      .item-main {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .item-title {
+        color: $espresso;
+        font-size: 15px;
+        font-weight: 500;
+      }
+      .item-meta {
+        color: $muted;
+        font-size: 13px;
+      }
+      .item-preview {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .item-date {
+        flex-shrink: 0;
+        color: $muted;
+        font-size: 13px;
+      }
+    }
+
     .search-area {
       display: flex;
       flex-direction: row;
