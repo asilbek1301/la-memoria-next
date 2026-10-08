@@ -90,6 +90,7 @@
 .navbar,
 .nav-drawer,
 .nav-menu,
+.notification-panel,
 .home-hero,
 .home-page,
 .package-page,
@@ -249,10 +250,11 @@
 		display: inline-flex;
 		@include focus-ring;
 	}
-	.saved-btn {
+	.saved-btn,
+	.bell-btn {
 		position: relative;
 	}
-	.saved-badge {
+	.count-badge {
 		position: absolute;
 		top: 2px;
 		right: 0;
@@ -332,6 +334,107 @@
 	}
 	.MuiMenuItem-root.Mui-selected {
 		background: $sand;
+	}
+}
+
+/** NOTIFICATIONS (NotificationBell.tsx): a panel under the bell; one width fits desktop and phones **/
+.notification-panel.MuiPaper-root {
+	width: min(380px, calc(100vw - 32px));
+	max-height: min(520px, calc(100vh - #{$nav-height} - 24px));
+	margin-top: 8px;
+	display: flex;
+	flex-direction: column;
+	border: 1px solid $line;
+	border-radius: $radius-menu;
+	background: $ivory;
+	box-shadow: $soft-shadow;
+	color: $espresso;
+	font-family: $font;
+	.panel-head {
+		padding: 16px 20px 12px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		border-bottom: 1px solid $line;
+	}
+	.panel-title {
+		margin: 0;
+		@include text-title-editorial;
+	}
+	.panel-list {
+		margin: 0;
+		padding: 6px 0;
+		overflow-y: auto;
+		list-style: none;
+	}
+	.notification-item {
+		width: 100%;
+		padding: 12px 20px;
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		border: none;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+		@include focus-ring;
+		&:hover {
+			background: $ivory-deep;
+		}
+		&.unread {
+			background: $blush;
+			&:hover {
+				background: $sand;
+			}
+		}
+	}
+	.avatar {
+		width: 36px;
+		height: 36px;
+		flex: none;
+		border-radius: 50%;
+		background: $sand;
+		object-fit: cover;
+	}
+	.item-body {
+		min-width: 0;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.item-text {
+		@include text-body-md;
+		overflow-wrap: anywhere;
+		strong {
+			font-weight: 600;
+		}
+	}
+	.item-time {
+		@include text-label-meta;
+		color: $muted;
+	}
+	.unread-dot {
+		width: 8px;
+		height: 8px;
+		margin-top: 8px;
+		flex: none;
+		border-radius: 50%;
+		background: $mocha;
+	}
+	.skeleton.text {
+		flex: 1;
+		height: 36px;
+	}
+	.panel-empty {
+		margin: 0;
+		padding: 28px 20px 32px;
+		@include text-body-md;
+		color: $muted;
 	}
 }
 
@@ -5286,6 +5389,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.notification-panel .notification-item {
+		transition: none;
+	}
 	.account-page {
 		.mode-toggle button,
 		.type-card {

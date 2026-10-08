@@ -4,7 +4,6 @@ import { useRouter, withRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { Drawer, Menu, MenuItem } from '@mui/material';
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -16,6 +15,8 @@ import { getJwtToken, logOut, updateUserInfo } from '../auth';
 import { userVar } from '../../apollo/store';
 import { GET_FAVORITES } from '../../apollo/user/query';
 import AnimatedLogo from './common/AnimatedLogo';
+import NotificationBell from './common/NotificationBell';
+import useDeviceDetect from '../hooks/useDeviceDetect';
 import { itemFadeUp, navbarVariants, springSnappy } from './common/motion';
 
 const navLinks = [
@@ -35,6 +36,7 @@ const Top = () => {
 	const user = useReactiveVar(userVar);
 	const { t } = useTranslation('common');
 	const router = useRouter();
+	const device = useDeviceDetect();
 	const [lang, setLang] = useState<string>('en');
 	const [langAnchor, setLangAnchor] = useState<null | HTMLElement>(null);
 	const [userAnchor, setUserAnchor] = useState<null | HTMLElement>(null);
@@ -87,6 +89,8 @@ const Top = () => {
 	const indicatorTarget = hoveredLink ?? activeLink;
 	const currentLang = languages.find((item) => item.id === lang) ?? languages[0];
 	const savedHref = user?._id ? '/mypage?category=myFavorites' : '/account/join';
+	// phones get the logo's own default size, so it fits beside the menu button and the three header buttons
+	const logoSize = device === 'mobile' ? { width: 150, height: 52 } : { width: 170, height: 59 };
 
 	return (
 		<MotionConfig reducedMotion="user">
@@ -127,21 +131,19 @@ const Top = () => {
 
 					<motion.div variants={itemFadeUp} className={'logo-box'}>
 						<Link href={'/'} aria-label="La Memoria home">
-							<AnimatedLogo tone="dark" width={170} height={59} />
+							<AnimatedLogo tone="dark" {...logoSize} />
 						</Link>
 					</motion.div>
 
 					<motion.div variants={itemFadeUp} className={'user-box'}>
-						<Link href={'/package'} className={'icon-btn search-btn'} aria-label="Search packages">
-							<SearchRoundedIcon />
-						</Link>
+						<NotificationBell />
 						<Link
 							href={savedHref}
 							className={'icon-btn saved-btn'}
 							aria-label={savedTotal ? `Liked packages (${savedTotal})` : 'Liked packages'}
 						>
 							<FavoriteBorderRoundedIcon />
-							{savedTotal > 0 && <span className={'saved-badge'}>{savedTotal > 99 ? '99+' : savedTotal}</span>}
+							{savedTotal > 0 && <span className={'count-badge'}>{savedTotal > 99 ? '99+' : savedTotal}</span>}
 						</Link>
 
 						<button

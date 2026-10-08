@@ -45,7 +45,6 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 	const { query } = router;
 
 	const articleId = query?.id as string;
-	const articleCategory = query?.articleCategory as string;
 
 	const [comment, setComment] = useState<string>('');
 	const [wordsCnt, setWordsCnt] = useState<number>(0);
@@ -63,6 +62,8 @@ const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
 	const [updatedCommentId, setUpdatedCommentId] = useState<string>('');
 	const [likeLoading, setLikeLoading] = useState<boolean>(false);
 	const [boardArticle, setBoardArticle] = useState<BoardArticle>();
+	// links that carry only ?id= (e.g. from a notification) take the board from the post itself
+	const articleCategory = (query?.articleCategory as string) ?? boardArticle?.articleCategory;
 
 	/** APOLLO REQUESTS **/
 

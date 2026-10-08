@@ -416,3 +416,23 @@ export const CREATE_INQUIRY = gql`
 		}
 	}
 `;
+
+/**************************
+ *      NOTIFICATION      *
+ *************************/
+
+export const READ_NOTIFICATION = gql`
+	mutation ReadNotification($notificationId: String!) {
+		readNotification(notificationId: $notificationId) {
+			_id
+			notificationStatus
+		}
+	}
+`;
+
+/** returns how many were marked as read **/
+export const READ_ALL_NOTIFICATIONS = gql`
+	mutation ReadAllNotifications {
+		readAllNotifications
+	}
+`;

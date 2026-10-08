@@ -737,3 +737,40 @@ export const GET_NOTICES = gql`
 		}
 	}
 `;
+
+/**************************
+ *      NOTIFICATION      *
+ *************************/
+
+/** the header bell's number; the logged-in member's own unread notifications **/
+export const GET_UNREAD_NOTIFICATIONS = gql`
+	query GetUnreadNotifications {
+		getUnreadNotifications
+	}
+`;
+
+/** newest first, with the member who caused each one **/
+export const GET_NOTIFICATIONS = gql`
+	query GetNotifications($input: NotificationsInquiry!) {
+		getNotifications(input: $input) {
+			list {
+				_id
+				notificationType
+				notificationStatus
+				notificationGroup
+				notificationTitle
+				notificationRefId
+				authorId
+				createdAt
+				authorData {
+					_id
+					memberNick
+					memberImage
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;

@@ -16,7 +16,11 @@
         display: grid;
         grid-template-columns: auto 1fr auto;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
+        .icon-btn {
+          width: 36px;
+          height: 36px;
+        }
         .menu-btn {
           display: inline-flex;
         }
@@ -25,18 +29,13 @@
         }
         .logo-box {
           justify-self: center;
-          line-height: 0;
-          .animated-logo svg {
-            width: 124px;
-            height: auto;
-          }
+          line-height: 0; // the logo's size comes from Top.tsx
         }
         .user-box {
           justify-self: end;
           display: flex;
           align-items: center;
-          gap: 4px;
-          .search-btn,
+          gap: 0;
           .lang-btn {
             display: none;
           }
