@@ -20,7 +20,7 @@ const footerColumns = [
 		title: 'Studios',
 		links: [
 			{ label: 'All studios', href: '/studio' },
-			{ label: 'Join as a studio', href: '/account/join' },
+			{ label: 'Join as a studio', href: '/account/join?mode=signup&type=studio' },
 			{ label: 'Community', href: '/community?articleCategory=FREE' },
 		],
 	},

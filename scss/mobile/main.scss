@@ -397,6 +397,23 @@
       width: 100%;
     }
   }
+  // log in / sign up: one column with the page gutters
+  #account-page {
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: calc(#{$nav-height-mobile} + 40px) 24px $section-space-mobile;
+    .account-box {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .account-title {
+      @include text-headline-sm;
+    }
+    .type-cards {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
   #help-page {
     width: 100%;
     .container {

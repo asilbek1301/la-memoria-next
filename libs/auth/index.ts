@@ -2,8 +2,7 @@ import decodeJWT from 'jwt-decode';
 import { initializeApollo } from '../../apollo/client';
 import { userVar } from '../../apollo/store';
 import { CustomJwtPayload } from '../types/customJwtPayload';
-import { sweetMixinErrorAlert } from '../sweetAlert';
-import { LOGIN, SIGN_UP } from '../../apollo/user/mutation';
+import { GOOGLE_AUTH, LOGIN, SIGN_UP } from '../../apollo/user/mutation';
 
 export function getJwtToken(): any {
 	if (typeof window !== 'undefined') {
@@ -15,103 +14,88 @@ export function setJwtToken(token: string) {
 	localStorage.setItem('accessToken', token);
 }
 
-export const logIn = async (nick: string, password: string): Promise<void> => {
-	try {
-		const { jwtToken } = await requestJwtToken({ nick, password });
-
-		if (jwtToken) {
-			updateStorage({ jwtToken });
-			updateUserInfo(jwtToken);
-		}
-	} catch (err) {
-		console.warn('login err', err);
-		logOut();
-		// throw new Error('Login Err');
-	}
+/** the backend's login and signup errors, in plain words for the form **/
+const authMessages: Record<string, string> = {
+	'No member with that member nick!': 'No account with this nickname.',
+	'Wrong password, try again!': 'Wrong password.',
+	'You have been blocked!': 'This account has been blocked.',
+	'Already used member nick or phone!': 'This nickname or phone number is already used.',
+	'Not Allowed Request!': 'This account type cannot be created here.',
+	'Google sign-in could not be verified!': 'Google sign-in did not work. Please try again.',
+	'This account signs in with Google!': 'This account uses Google. Choose "Continue with Google" instead.',
+	'Bad Request Exception': 'Please check the fields above.',
 };
 
-const requestJwtToken = async ({
-	nick,
-	password,
-}: {
-	nick: string;
-	password: string;
-}): Promise<{ jwtToken: string }> => {
-	const apolloClient = await initializeApollo();
+const toAuthError = (err: any): Error => {
+	if (err?.networkError) return new Error('We could not reach the server. Please try again.');
+	const message: string = err?.graphQLErrors?.[0]?.message ?? '';
+	return new Error(authMessages[message] ?? 'Something went wrong. Please try again.');
+};
 
+/** saves the token and fills userVar from it **/
+const saveToken = (jwtToken: string) => {
+	updateStorage({ jwtToken });
+	updateUserInfo(jwtToken);
+};
+
+/** logs in; on failure throws an Error whose message can be shown as is **/
+export const logIn = async (nick: string, password: string): Promise<void> => {
+	const apolloClient = await initializeApollo();
 	try {
-		const result = await apolloClient.mutate({
+		const { data } = await apolloClient.mutate({
 			mutation: LOGIN,
 			variables: { input: { memberNick: nick, memberPassword: password } },
 			fetchPolicy: 'network-only',
+			context: { quiet: true }, // the form shows the message, not a popup
 		});
-
-		console.log('---------- login ----------');
-		const { accessToken } = result?.data?.login;
-
-		return { jwtToken: accessToken };
-	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		switch (err.graphQLErrors[0].message) {
-			case 'Definer: login and password do not match':
-				await sweetMixinErrorAlert('Please check your password again');
-				break;
-			case 'Definer: user has been blocked!':
-				await sweetMixinErrorAlert('User has been blocked!');
-				break;
-		}
-		throw new Error('token error');
-	}
-};
-
-export const signUp = async (nick: string, password: string, phone: string, type: string): Promise<void> => {
-	try {
-		const { jwtToken } = await requestSignUpJwtToken({ nick, password, phone, type });
-
-		if (jwtToken) {
-			updateStorage({ jwtToken });
-			updateUserInfo(jwtToken);
-		}
+		saveToken(data.login.accessToken);
 	} catch (err) {
-		console.warn('login err', err);
-		logOut();
-		// throw new Error('Login Err');
+		throw toAuthError(err);
 	}
 };
 
-const requestSignUpJwtToken = async ({
-	nick,
-	password,
-	phone,
-	type,
-}: {
-	nick: string;
-	password: string;
-	phone: string;
-	type: string;
-}): Promise<{ jwtToken: string }> => {
+/** creates a couple (USER) or studio (STUDIO) account and logs it in; throws like logIn **/
+export const signUp = async (nick: string, password: string, phone: string, type: string): Promise<void> => {
 	const apolloClient = await initializeApollo();
-
 	try {
-		const result = await apolloClient.mutate({
+		const { data } = await apolloClient.mutate({
 			mutation: SIGN_UP,
+			variables: { input: { memberNick: nick, memberPassword: password, memberPhone: phone, memberType: type } },
+			fetchPolicy: 'network-only',
+			context: { quiet: true }, // the form shows the message, not a popup
+		});
+		saveToken(data.signup.accessToken);
+	} catch (err) {
+		throw toAuthError(err);
+	}
+};
+
+const GOOGLE_NEEDS_DETAILS = 'Google sign-up needs more details!';
+
+/** signs in with a Google ID token. 'done': logged in. 'needs-details': a new Google user must first choose
+    a nickname, phone and account type, then call this again with them. Throws like logIn **/
+export const googleLogIn = async (
+	idToken: string,
+	details?: { nick: string; phone: string; type: string },
+): Promise<'done' | 'needs-details'> => {
+	const apolloClient = await initializeApollo();
+	try {
+		const { data } = await apolloClient.mutate({
+			mutation: GOOGLE_AUTH,
 			variables: {
-				input: { memberNick: nick, memberPassword: password, memberPhone: phone, memberType: type },
+				input: {
+					idToken,
+					...(details ? { memberNick: details.nick, memberPhone: details.phone, memberType: details.type } : {}),
+				},
 			},
 			fetchPolicy: 'network-only',
+			context: { quiet: true }, // the form shows the message, not a popup
 		});
-
-		console.log('---------- login ----------');
-		const { accessToken } = result?.data?.signup;
-
-		return { jwtToken: accessToken };
+		saveToken(data.googleAuth.accessToken);
+		return 'done';
 	} catch (err: any) {
-		console.log('request token err', err.graphQLErrors);
-		const message: string = err?.graphQLErrors?.[0]?.message ?? err?.message ?? 'Signup failed!';
-		if (message === 'Bad Request Exception') {
-			throw new Error('Nick must be 3-12 characters and password 5-12 characters');
-		}
-		throw new Error(message);
+		if (err?.graphQLErrors?.[0]?.message === GOOGLE_NEEDS_DETAILS) return 'needs-details';
+		throw toAuthError(err);
 	}
 };
 

@@ -61,6 +61,35 @@ export const LOGIN = gql`
 	}
 `;
 
+/** Sign in with Google (log in, or finish a new account with nickname, phone and type) **/
+export const GOOGLE_AUTH = gql`
+	mutation GoogleAuth($input: GoogleAuthInput!) {
+		googleAuth(input: $input) {
+			_id
+			memberType
+			memberStatus
+			memberAuthType
+			memberPhone
+			memberNick
+			memberFullName
+			memberImage
+			memberAddress
+			memberDesc
+			memberWarnings
+			memberBlocks
+			memberPackages
+			memberRank
+			memberPoints
+			memberLikes
+			memberViews
+			deletedAt
+			createdAt
+			updatedAt
+			accessToken
+		}
+	}
+`;
+
 export const UPDATE_MEMBER = gql`
 	mutation UpdateMember($input: MemberUpdate!) {
 		updateMember(input: $input) {

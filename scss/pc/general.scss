@@ -96,6 +96,7 @@
 .studio-page,
 .community-page,
 .help-page,
+.account-page,
 .detail-page,
 .filter-panel,
 .filter-sheet,
@@ -509,6 +510,7 @@
 .studio-page,
 .community-page,
 .help-page,
+.account-page,
 .detail-page,
 .filter-panel,
 .filter-sheet,
@@ -1883,36 +1885,11 @@
 		gap: 8px;
 	}
 	.field-label {
-		@include text-label-uppercase;
-		color: $muted;
+		@include form-label;
 	}
 	input,
 	textarea {
-		width: 100%;
-		padding: 13px 16px;
-		box-sizing: border-box;
-		border: 1px solid $line;
-		border-radius: $radius-tile;
-		background: #ffffff;
-		color: $espresso;
-		font-family: $font;
-		font-size: 15px;
-		transition: border-color 0.3s ease;
-		&::placeholder {
-			color: $muted;
-			opacity: 0.8;
-		}
-		&:focus {
-			border-color: $espresso;
-			outline: none;
-		}
-		&:focus-visible {
-			outline: 2px solid $mocha;
-			outline-offset: 2px;
-		}
-		&[aria-invalid='true'] {
-			border-color: $error-ink;
-		}
+		@include form-input;
 	}
 	textarea {
 		min-height: 140px;
@@ -1926,10 +1903,7 @@
 		gap: 16px;
 	}
 	.field-error {
-		margin: 0;
-		color: $error-ink;
-		font-size: 13px;
-		line-height: 1.5;
+		@include form-error;
 	}
 	.field-count {
 		flex-shrink: 0;
@@ -2010,6 +1984,254 @@
 		color: $muted;
 		font-size: 15px;
 		line-height: 1.6;
+	}
+}
+
+/** LOG IN / SIGN UP LOOKS (pages/account/join.tsx, libs/components/account/*); layout is in pc/account/join.scss
+    and mobile/main.scss. Fields use the shared form mixins in variables.scss **/
+.account-page {
+	/** one centred column: heading, toggle, form **/
+	.mode-toggle {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		padding: 4px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: $ivory-deep;
+		button {
+			padding: 10px 0;
+			border: none;
+			border-radius: $radius-pill;
+			background: transparent;
+			color: $muted;
+			font-family: $font;
+			font-size: 14px;
+			cursor: pointer;
+			transition: background-color 0.3s ease, color 0.3s ease;
+			@include focus-ring;
+			&.active {
+				background: #ffffff;
+				color: $espresso;
+				box-shadow: 0 1px 2px rgba(62, 44, 35, 0.08);
+			}
+		}
+	}
+	.account-title {
+		@include text-headline-md;
+		margin: 0;
+		color: $espresso;
+		text-align: center;
+	}
+	.account-form {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+	.account-field {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.field-label {
+		@include form-label;
+	}
+	.input-wrap {
+		position: relative;
+		input {
+			@include form-input;
+		}
+		// room for the Show / Hide button
+		&.with-toggle input {
+			padding-right: 72px;
+		}
+	}
+	.show-btn {
+		position: absolute;
+		top: 50%;
+		right: 8px;
+		transform: translateY(-50%);
+		padding: 6px 10px;
+		border: none;
+		border-radius: $radius-pill;
+		background: transparent;
+		color: $muted;
+		font-family: $font;
+		font-size: 13px;
+		cursor: pointer;
+		@include focus-ring;
+		&:hover {
+			color: $espresso;
+		}
+	}
+	.field-rules {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		li {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+			color: $muted;
+			font-size: 13px;
+			svg {
+				font-size: 16px;
+				opacity: 0.35;
+			}
+			&.met {
+				color: $espresso;
+				svg {
+					opacity: 1;
+					color: $mocha;
+				}
+			}
+		}
+	}
+	.field-error {
+		@include form-error;
+	}
+	.form-error {
+		margin: 0;
+		padding: 12px 16px;
+		border-left: 2px solid $error-ink;
+		background: $ivory-deep;
+		color: $error-ink;
+		font-size: 14px;
+	}
+	.submit-btn {
+		width: 100%;
+		// a submit is not a way forward to another page: no arrow
+		&::after {
+			content: none;
+		}
+	}
+	.switch-line {
+		margin: 0;
+		color: $muted;
+		font-size: 14px;
+		text-align: center;
+	}
+	.switch-btn {
+		padding: 0;
+		border: none;
+		background: none;
+		color: $espresso;
+		font-family: $font;
+		font-size: 14px;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		cursor: pointer;
+		@include focus-ring;
+	}
+
+	/** "Continue with Google" (Google draws the button) and the "or" line before the form **/
+	.google-signin {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+	.google-button {
+		min-height: $google-button-height; // keeps the space while Google's script loads
+		display: flex;
+		justify-content: center;
+	}
+	.or-line {
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		color: $muted;
+		font-size: 13px;
+		&::before,
+		&::after {
+			content: '';
+			flex: 1;
+			height: 1px;
+			background: $line;
+		}
+	}
+	.form-note {
+		margin: 0;
+		color: $muted;
+		font-size: 15px;
+		line-height: 1.6;
+		text-align: center;
+	}
+
+	/** account type: two cards, the chosen one with an espresso border and a check **/
+	.account-types {
+		margin: 0;
+		padding: 0;
+		border: none;
+		legend {
+			margin-bottom: 8px;
+			padding: 0;
+		}
+	}
+	.type-cards {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+	}
+	.type-card {
+		position: relative;
+		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		border: 1px solid $line;
+		border-radius: $radius-tile;
+		background: #ffffff;
+		cursor: pointer;
+		transition: border-color 0.3s ease;
+		input {
+			position: absolute;
+			opacity: 0;
+			width: 1px;
+			height: 1px;
+		}
+		&:has(input:focus-visible) {
+			outline: 2px solid $mocha;
+			outline-offset: 2px;
+		}
+		&:hover {
+			border-color: $muted;
+		}
+		&.selected {
+			border-color: $espresso;
+			box-shadow: inset 0 0 0 1px $espresso;
+		}
+	}
+	.type-check {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		width: 22px;
+		height: 22px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid $line;
+		border-radius: 50%;
+		color: transparent;
+		svg {
+			font-size: 15px;
+		}
+	}
+	.type-card.selected .type-check {
+		border-color: $espresso;
+		background: $espresso;
+		color: $ivory;
+	}
+	.type-title {
+		padding-right: 28px;
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 17px;
+	}
+	.type-text {
+		color: $muted;
+		font-size: 13px;
+		line-height: 1.5;
 	}
 }
 
@@ -2113,6 +2335,7 @@
 .studio-page,
 .community-page,
 .help-page,
+.account-page,
 .detail-page {
 	background: $ivory;
 	color: $espresso;
@@ -5063,6 +5286,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.account-page {
+		.mode-toggle button,
+		.type-card {
+			transition: none;
+		}
+	}
 	.admin .dashboard .stat-tile {
 		transition: none;
 		&:hover {

@@ -77,6 +77,7 @@ const ContactForm = ({ idPrefix }: { idPrefix: string }) => {
 				variables: {
 					input: { inquiryName: values.name.trim(), inquiryEmail: values.email.trim(), inquiryMessage: values.message.trim() },
 				},
+				context: { quiet: true }, // the form shows its own message
 			});
 			setSentTo(values.email.trim());
 		} catch (err: any) {

@@ -91,11 +91,13 @@ function createIsomorphicLink() {
 			webSocketImpl: LoggingWebSocket
 		});
 
-		const errorLink = onError(({ graphQLErrors, networkError, response }) => {
+		const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
+			// forms that show their own message ask for no popup: mutate({ ..., context: { quiet: true } })
+			const quiet = Boolean(operation.getContext().quiet);
 			if (graphQLErrors) {
-				graphQLErrors.map(({ message, locations, path, extensions }) => {
+				graphQLErrors.map(({ message, locations, path }) => {
 					console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`);
-					if (!message.includes('input')) sweetErrorAlert(message);
+					if (!quiet && !message.includes('input')) sweetErrorAlert(message);
 				});
 			}
 			if (networkError) console.log(`[Network error]: ${networkError}`);

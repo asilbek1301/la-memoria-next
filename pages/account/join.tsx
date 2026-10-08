@@ -1,12 +1,16 @@
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import { Box, Button, Checkbox, FormControlLabel, FormGroup, Stack } from '@mui/material';
 import { useRouter } from 'next/router';
-import { logIn, signUp } from '../../libs/auth';
-import { sweetMixinErrorAlert } from '../../libs/sweetAlert';
+import { useReactiveVar } from '@apollo/client';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import LoginForm from '../../libs/components/account/LoginForm';
+import SignupForm from '../../libs/components/account/SignupForm';
+import GoogleButton from '../../libs/components/account/GoogleButton';
+import GoogleFinishForm from '../../libs/components/account/GoogleFinishForm';
+import { AccountType, safeReferrer } from '../../libs/components/account/accountRules';
+import { userVar } from '../../apollo/store';
+import { googleLogIn } from '../../libs/auth';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -14,204 +18,109 @@ export const getStaticProps = async ({ locale }: any) => ({
 	},
 });
 
+type Mode = 'login' | 'signup';
+
+/** Log in and sign up, one page. The URL picks the form (?mode=signup, ?type=studio) and where to return (?referrer=) **/
 const Join: NextPage = () => {
 	const router = useRouter();
-	const device = useDeviceDetect();
-	const [input, setInput] = useState({ nick: '', password: '', phone: '', type: 'USER' });
-	const [loginView, setLoginView] = useState<boolean>(true);
+	const user = useReactiveVar(userVar);
+	const mode: Mode = router.query.mode === 'signup' ? 'signup' : 'login';
+	const initialType: AccountType = router.query.type === 'studio' ? 'STUDIO' : 'USER';
+	const referrer = safeReferrer(router.query.referrer);
+	const leaving = useRef<boolean>(false);
+	// a new Google user's token, kept while they finish their account
+	const [googleToken, setGoogleToken] = useState<string>('');
+	const [googleError, setGoogleError] = useState<string>('');
 
-	/** HANDLERS **/
-	const viewChangeHandler = (state: boolean) => {
-		setLoginView(state);
-	};
+	// someone already logged in has nothing to do here. Saving a new login token updates the user straight away,
+	// so wait one tick: a fresh login's goNext runs first and marks leaving, and only real visitors are sent home
+	useEffect(() => {
+		if (!user?._id) return;
+		const timer = setTimeout(() => {
+			if (!leaving.current) router.replace('/');
+		}, 0);
+		return () => clearTimeout(timer);
+	}, [user?._id, router]);
 
-	const checkUserTypeHandler = (e: any) => {
-		const checked = e.target.checked;
-		if (checked) {
-			const value = e.target.name;
-			handleInput('type', value);
-		} else {
-			handleInput('type', 'USER');
-		}
-	};
-
-	const handleInput = useCallback((name: any, value: any) => {
-		setInput((prev) => {
-			return { ...prev, [name]: value };
+	const switchMode = (next: Mode) =>
+		router.replace({ pathname: '/account/join', query: { ...router.query, mode: next } }, undefined, {
+			shallow: true,
+			scroll: false,
 		});
-	}, []);
 
-	const doLogin = useCallback(async () => {
-		console.warn(input);
+	// back to the page that sent them here; otherwise home, or My Page for a new studio
+	const goNext = (type?: AccountType) => {
+		leaving.current = true;
+		router.push(referrer ?? (type === 'STUDIO' ? '/mypage' : '/'));
+	};
+
+	// "Continue with Google": a linked account logs straight in; a new one finishes its account first
+	const googleHandler = async (idToken: string) => {
+		setGoogleError('');
 		try {
-			await logIn(input.nick, input.password);
-			await router.push(`${router.query.referrer ?? '/'}`);
+			const result = await googleLogIn(idToken);
+			if (result === 'needs-details') setGoogleToken(idToken);
+			else goNext();
 		} catch (err: any) {
-			await sweetMixinErrorAlert(err.message);
+			setGoogleError(err.message);
 		}
-	}, [input]);
+	};
 
-	const doSignUp = useCallback(async () => {
-		console.warn(input);
-		try {
-			await signUp(input.nick, input.password, input.phone, input.type);
-			await router.push(`${router.query.referrer ?? '/'}`);
-		} catch (err: any) {
-			await sweetMixinErrorAlert(err.message);
-		}
-	}, [input]);
-
-	console.log('+input: ', input);
-
-	if (device === 'mobile') {
-		return <div>LOGIN MOBILE</div>;
-	} else {
+	if (googleToken) {
 		return (
-			<Stack className={'join-page'}>
-				<Stack className={'container'}>
-					<Stack className={'main'}>
-						<Stack className={'left'}>
-							{/* @ts-ignore */}
-							<Box className={'logo'}>
-								<img src="/img/logo/logoText.svg" alt="" />
-								<span>La Memoria</span>
-							</Box>
-							<Box className={'info'}>
-								<span>{loginView ? 'login' : 'signup'}</span>
-								<p>{loginView ? 'Login' : 'Sign'} in with this account across the following sites.</p>
-							</Box>
-							<Box className={'input-wrap'}>
-								<div className={'input-box'}>
-									<span>Nickname</span>
-									<input
-										type="text"
-										placeholder={'Enter Nickname'}
-										onChange={(e) => handleInput('nick', e.target.value)}
-										required={true}
-										onKeyDown={(event) => {
-											if (event.key == 'Enter' && loginView) doLogin();
-											if (event.key == 'Enter' && !loginView) doSignUp();
-										}}
-									/>
-								</div>
-								<div className={'input-box'}>
-									<span>Password</span>
-									<input
-										type="text"
-										placeholder={'Enter Password'}
-										onChange={(e) => handleInput('password', e.target.value)}
-										required={true}
-										onKeyDown={(event) => {
-											if (event.key == 'Enter' && loginView) doLogin();
-											if (event.key == 'Enter' && !loginView) doSignUp();
-										}}
-									/>
-								</div>
-								{!loginView && (
-									<div className={'input-box'}>
-										<span>Phone</span>
-										<input
-											type="text"
-											placeholder={'Enter Phone'}
-											onChange={(e) => handleInput('phone', e.target.value)}
-											required={true}
-											onKeyDown={(event) => {
-												if (event.key == 'Enter') doSignUp();
-											}}
-										/>
-									</div>
-								)}
-							</Box>
-							<Box className={'register'}>
-								{!loginView && (
-									<div className={'type-option'}>
-										<span className={'text'}>I want to be registered as:</span>
-										<div>
-											<FormGroup>
-												<FormControlLabel
-													control={
-														<Checkbox
-															size="small"
-															name={'USER'}
-															onChange={checkUserTypeHandler}
-															checked={input?.type == 'USER'}
-														/>
-													}
-													label="Couple"
-												/>
-											</FormGroup>
-											<FormGroup>
-												<FormControlLabel
-													control={
-														<Checkbox
-															size="small"
-															name={'STUDIO'}
-															onChange={checkUserTypeHandler}
-															checked={input?.type == 'STUDIO'}
-														/>
-													}
-													label="Studio"
-												/>
-											</FormGroup>
-										</div>
-									</div>
-								)}
-
-								{loginView && (
-									<div className={'remember-info'}>
-										<FormGroup>
-											<FormControlLabel control={<Checkbox defaultChecked size="small" />} label="Remember me" />
-										</FormGroup>
-										<a>Lost your password?</a>
-									</div>
-								)}
-
-								{loginView ? (
-									<Button
-										variant="contained"
-										endIcon={<img src="/img/icons/rightup.svg" alt="" />}
-										disabled={input.nick == '' || input.password == ''}
-										onClick={doLogin}
-									>
-										LOGIN
-									</Button>
-								) : (
-									<Button
-										variant="contained"
-										disabled={input.nick == '' || input.password == '' || input.phone == '' || input.type == ''}
-										onClick={doSignUp}
-										endIcon={<img src="/img/icons/rightup.svg" alt="" />}
-									>
-										SIGNUP
-									</Button>
-								)}
-							</Box>
-							<Box className={'ask-info'}>
-								{loginView ? (
-									<p>
-										Not registered yet?
-										<b
-											onClick={() => {
-												viewChangeHandler(false);
-											}}
-										>
-											SIGNUP
-										</b>
-									</p>
-								) : (
-									<p>
-										Have account?
-										<b onClick={() => viewChangeHandler(true)}> LOGIN</b>
-									</p>
-								)}
-							</Box>
-						</Stack>
-						<Stack className={'right'}></Stack>
-					</Stack>
-				</Stack>
-			</Stack>
+			<div id="account-page" className={'account-page'}>
+				<div className={'account-box'}>
+					<h1 id="account-title" className={'account-title'}>
+						Finish your account
+					</h1>
+					<GoogleFinishForm idToken={googleToken} onSuccess={goNext} onCancel={() => setGoogleToken('')} />
+				</div>
+			</div>
 		);
 	}
+
+	return (
+		<div id="account-page" className={'account-page'}>
+			<div className={'account-box'}>
+				<h1 id="account-title" className={'account-title'}>
+					{mode === 'login' ? 'Welcome back' : 'Create your account'}
+				</h1>
+
+				<div className={'mode-toggle'} role="group" aria-label="Log in or sign up">
+					{(['login', 'signup'] as Mode[]).map((value) => (
+						<button
+							key={value}
+							type="button"
+							className={mode === value ? 'active' : ''}
+							aria-pressed={mode === value}
+							onClick={() => switchMode(value)}
+						>
+							{value === 'login' ? 'Log in' : 'Sign up'}
+						</button>
+					))}
+				</div>
+
+				<GoogleButton onCredential={googleHandler} />
+				{googleError && (
+					<p className={'form-error'} role="alert">
+						{googleError}
+					</p>
+				)}
+
+				{mode === 'login' ? (
+					<LoginForm onSuccess={() => goNext()} onSwitch={() => switchMode('signup')} />
+				) : (
+					<SignupForm
+						key={initialType}
+						initialType={initialType}
+						onSuccess={goNext}
+						onSwitch={() => switchMode('login')}
+					/>
+				)}
+			</div>
+		</div>
+	);
 };
 
-export default withLayoutBasic(Join);
+// no footer: the page is just the form
+export default withLayoutFull(Join, { footer: false });

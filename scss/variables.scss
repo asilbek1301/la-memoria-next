@@ -171,6 +171,8 @@ $btn-height: 52px;
 $btn-pad-x: 32px;
 $photo-chip-bg: rgba(255, 255, 255, 0.92); // white chips on photos (heart, view count)
 $photo-chip: 36px; // their height
+$account-form-width: 420px; // the log in / sign up column
+$google-button-height: 44px; // Google's large sign-in button
 $faq-sign: 32px; // the plus / minus circle on Help questions
 $community-avatar: 36px; // author photo on community posts
 $btn-height-sm: 40px; // compact buttons, e.g. Follow on the studio page
@@ -377,6 +379,45 @@ $btn-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' vi
 		background-size: 0% 1px;
 		cursor: not-allowed;
 	}
+}
+
+/** FORM FIELDS (contact form, log in / sign up): one look for every text field on the site **/
+@mixin form-label {
+	@include text-label-uppercase;
+	color: $muted;
+}
+@mixin form-input {
+	width: 100%;
+	padding: 13px 16px;
+	box-sizing: border-box;
+	border: 1px solid $line;
+	border-radius: $radius-tile;
+	background: #ffffff;
+	color: $espresso;
+	font-family: $font;
+	font-size: 15px;
+	transition: border-color 0.3s ease;
+	&::placeholder {
+		color: $muted;
+		opacity: 0.8;
+	}
+	&:focus {
+		border-color: $espresso;
+		outline: none;
+	}
+	&:focus-visible {
+		outline: 2px solid $mocha;
+		outline-offset: 2px;
+	}
+	&[aria-invalid='true'] {
+		border-color: $error-ink;
+	}
+}
+@mixin form-error {
+	margin: 0;
+	color: $error-ink;
+	font-size: 13px;
+	line-height: 1.5;
 }
 
 @mixin focus-ring {

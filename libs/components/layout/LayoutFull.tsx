@@ -10,8 +10,9 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-const withLayoutFull = (Component: any) => {
-	return (props: any) => {
+/** shared header, chat and footer, no banner; pass { footer: false } to leave the footer out (log in page) **/
+const withLayoutFull = (Component: any, { footer = true }: { footer?: boolean } = {}) => {
+	const LayoutFull = (props: any) => {
 		const device = useDeviceDetect();
 
 		/** LIFECYCLES **/
@@ -38,9 +39,11 @@ const withLayoutFull = (Component: any) => {
 							<Component {...props} />
 						</Stack>
 
-						<Stack id={'footer'}>
-							<Footer />
-						</Stack>
+						{footer && (
+							<Stack id={'footer'}>
+								<Footer />
+							</Stack>
+						)}
 					</Stack>
 				</>
 			);
@@ -62,14 +65,17 @@ const withLayoutFull = (Component: any) => {
 
 						<Chat />
 
-						<Stack id={'footer'}>
-							<Footer />
-						</Stack>
+						{footer && (
+							<Stack id={'footer'}>
+								<Footer />
+							</Stack>
+						)}
 					</Stack>
 				</>
 			);
 		}
 	};
+	return LayoutFull;
 };
 
 export default withLayoutFull;
