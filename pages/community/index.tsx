@@ -317,7 +317,7 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 					)}
 
 					<p className={'community-guidelines'}>
-						<Link href={'/cs?tab=notice'} className={'button-link'}>
+						<Link href={'/cs?tab=faq&q=guidelines'} className={'button-link'}>
 							Community guidelines
 						</Link>
 					</p>

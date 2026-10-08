@@ -6,6 +6,7 @@ import PopularPackages from '../libs/components/homepage/PopularPackages';
 import PackageTiers from '../libs/components/homepage/PackageTiers';
 import TopStudios from '../libs/components/homepage/TopStudios';
 import CommunityBoards from '../libs/components/homepage/CommunityBoards';
+import HomeContact from '../libs/components/homepage/HomeContact';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export const getStaticProps = async ({ locale }: any) => ({
@@ -23,6 +24,7 @@ const Home: NextPage = () => {
 			<PackageTiers />
 			<TopStudios />
 			<CommunityBoards />
+			<HomeContact />
 		</div>
 	);
 };

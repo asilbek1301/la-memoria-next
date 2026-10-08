@@ -75,6 +75,23 @@
 				}
 			}
 		}
+		// "Write to us": the form, with the phone line beside it
+		.home-contact-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+			gap: 64px;
+			align-items: start;
+			.contact-form-panel {
+				padding: 40px;
+			}
+			.home-contact-aside {
+				padding-top: 12px;
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 12px;
+			}
+		}
 		.trend-grid {
 			display: grid;
 			grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);

@@ -239,3 +239,52 @@ export const GET_ALL_RESERVATIONS_BY_ADMIN = gql`
 		}
 	}
 `;
+
+/**************************
+ *         NOTICE         *
+ *************************/
+
+export const GET_ALL_NOTICES_BY_ADMIN = gql`
+	query GetAllNoticesByAdmin($input: AllNoticesInquiry!) {
+		getAllNoticesByAdmin(input: $input) {
+			list {
+				_id
+				noticeCategory
+				noticeStatus
+				noticeTopic
+				noticeTitle
+				noticeContent
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+/**************************
+ *        INQUIRY         *
+ *************************/
+
+export const GET_ALL_INQUIRIES_BY_ADMIN = gql`
+	query GetAllInquiriesByAdmin($input: AllInquiriesInquiry!) {
+		getAllInquiriesByAdmin(input: $input) {
+			list {
+				_id
+				inquiryStatus
+				inquiryName
+				inquiryEmail
+				inquiryMessage
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;

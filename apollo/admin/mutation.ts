@@ -153,3 +153,68 @@ export const REMOVE_COMMENT_BY_ADMIN = gql`
 		}
 	}
 `;
+
+/**************************
+ *         NOTICE         *
+ *************************/
+
+export const CREATE_NOTICE = gql`
+	mutation CreateNotice($input: NoticeInput!) {
+		createNotice(input: $input) {
+			_id
+			noticeCategory
+			noticeStatus
+			noticeTopic
+			noticeTitle
+			noticeContent
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const UPDATE_NOTICE_BY_ADMIN = gql`
+	mutation UpdateNoticeByAdmin($input: NoticeUpdate!) {
+		updateNoticeByAdmin(input: $input) {
+			_id
+			noticeCategory
+			noticeStatus
+			noticeTopic
+			noticeTitle
+			noticeContent
+			memberId
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const REMOVE_NOTICE_BY_ADMIN = gql`
+	mutation RemoveNoticeByAdmin($input: String!) {
+		removeNoticeByAdmin(noticeId: $input) {
+			_id
+		}
+	}
+`;
+
+/**************************
+ *        INQUIRY         *
+ *************************/
+
+export const UPDATE_INQUIRY_BY_ADMIN = gql`
+	mutation UpdateInquiryByAdmin($input: InquiryUpdate!) {
+		updateInquiryByAdmin(input: $input) {
+			_id
+			inquiryStatus
+		}
+	}
+`;
+
+export const REMOVE_INQUIRY_BY_ADMIN = gql`
+	mutation RemoveInquiryByAdmin($input: String!) {
+		removeInquiryByAdmin(inquiryId: $input) {
+			_id
+		}
+	}
+`;

@@ -366,6 +366,116 @@
   }
 
   /** STUDIOS PAGE LAYOUT (phone); looks are in pc/general.scss under .studio-page **/
+  // the contact form is one column on phones (Help page and homepage)
+  .contact-form {
+    .form-row {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .form-foot .button-primary {
+      width: 100%;
+    }
+  }
+  .home-page .home-contact-grid {
+    display: grid;
+    gap: 32px;
+    .contact-form-panel {
+      padding: 24px 20px;
+    }
+    .home-contact-aside {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+  #help-page {
+    width: 100%;
+    .container {
+      @include page-container-mobile;
+    }
+    .help-header {
+      padding-top: calc(#{$nav-height-mobile} + 36px);
+      .header-row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 24px;
+      }
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .page-title {
+        @include text-headline-lg-mobile;
+      }
+      .page-intro {
+        font-size: 14px;
+      }
+      .search-field {
+        width: 100%;
+      }
+      .help-tabs {
+        margin-top: 32px;
+        gap: 28px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+    }
+    .help-body {
+      padding-top: 36px;
+      padding-bottom: $section-space-mobile;
+      .section-head {
+        margin-bottom: 24px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .filter-tabs {
+        max-width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+          display: none;
+        }
+        button {
+          flex-shrink: 0;
+        }
+      }
+      .faq-question button {
+        padding: 20px 0;
+        font-size: 17px;
+        gap: 16px;
+      }
+      .faq-answer {
+        padding: 0 0 22px;
+      }
+      .help-cta {
+        margin-top: 48px;
+        padding: 28px 20px;
+        .button-primary {
+          width: 100%;
+        }
+      }
+      .contact-layout {
+        display: grid;
+        gap: 16px;
+      }
+      .contact-form-panel {
+        padding: 24px 20px;
+      }
+      .contact-list {
+        display: grid;
+        gap: 16px;
+      }
+      .contact-card {
+        padding: 24px 20px;
+      }
+    }
+  }
   #community-list-page {
     width: 100%;
     .container {

@@ -372,3 +372,18 @@ export const UPDATE_RESERVATION = gql`
 		}
 	}
 `;
+
+/**************************
+ *        INQUIRY         *
+ *************************/
+
+/** the contact form (Help page and homepage); anyone can send one **/
+export const CREATE_INQUIRY = gql`
+	mutation CreateInquiry($input: InquiryInput!) {
+		createInquiry(input: $input) {
+			_id
+			inquiryStatus
+			createdAt
+		}
+	}
+`;

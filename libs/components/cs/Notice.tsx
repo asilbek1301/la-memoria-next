@@ -1,53 +1,81 @@
-import React from 'react';
-import { Stack, Box } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
+import React, { useState } from 'react';
+import Moment from 'react-moment';
+import { useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
+import { GET_NOTICES } from '../../../apollo/user/query';
+import { Notice as NoticeItem } from '../../types/notice/notice';
+import { NoticeCategory } from '../../enums/notice.enum';
 
-const Notice = () => {
-	const device = useDeviceDetect();
+const NOTICE_LIMIT = 50;
+
+/** notices written by admins, newest first; each one opens in place **/
+const Notice = ({ onFaq }: { onFaq: () => void }) => {
+	const [open, setOpen] = useState<string[]>([]);
 
 	/** APOLLO REQUESTS **/
-	/** LIFECYCLES **/
-	/** HANDLERS **/
+	const { data, loading } = useQuery(GET_NOTICES, {
+		fetchPolicy: 'cache-and-network',
+		variables: { input: { page: 1, limit: NOTICE_LIMIT, search: { noticeCategory: NoticeCategory.NOTICE } } },
+	});
+	const list: NoticeItem[] = data?.getNotices?.list ?? [];
 
-	const data = [
-		{
-			no: 1,
-			event: true,
-			title: 'Register to use and get discounts',
-			date: '01.03.2024',
-		},
-		{
-			no: 2,
-			title: "It's absolutely free to upload and trade packages",
-			date: '31.03.2024',
-		},
-	];
+	const toggle = (id: string) => setOpen((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
-	if (device === 'mobile') {
-		return <div>NOTICE MOBILE</div>;
-	} else {
-		return (
-			<Stack className={'notice-content'}>
-				<span className={'title'}>Notice</span>
-				<Stack className={'main'}>
-					<Box component={'div'} className={'top'}>
-						<span>number</span>
-						<span>title</span>
-						<span>date</span>
-					</Box>
-					<Stack className={'bottom'}>
-						{data.map((ele: any) => (
-							<div className={`notice-card ${ele?.event && 'event'}`} key={ele.title}>
-								{ele?.event ? <div>event</div> : <span className={'notice-number'}>{ele.no}</span>}
-								<span className={'notice-title'}>{ele.title}</span>
-								<span className={'notice-date'}>{ele.date}</span>
-							</div>
-						))}
-					</Stack>
-				</Stack>
-			</Stack>
-		);
-	}
+	return (
+		<section className={'help-notices'} aria-labelledby="notices-title">
+			<div className={'section-head'}>
+				<h2 id="notices-title" className={'section-title'}>
+					Notices
+				</h2>
+			</div>
+			{loading && list.length === 0 ? (
+				<ul className={'faq-list'} aria-busy="true" aria-label="Loading notices">
+					{Array.from({ length: 3 }).map((_, i) => (
+						<li key={i} className={'faq-item'}>
+							<Skeleton width="50%" height={32} className={'faq-skeleton'} />
+						</li>
+					))}
+				</ul>
+			) : list.length === 0 ? (
+				<div className={'empty-box help-empty'}>
+					<p>No notices right now.</p>
+					<button type="button" className={'button-primary'} onClick={onFaq}>
+						Read the FAQ
+					</button>
+				</div>
+			) : (
+				<ul className={'faq-list'}>
+					{list.map((item) => {
+						const expanded = open.includes(item._id);
+						return (
+							<li key={item._id} className={`faq-item notice-item ${expanded ? 'open' : ''}`}>
+								<h3 className={'faq-question'}>
+									<button
+										type="button"
+										id={`n-${item._id}`}
+										aria-expanded={expanded}
+										aria-controls={`nc-${item._id}`}
+										onClick={() => toggle(item._id)}
+									>
+										<span className={'notice-head'}>
+											<Moment className={'notice-date'} format="MMMM D, YYYY">
+												{item.createdAt}
+											</Moment>
+											<span>{item.noticeTitle}</span>
+										</span>
+										<i className={'faq-sign'} aria-hidden="true" />
+									</button>
+								</h3>
+								<div id={`nc-${item._id}`} role="region" aria-labelledby={`n-${item._id}`} className={'faq-answer'} hidden={!expanded}>
+									<p>{item.noticeContent}</p>
+								</div>
+							</li>
+						);
+					})}
+				</ul>
+			)}
+		</section>
+	);
 };
 
 export default Notice;

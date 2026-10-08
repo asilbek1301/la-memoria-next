@@ -711,3 +711,29 @@ export const GET_STUDIO_RESERVATIONS = gql`
 		}
 	}
 `;
+
+/**************************
+ *         NOTICE         *
+ *************************/
+
+/** Help page content written by admins (FAQ, notices); active items only **/
+export const GET_NOTICES = gql`
+	query GetNotices($input: NoticesInquiry!) {
+		getNotices(input: $input) {
+			list {
+				_id
+				noticeCategory
+				noticeStatus
+				noticeTopic
+				noticeTitle
+				noticeContent
+				memberId
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
