@@ -25,6 +25,7 @@ import PopularPackageCard from '../../libs/components/homepage/PopularPackageCar
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { formatHours } from '../../libs/components/package/packageSearch';
 import { studioName } from '../../libs/components/studio/studioSearch';
+import ViewCount from '../../libs/components/common/ViewCount';
 import { Package } from '../../libs/types/package/package';
 import { T } from '../../libs/types/common';
 import { Direction, Message } from '../../libs/enums/common.enum';
@@ -187,6 +188,7 @@ const PackageDetail: NextPage = () => {
 
 	const isLiked = Boolean(pkg.meLiked?.[0]?.myFavorite);
 	const likes = pkg.packageLikes ?? 0;
+	const views = pkg.packageViews ?? 0;
 	const city = prettyEnum(pkg.packageLocation);
 	const studio = pkg.memberData;
 	const desc = pkg.packageDesc?.trim() ?? '';
@@ -243,6 +245,7 @@ const PackageDetail: NextPage = () => {
 								</div>
 							</div>
 							<div className={'head-actions'}>
+								{views > 0 && <ViewCount count={views} className={'icon-action icon-stat'} />}
 								<button
 									type="button"
 									className={`icon-action ${isLiked ? 'liked' : ''}`}

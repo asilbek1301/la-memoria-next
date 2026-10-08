@@ -200,7 +200,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 						<ul className={'package-grid'}>
 							{packages.map((pkg: Package) => (
 								<li key={pkg._id}>
-									<PopularPackageCard pkg={pkg} likePackageHandler={likePackageHandler} />
+									<PopularPackageCard pkg={pkg} likePackageHandler={likePackageHandler} showViews />
 								</li>
 							))}
 						</ul>

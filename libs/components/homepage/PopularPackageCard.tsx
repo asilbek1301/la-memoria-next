@@ -7,15 +7,19 @@ import { Package } from '../../types/package/package';
 import { formatKRW, prettyEnum } from '../../utils';
 import { packageDetailHref, packageImage, packageInclusions } from './TrendPackageCard';
 import { userVar } from '../../../apollo/store';
+import ViewCount from '../common/ViewCount';
 
 interface PopularPackageCardProps {
 	pkg: Package;
 	/** when given, a save (like) button is shown on the photo (the package list uses it; the homepage does not) */
 	likePackageHandler?: (user: any, id: string) => void;
+	/** shows the view count (an eye) next to the like button (the package list uses it; the homepage does not) */
+	showViews?: boolean;
 }
 
 const PopularPackageCard = (props: PopularPackageCardProps) => {
-	const { pkg, likePackageHandler } = props;
+	const { pkg, likePackageHandler, showViews } = props;
+	const views = showViews ? pkg?.packageViews ?? 0 : 0;
 	const user = useReactiveVar(userVar);
 	const isLiked = Boolean(pkg?.meLiked && pkg?.meLiked[0]?.myFavorite);
 	const image = packageImage(pkg);
@@ -35,16 +39,21 @@ const PopularPackageCard = (props: PopularPackageCardProps) => {
 				{image ? <img src={image} alt="" loading="lazy" /> : <span className={'img-placeholder'} />}
 				<span className={'tag'}>{prettyEnum(pkg?.packageType)} tier</span>
 			</Link>
-			{likePackageHandler && (
-				<button
-					type="button"
-					className={`like-btn ${isLiked ? 'liked' : ''}`}
-					aria-label={isLiked ? `Unlike ${pkg?.packageTitle}` : `Like ${pkg?.packageTitle}`}
-					aria-pressed={isLiked}
-					onClick={() => likePackageHandler(user, pkg?._id)}
-				>
-					{isLiked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
-				</button>
+			{(views > 0 || likePackageHandler) && (
+				<div className={'photo-actions'}>
+					{views > 0 && <ViewCount count={views} />}
+					{likePackageHandler && (
+						<button
+							type="button"
+							className={`like-btn ${isLiked ? 'liked' : ''}`}
+							aria-label={isLiked ? `Unlike ${pkg?.packageTitle}` : `Like ${pkg?.packageTitle}`}
+							aria-pressed={isLiked}
+							onClick={() => likePackageHandler(user, pkg?._id)}
+						>
+							{isLiked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
+						</button>
+					)}
+				</div>
 			)}
 			<div className={'card-meta'}>
 				<span>

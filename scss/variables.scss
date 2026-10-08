@@ -169,6 +169,8 @@ $btn-arrow-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 /** BUTTONS: shared tokens for button-primary / button-secondary / text-link **/
 $btn-height: 52px;
 $btn-pad-x: 32px;
+$photo-chip-bg: rgba(255, 255, 255, 0.92); // white chips on photos (heart, view count)
+$photo-chip: 36px; // their height
 $community-avatar: 36px; // author photo on community posts
 $btn-height-sm: 40px; // compact buttons, e.g. Follow on the studio page
 $btn-pad-x-sm: 20px;

@@ -6,21 +6,25 @@ import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { Member } from '../../types/member/member';
 import { userVar } from '../../../apollo/store';
+import ViewCount from '../common/ViewCount';
 import { studioHref, studioImage, studioLocation, studioName, studioStats } from './studioSearch';
 
 interface StudioCardProps {
 	studio: Member;
 	likeMemberHandler: (user: any, id: string) => void;
+	/** shows the view count (an eye) beside the like button (the studios list uses it) */
+	showViews?: boolean;
 }
 
 /** studios grid card: framed arch portrait, then the location, name, description and counts, centred **/
 const StudioCard = (props: StudioCardProps) => {
-	const { studio, likeMemberHandler } = props;
+	const { studio, likeMemberHandler, showViews } = props;
 	const user = useReactiveVar(userVar);
 	const name = studioName(studio);
 	const href = studioHref(studio);
 	const image = studioImage(studio);
 	const location = studioLocation(studio?.memberAddress);
+	const views = showViews ? studio?.memberViews ?? 0 : 0;
 	const stats = studioStats(studio);
 	const isLiked = Boolean(studio?.meLiked && studio.meLiked[0]?.myFavorite);
 
@@ -30,15 +34,18 @@ const StudioCard = (props: StudioCardProps) => {
 				<Link href={href} className={'arch-media'} tabIndex={-1} aria-hidden="true">
 					{image ? <img src={image} alt="" loading="lazy" /> : <span className={'arch-initial'}>{name.charAt(0)}</span>}
 				</Link>
-				<button
-					type="button"
-					className={`like-btn ${isLiked ? 'liked' : ''}`}
-					aria-label={isLiked ? `Unlike ${name}` : `Like ${name}`}
-					aria-pressed={isLiked}
-					onClick={() => likeMemberHandler(user, studio?._id)}
-				>
-					{isLiked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
-				</button>
+				<div className={'photo-actions'}>
+					{views > 0 && <ViewCount count={views} />}
+					<button
+						type="button"
+						className={`like-btn ${isLiked ? 'liked' : ''}`}
+						aria-label={isLiked ? `Unlike ${name}` : `Like ${name}`}
+						aria-pressed={isLiked}
+						onClick={() => likeMemberHandler(user, studio?._id)}
+					>
+						{isLiked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
+					</button>
+				</div>
 			</div>
 			{location && <p className={'tile-location'}>{location}</p>}
 			<h3 className={'tile-name'}>

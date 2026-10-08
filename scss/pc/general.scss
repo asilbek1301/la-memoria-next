@@ -790,6 +790,28 @@
 			color: $mocha;
 		}
 	}
+	// the heart and the view count grouped on a photo
+	.photo-actions {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+	.view-count {
+		height: $photo-chip;
+		padding: 0 12px;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		box-sizing: border-box;
+		border-radius: $radius-pill;
+		background: $photo-chip-bg;
+		color: $espresso;
+		font-family: $font;
+		font-size: 13px;
+		svg {
+			font-size: 17px;
+		}
+	}
 	.price {
 		color: $espresso;
 		font-family: $font-heading;
@@ -2006,8 +2028,8 @@
 		}
 	}
 	.popular-card {
-		position: relative; // anchors the save button on the photo
-		> .like-btn {
+		position: relative; // anchors the heart (and view count) on the photo
+		> .photo-actions {
 			position: absolute;
 			top: 16px;
 			right: 16px;
@@ -2307,10 +2329,11 @@
 		.arch-frame {
 			width: 100%;
 		}
-		.like-btn {
+		// bottom corner of the photo: the arch top is curved, the bottom corners are square
+		.photo-actions {
 			position: absolute;
-			top: 18px;
-			right: 18px;
+			right: 22px;
+			bottom: 22px;
 			z-index: 1;
 		}
 		.button-link {
@@ -2633,6 +2656,13 @@
 		}
 		&.liked {
 			color: $mocha;
+		}
+		// the view count: same outline, but only information
+		&.icon-stat {
+			cursor: default;
+			&:hover {
+				border-color: $line;
+			}
 		}
 	}
 

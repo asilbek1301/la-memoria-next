@@ -541,13 +541,24 @@
         .arch-frame {
           padding: 6px;
         }
+        .photo-actions {
+          right: 12px;
+          bottom: 12px;
+          gap: 6px;
+        }
         .like-btn {
-          top: 10px;
-          right: 10px;
           width: 32px;
           height: 32px;
           svg {
             font-size: 16px;
+          }
+        }
+        .view-count {
+          height: 32px;
+          padding: 0 10px;
+          font-size: 12px;
+          svg {
+            font-size: 15px;
           }
         }
       }
@@ -776,9 +787,11 @@
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 40px 16px;
+      .studio-tile .photo-actions {
+        right: 12px;
+        bottom: 12px;
+      }
       .studio-tile .like-btn {
-        top: 10px;
-        right: 10px;
         width: 32px;
         height: 32px;
       }

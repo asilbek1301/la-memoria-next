@@ -225,7 +225,7 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 						<ul className={'studio-grid'}>
 							{studios.map((studio: Member) => (
 								<li key={studio._id}>
-									<StudioCard studio={studio} likeMemberHandler={likeMemberHandler} />
+									<StudioCard studio={studio} likeMemberHandler={likeMemberHandler} showViews />
 								</li>
 							))}
 						</ul>
