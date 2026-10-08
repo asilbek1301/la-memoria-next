@@ -1,21 +1,27 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { NextPage } from 'next';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Button, Stack, Typography } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import { useMutation, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
 import { MemberUpdate } from '../../types/member/member.update';
-import { useMutation, useReactiveVar } from '@apollo/client';
+import { MemberType } from '../../enums/member.enum';
 import { getJwtToken, updateStorage, updateUserInfo } from '../../auth';
 import { UPDATE_MEMBER } from '../../../apollo/user/mutation';
 import { sweetErrorHandling, sweetMixinSuccessAlert } from '../../sweetAlert';
-import { Messages, REACT_APP_API_URL } from '../../config';
+import { Messages } from '../../config';
+import { memberPhoto } from '../studio/studioSearch';
 
-const MyProfile: NextPage = ({ initialValues, ...props }: any) => {
-	const device = useDeviceDetect();
-	const token = getJwtToken();
+const DESC_MAX = 300;
+
+type ProfileFields = Pick<MemberUpdate, 'memberNick' | 'memberFullName' | 'memberPhone' | 'memberAddress' | 'memberDesc' | 'memberImage'>;
+
+/** profile form: photo, nickname, name, phone, address and an "About" text (same UPDATE_MEMBER and token refresh as before) **/
+const MyProfile = () => {
 	const user = useReactiveVar(userVar);
-	const [updateData, setUpdateData] = useState<MemberUpdate>(initialValues);
+	const isStudio = user?.memberType === MemberType.STUDIO;
+	const fileRef = useRef<HTMLInputElement>(null);
+	const [form, setForm] = useState<ProfileFields>({});
+	const [uploading, setUploading] = useState<boolean>(false);
+	const [saving, setSaving] = useState<boolean>(false);
 
 	/** APOLLO REQUESTS **/
 
@@ -24,195 +30,154 @@ const MyProfile: NextPage = ({ initialValues, ...props }: any) => {
 	/** LIFECYCLES **/
 
 	useEffect(() => {
-		setUpdateData({
-			...updateData,
+		setForm({
 			memberNick: user.memberNick,
+			memberFullName: user.memberFullName,
 			memberPhone: user.memberPhone,
 			memberAddress: user.memberAddress,
-			memberImage: user.memberImage,
+			memberDesc: user.memberDesc,
+			// the login placeholder path is not a real photo: never send it back as one
+			memberImage: memberPhoto(user.memberImage) ? user.memberImage : '',
 		});
 	}, [user]);
 
 	/** HANDLERS **/
-	
-	const uploadImage = async (e: any) => {
-		try {
-			const image = e.target.files[0];
-			console.log('+image:', image);
 
+	const set = (key: keyof ProfileFields) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+		setForm({ ...form, [key]: e.target.value });
+
+	// the same GraphQL multipart upload as before
+	const uploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const image = e.target.files?.[0];
+		if (!image) return;
+		try {
+			setUploading(true);
 			const formData = new FormData();
 			formData.append(
 				'operations',
 				JSON.stringify({
 					query: `mutation ImageUploader($file: Upload!, $target: String!) {
-						imageUploader(file: $file, target: $target) 
-				  }`,
-					variables: {
-						file: null,
-						target: 'member',
-					},
+						imageUploader(file: $file, target: $target)
+					}`,
+					variables: { file: null, target: 'member' },
 				}),
 			);
-			formData.append(
-				'map',
-				JSON.stringify({
-					'0': ['variables.file'],
-				}),
-			);
+			formData.append('map', JSON.stringify({ '0': ['variables.file'] }));
 			formData.append('0', image);
-
 			const response = await axios.post(`${process.env.REACT_APP_API_GRAPHQL_URL}`, formData, {
 				headers: {
 					'Content-Type': 'multipart/form-data',
 					'apollo-require-preflight': true,
-					Authorization: `Bearer ${token}`,
+					Authorization: `Bearer ${getJwtToken()}`,
 				},
 			});
-
-			const responseImage = response.data.data.imageUploader;
-			console.log('+responseImage: ', responseImage);
-			updateData.memberImage = responseImage;
-			setUpdateData({ ...updateData });
-
-			return `${REACT_APP_API_URL}/${responseImage}`;
+			setForm((current) => ({ ...current, memberImage: response.data.data.imageUploader }));
 		} catch (err) {
-			console.log('Error, uploadImage:', err);
+			await sweetErrorHandling(err);
+		} finally {
+			setUploading(false);
 		}
 	};
 
-	const updateMemberHandler = useCallback(async () => {
+	const submit = async (e: React.FormEvent) => {
+		e.preventDefault();
 		try {
 			if (!user._id) throw new Error(Messages.error2);
-			updateData._id = user._id;
-			const result = await updateMember({
-				variables: {
-					input: updateData,
-				},
+			setSaving(true);
+			const input: MemberUpdate = { _id: user._id };
+			(Object.keys(form) as (keyof ProfileFields)[]).forEach((key) => {
+				const value = form[key]?.trim();
+				if (value) (input as any)[key] = value;
 			});
-
-			//@ts-ignore
+			// the description may be cleared on purpose
+			input.memberDesc = form.memberDesc?.trim() ?? '';
+			const result = await updateMember({ variables: { input } });
 			const jwtToken = result.data.updateMember?.accessToken;
 			await updateStorage({ jwtToken });
-			updateUserInfo(result.data.updateMember?.accessToken);
-			await sweetMixinSuccessAlert('Information updated successfully');
+			updateUserInfo(jwtToken);
+			await sweetMixinSuccessAlert('Your profile is updated');
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
-		}
-	}, [updateData]);
-
-	const doDisabledCheck = () => {
-		if (
-			updateData.memberNick === '' ||
-			updateData.memberPhone === '' ||
-			updateData.memberAddress === '' ||
-			updateData.memberImage === ''
-		) {
-			return true;
+		} finally {
+			setSaving(false);
 		}
 	};
 
-	console.log('+updateData', updateData);
+	const image = memberPhoto(form.memberImage);
+	const nickOk = (form.memberNick?.trim().length ?? 0) >= 3 && (form.memberNick?.trim().length ?? 0) <= 12;
+	const nameOk = !form.memberFullName?.trim() || (form.memberFullName.trim().length >= 3 && form.memberFullName.trim().length <= 100);
+	const canSave = nickOk && nameOk && Boolean(form.memberPhone?.trim()) && !uploading && !saving;
 
-	if (device === 'mobile') {
-		return <>MY PROFILE PAGE MOBILE</>;
-	} else
-		return (
-			<div id="my-profile-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">My Profile</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="top-box">
-					<Stack className="photo-box">
-						<Typography className="title">Photo</Typography>
-						<Stack className="image-big-box">
-							<Stack className="image-box">
-								<img
-									src={
-										updateData?.memberImage
-											? `${REACT_APP_API_URL}/${updateData?.memberImage}`
-											: `/img/profile/defaultUser.svg`
-									}
-									alt=""
-								/>
-							</Stack>
-							<Stack className="upload-big-box">
-								<input
-									type="file"
-									hidden
-									id="hidden-input"
-									onChange={uploadImage}
-									accept="image/jpg, image/jpeg, image/png"
-								/>
-								<label htmlFor="hidden-input" className="labeler">
-									<Typography>Upload Profile Image</Typography>
-								</label>
-								<Typography className="upload-text">A photo must be in JPG, JPEG or PNG format!</Typography>
-							</Stack>
-						</Stack>
-					</Stack>
-					<Stack className="small-input-box">
-						<Stack className="input-box">
-							<Typography className="title">Username</Typography>
-							<input
-								type="text"
-								placeholder="Your username"
-								value={updateData.memberNick}
-								onChange={({ target: { value } }) => setUpdateData({ ...updateData, memberNick: value })}
-							/>
-						</Stack>
-						<Stack className="input-box">
-							<Typography className="title">Phone</Typography>
-							<input
-								type="text"
-								placeholder="Your Phone"
-								value={updateData.memberPhone}
-								onChange={({ target: { value } }) => setUpdateData({ ...updateData, memberPhone: value })}
-							/>
-						</Stack>
-					</Stack>
-					<Stack className="address-box">
-						<Typography className="title">Address</Typography>
-						<input
-							type="text"
-							placeholder="Your address"
-							value={updateData.memberAddress}
-							onChange={({ target: { value } }) => setUpdateData({ ...updateData, memberAddress: value })}
-						/>
-					</Stack>
-					<Stack className="about-me-box">
-						<Button className="update-button" onClick={updateMemberHandler} disabled={doDisabledCheck()}>
-							<Typography>Update Profile</Typography>
-							<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" fill="none">
-								<g clipPath="url(#clip0_7065_6985)">
-									<path
-										d="M12.6389 0H4.69446C4.49486 0 4.33334 0.161518 4.33334 0.361122C4.33334 0.560727 4.49486 0.722245 4.69446 0.722245H11.7672L0.105803 12.3836C-0.0352676 12.5247 -0.0352676 12.7532 0.105803 12.8942C0.176321 12.9647 0.268743 13 0.361131 13C0.453519 13 0.545907 12.9647 0.616459 12.8942L12.2778 1.23287V8.30558C12.2778 8.50518 12.4393 8.6667 12.6389 8.6667C12.8385 8.6667 13 8.50518 13 8.30558V0.361122C13 0.161518 12.8385 0 12.6389 0Z"
-										fill="white"
-									/>
-								</g>
-								<defs>
-									<clipPath id="clip0_7065_6985">
-										<rect width="13" height="13" fill="white" />
-									</clipPath>
-								</defs>
-							</svg>
-						</Button>
-					</Stack>
-				</Stack>
+	return (
+		<section className={'my-section'} aria-labelledby="profile-title">
+			<div className={'section-row'}>
+				<div>
+					<h2 id="profile-title" className={'detail-title'}>
+						Profile
+					</h2>
+					<p className={'section-note'}>
+						{isStudio ? 'How your studio appears to couples.' : 'Your details for studios and other members.'}
+					</p>
+				</div>
 			</div>
-		);
-};
 
-MyProfile.defaultProps = {
-	initialValues: {
-		_id: '',
-		memberImage: '',
-		memberNick: '',
-		memberPhone: '',
-		memberAddress: '',
-	},
+			<form className={'my-form'} onSubmit={submit}>
+				<div className={'photo-field'}>
+					<div className={'my-avatar large'} aria-hidden="true">
+						{image ? <img src={image} alt="" /> : <span className={'arch-initial'}>{(form.memberNick ?? '?').charAt(0).toUpperCase()}</span>}
+					</div>
+					<div className={'photo-actions'}>
+						<p className={'field-label'}>Photo</p>
+						<input ref={fileRef} type="file" accept="image/jpeg,image/jpg,image/png" hidden onChange={uploadImage} />
+						<button type="button" className={'button-secondary'} onClick={() => fileRef.current?.click()} disabled={uploading}>
+							{uploading ? 'Uploading…' : image ? 'Change photo' : 'Add a photo'}
+						</button>
+						<p className={'field-help'}>JPG or PNG.</p>
+					</div>
+				</div>
+
+				<div className={'form-grid'}>
+					<label className={'field'}>
+						<span className={'field-label'}>Nickname</span>
+						<input value={form.memberNick ?? ''} onChange={set('memberNick')} minLength={3} maxLength={12} required />
+						<span className={'field-help'}>3 to 12 characters.</span>
+					</label>
+					<label className={'field'}>
+						<span className={'field-label'}>
+							{isStudio ? 'Studio name' : 'Full name'} <span className={'field-optional'}>(optional)</span>
+						</span>
+						<input value={form.memberFullName ?? ''} onChange={set('memberFullName')} maxLength={100} />
+						{isStudio && <span className={'field-help'}>Shown instead of your nickname.</span>}
+					</label>
+					<label className={'field'}>
+						<span className={'field-label'}>Phone</span>
+						<input type="tel" value={form.memberPhone ?? ''} onChange={set('memberPhone')} required />
+					</label>
+					<label className={'field'}>
+						<span className={'field-label'}>Address</span>
+						<input value={form.memberAddress ?? ''} onChange={set('memberAddress')} />
+						{isStudio && <span className={'field-help'}>Street, district, city. For example: 12, Dosan-daero, Gangnam-gu, Seoul</span>}
+					</label>
+					<label className={'field wide'}>
+						<span className={'field-label'}>
+							About <span className={'field-optional'}>(optional)</span>
+						</span>
+						<textarea rows={4} maxLength={DESC_MAX} value={form.memberDesc ?? ''} onChange={set('memberDesc')} />
+						<span className={'field-help'}>
+							{isStudio ? 'Shown on your studio page. ' : ''}
+							{(form.memberDesc ?? '').length} / {DESC_MAX}
+						</span>
+					</label>
+				</div>
+
+				<div className={'form-foot'}>
+					<button type="submit" className={'button-primary'} disabled={!canSave}>
+						{saving ? 'Saving…' : 'Save changes'}
+					</button>
+				</div>
+			</form>
+		</section>
+	);
 };
 
 export default MyProfile;

@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { Skeleton } from '@mui/material';
+import { Drawer, Skeleton } from '@mui/material';
 import { useReducedMotion } from 'framer-motion';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import PopularPackageCard from '../../libs/components/homepage/PopularPackageCard';
 import { FilterTabs } from '../../libs/components/homepage/HomeSection';
@@ -15,13 +16,14 @@ import StudioCard from '../../libs/components/studio/StudioCard';
 import StudioTiers, { TierFilter } from '../../libs/components/studio/detail/StudioTiers';
 import PortfolioWall from '../../libs/components/studio/detail/PortfolioWall';
 import CommentsSection from '../../libs/components/common/CommentsSection';
+import MyFollowList from '../../libs/components/mypage/MyFollowList';
+import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { SortMenu, SortOption } from '../../libs/components/common/ListControls';
 import {
 	plural,
 	studioImage,
 	studioLocation,
 	studioName,
-	studioStats,
 } from '../../libs/components/studio/studioSearch';
 import { Member } from '../../libs/types/member/member';
 import { Package } from '../../libs/types/package/package';
@@ -63,10 +65,12 @@ const StudioDetail: NextPage = () => {
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
 	const reduceMotion = useReducedMotion();
+	const device = useDeviceDetect();
 	const studioId = typeof router.query.studioId === 'string' ? router.query.studioId : '';
 	const [tier, setTier] = useState<TierFilter>('ALL');
 	const [sort, setSort] = useState<SortOption>(packageSorts[0]);
 	const [visible, setVisible] = useState<number>(PAGE_STEP);
+	const [followersOpen, setFollowersOpen] = useState<boolean>(false);
 	const packagesRef = useRef<HTMLElement>(null);
 
 	/** APOLLO REQUESTS **/
@@ -127,6 +131,19 @@ const StudioDetail: NextPage = () => {
 			else await subscribe({ variables: { input: studioId } });
 			await getMemberRefetch({ input: studioId });
 			await sweetTopSmallSuccessAlert(following ? 'Unfollowed' : 'Following', 800);
+		} catch (err: any) {
+			sweetMixinErrorAlert(err.message).then();
+		}
+	};
+
+	// Follow / Following on a row of the followers panel
+	const toggleFollowHandler = (follow: boolean) => async (id: string, refetch: any, query: any) => {
+		try {
+			requireLogin();
+			if (follow) await subscribe({ variables: { input: id } });
+			else await unsubscribe({ variables: { input: id } });
+			await refetch({ input: query });
+			await sweetTopSmallSuccessAlert(follow ? 'Following' : 'Unfollowed', 800);
 		} catch (err: any) {
 			sweetMixinErrorAlert(err.message).then();
 		}
@@ -207,10 +224,18 @@ const StudioDetail: NextPage = () => {
 	const location = studioLocation(studio.memberAddress);
 	const city = studio.memberAddress?.split(',').pop()?.trim() ?? '';
 	const likes = studio.memberLikes ?? 0;
-	const stats = [studioStats(studio), likes > 0 && plural(likes, 'like')].filter(Boolean).join(' · ');
+	// the follower count opens the followers panel, so it sits next to the Follow button, not in the stats
+	const packageCount = studio.memberPackages ?? 0;
+	const followerCount = studio.memberFollowers ?? 0;
+	const isSelf = Boolean(user?._id) && user._id === studio._id;
+	const stats = [
+		packageCount > 0 && plural(packageCount, 'package'),
+		likes > 0 && plural(likes, 'like'),
+	]
+		.filter(Boolean)
+		.join(' · ');
 	const following = Boolean(studio.meFollowed?.[0]?.myFollowing);
 	const liked = Boolean(studio.meLiked?.[0]?.myFavorite);
-	const isSelf = Boolean(user?._id) && user._id === studio._id;
 	const hasPackages = packages.length > 0;
 
 	const shown = packages
@@ -251,26 +276,35 @@ const StudioDetail: NextPage = () => {
 						<h1 className={'hero-name'}>{name}</h1>
 						{studio.memberDesc && <p className={'hero-desc'}>{studio.memberDesc}</p>}
 						{stats && <p className={'hero-stats'}>{stats}</p>}
-						{!isSelf && (
+						{(!isSelf || followerCount > 0) && (
 							<div className={'hero-actions'}>
-								<button
-									type="button"
-									className={following ? 'button-secondary following' : 'button-primary'}
-									aria-pressed={following}
-									onClick={followHandler}
-								>
-									{following ? 'Following' : 'Follow'}
-								</button>
-								<button
-									type="button"
-									className={`icon-action ${liked ? 'liked' : ''}`}
-									aria-label={liked ? `Remove ${name} from saved studios` : `Save ${name}`}
-									aria-pressed={liked}
-									onClick={() => likeStudioHandler(user, studio._id)}
-								>
-									{liked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
-									{likes > 0 && <span className={'action-count'}>{likes}</span>}
-								</button>
+								{!isSelf && (
+									<>
+										<button
+											type="button"
+											className={following ? 'button-secondary following' : 'button-primary'}
+											aria-pressed={following}
+											onClick={followHandler}
+										>
+											{following ? 'Following' : 'Follow'}
+										</button>
+										<button
+											type="button"
+											className={`icon-action ${liked ? 'liked' : ''}`}
+											aria-label={liked ? `Unlike ${name}` : `Like ${name}`}
+											aria-pressed={liked}
+											onClick={() => likeStudioHandler(user, studio._id)}
+										>
+											{liked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
+											{likes > 0 && <span className={'action-count'}>{likes}</span>}
+										</button>
+									</>
+								)}
+								{followerCount > 0 && (
+									<button type="button" className={'followers-btn'} aria-haspopup="dialog" onClick={() => setFollowersOpen(true)}>
+										<strong>{followerCount}</strong> {followerCount === 1 ? 'follower' : 'followers'}
+									</button>
+								)}
 							</div>
 						)}
 					</div>
@@ -358,6 +392,34 @@ const StudioDetail: NextPage = () => {
 					</section>
 				)}
 			</div>
+
+			<Drawer
+				anchor={device === 'mobile' ? 'bottom' : 'right'}
+				open={followersOpen}
+				onClose={() => setFollowersOpen(false)}
+				classes={{ paper: `filter-panel follow-panel ${device === 'mobile' ? 'full' : ''}` }}
+				PaperProps={{ role: 'dialog', 'aria-labelledby': 'studio-followers-title' } as any}
+			>
+				<header className={'panel-head'}>
+					<h2 id="studio-followers-title" className={'panel-title'}>
+						Followers of {name}
+					</h2>
+					<button type="button" className={'icon-btn'} aria-label="Close" onClick={() => setFollowersOpen(false)}>
+						<CloseRoundedIcon />
+					</button>
+				</header>
+				<div className={'panel-body'}>
+					{followersOpen && (
+						<MyFollowList
+							mode={'followers'}
+							memberId={studio._id}
+							inPanel
+							subscribeHandler={toggleFollowHandler(true)}
+							unsubscribeHandler={toggleFollowHandler(false)}
+						/>
+					)}
+				</div>
+			</Drawer>
 		</div>
 	);
 };

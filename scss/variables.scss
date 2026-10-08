@@ -115,7 +115,6 @@ $portrait-arch: 999px 999px 8px 8px;
 		border-radius: $radius;
 		background: $portrait-sheen;
 		transform: translateX(-130%);
-		// transition: transform 1.2s cubic-bezier(0.45, 0, 0.25, 1); // even speed, so the light visibly crosses the photo
 		pointer-events: none;
 	}
 	img {
@@ -137,6 +136,20 @@ $portrait-arch: 999px 999px 8px 8px;
 	}
 }
 
+/** MY PAGE: album cover and invitation **/
+$print-width: 180px; // one printed photo in the header fan
+$my-prints-width: 420px;
+$my-greeting-size: 64px;
+$my-greeting-size-mobile: 40px;
+$print-shadow: 0 18px 40px -18px rgba(20, 14, 10, 0.45);
+$tab-raise: 0 6px 16px -10px rgba(20, 14, 10, 0.45);
+$invite-line: rgba(201, 168, 124, 0.8);
+$invite-line-soft: rgba(201, 168, 124, 0.35);
+
+/** FORMS (My Page) **/
+$error-ink: #a1453a; // destructive text actions (Delete)
+$select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236b4e3d' stroke-width='1.5'/%3E%3C/svg%3E");
+
 /** STUDIO DETAIL **/
 $studio-hero-portrait: 300px;
 $lightbox-bg: rgba(20, 14, 10, 0.96);
@@ -156,6 +169,9 @@ $btn-arrow-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 /** BUTTONS: shared tokens for button-primary / button-secondary / text-link **/
 $btn-height: 52px;
 $btn-pad-x: 32px;
+$community-avatar: 36px; // author photo on community posts
+$btn-height-sm: 40px; // compact buttons, e.g. Follow on the studio page
+$btn-pad-x-sm: 20px;
 $btn-font-size: 11px; // Stitch label-uppercase
 $btn-weight: 500;
 $btn-tracking: 0.18em;

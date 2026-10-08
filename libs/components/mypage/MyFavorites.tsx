@@ -1,105 +1,88 @@
 import React, { useState } from 'react';
-import { NextPage } from 'next';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Pagination, Stack, Typography } from '@mui/material';
-import PackageCard from '../package/PackageCard';
+import Link from 'next/link';
+import { useMutation, useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
+import { GET_FAVORITES } from '../../../apollo/user/query';
+import { LIKE_TARGET_PACKAGE } from '../../../apollo/user/mutation';
 import { Package } from '../../types/package/package';
 import { T } from '../../types/common';
-import { useMutation, useQuery } from '@apollo/client';
-import { LIKE_TARGET_PACKAGE } from '../../../apollo/user/mutation';
-import { GET_FAVORITES } from '../../../apollo/user/query';
 import { Messages } from '../../config';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import PopularPackageCard from '../homepage/PopularPackageCard';
+import { ResultsPagination } from '../common/ListControls';
 
-const MyFavorites: NextPage = () => {
-	const device = useDeviceDetect();
-	const [myFavorites, setMyFavorites] = useState<Package[]>([]);
-	const [total, setTotal] = useState<number>(0);
-	const [searchFavorites, setSearchFavorites] = useState<T>({ page: 1, limit: 6 });
+const PAGE_SIZE = 6;
+
+/** liked packages: every package here is liked, so the heart shows filled and removes it **/
+const MyFavorites = () => {
+	const [page, setPage] = useState<number>(1);
 
 	/** APOLLO REQUESTS **/
 
 	const [likeTargetPackage] = useMutation(LIKE_TARGET_PACKAGE);
-
-	const {
-		refetch: getFavoritesRefetch,
-	} = useQuery(GET_FAVORITES, {
+	const { data, loading, refetch } = useQuery(GET_FAVORITES, {
 		fetchPolicy: 'network-only',
-		variables: { input: searchFavorites },
+		variables: { input: { page, limit: PAGE_SIZE } },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setMyFavorites(data.getFavorites?.list);
-			setTotal(data.getFavorites?.metaCounter?.[0]?.total || 0);
-		},
 	});
+	const favorites: Package[] = (data?.getFavorites?.list ?? []).map((pkg: Package) => ({
+		...pkg,
+		meLiked: [{ memberId: '', likeRefId: pkg._id, myFavorite: true }],
+	}));
+	const total: number = data?.getFavorites?.metaCounter?.[0]?.total ?? 0;
 
 	/** HANDLERS **/
-
-	const paginationHandler = (e: T, value: number) => {
-		setSearchFavorites({ ...searchFavorites, page: value });
-	};
 
 	const likePackageHandler = async (user: T, id: string) => {
 		try {
 			if (!id) return;
 			if (!user._id) throw new Error(Messages.error2);
-
-			await likeTargetPackage({
-				variables: { input: id },
-			});
-
-			await getFavoritesRefetch({ input: searchFavorites });
-			await sweetTopSmallSuccessAlert('success', 800);
+			await likeTargetPackage({ variables: { input: id } });
+			await refetch({ input: { page, limit: PAGE_SIZE } });
+			await sweetTopSmallSuccessAlert('Removed from liked', 800);
 		} catch (err: any) {
 			console.log('Error, likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
-	if (device === 'mobile') {
-		return <div>LA MEMORIA SAVED PACKAGES MOBILE</div>;
-	} else {
-		return (
-			<div id="my-favorites-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">My Favorites</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="favorites-list-box">
-					{myFavorites?.length ? (
-						myFavorites?.map((pkg: Package) => {
-							return <PackageCard pkg={pkg} likePackageHandler={likePackageHandler} myFavorites={true} />;
-						})
-					) : (
-						<div className={'no-data'}>
-							<img src="/img/icons/icoAlert.svg" alt="" />
-							<p>No Favorites found!</p>
-						</div>
-					)}
-				</Stack>
-				{myFavorites?.length ? (
-					<Stack className="pagination-config">
-						<Stack className="pagination-box">
-							<Pagination
-								count={Math.ceil(total / searchFavorites.limit)}
-								page={searchFavorites.page}
-								shape="circular"
-								color="primary"
-								onChange={paginationHandler}
-							/>
-						</Stack>
-						<Stack className="total-result">
-							<Typography>
-								Total {total} saved package{total > 1 ? 's' : ''}
-							</Typography>
-						</Stack>
-					</Stack>
-				) : null}
+	return (
+		<section className={'my-section'} aria-labelledby="liked-title">
+			<div className={'section-row'}>
+				<div>
+					<h2 id="liked-title" className={'detail-title'}>
+						Liked packages
+					</h2>
+					<p className={'section-note'}>Packages you liked with the heart.</p>
+				</div>
 			</div>
-		);
-	}
+			{loading && favorites.length === 0 ? (
+				<div className={'my-grid'} aria-busy="true">
+					{[0, 1, 2].map((i) => (
+						<Skeleton key={i} variant="rectangular" className={'skeleton portrait'} />
+					))}
+				</div>
+			) : favorites.length === 0 ? (
+				<div className={'empty-box my-empty'}>
+					<p>No liked packages yet.</p>
+					<Link href={'/package'} className={'button-primary'}>
+						Browse packages
+					</Link>
+				</div>
+			) : (
+				<ul className={'my-grid'}>
+					{favorites.map((pkg) => (
+						<li key={pkg._id}>
+							<PopularPackageCard pkg={pkg} likePackageHandler={likePackageHandler} />
+						</li>
+					))}
+				</ul>
+			)}
+			{total > PAGE_SIZE && (
+				<ResultsPagination page={page} limit={PAGE_SIZE} total={total} onPage={setPage} noun="liked packages" />
+			)}
+		</section>
+	);
 };
 
 export default MyFavorites;

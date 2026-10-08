@@ -1,126 +1,75 @@
 import React, { useState } from 'react';
-import { NextPage } from 'next';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { Pagination, Stack, Typography } from '@mui/material';
-import CommunityCard from '../common/CommunityCard';
+import Link from 'next/link';
+import { useQuery, useReactiveVar } from '@apollo/client';
+import { Skeleton } from '@mui/material';
 import { userVar } from '../../../apollo/store';
-import { T } from '../../types/common';
-import { BoardArticle } from '../../types/board-article/board-article';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { LIKE_TARGET_BOARD_ARTICLE } from '../../../apollo/user/mutation';
 import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
-import { Message } from '../../enums/common.enum';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import { BoardArticle } from '../../types/board-article/board-article';
+import { Direction } from '../../enums/common.enum';
+import CommunityCard from '../homepage/CommunityCard';
+import { ResultsPagination } from '../common/ListControls';
 
-const MyArticles: NextPage = ({ initialInput, ...props }: T) => {
-	const device = useDeviceDetect();
+const PAGE_SIZE = 6;
+
+/** your community posts, newest first, with "Write a post" **/
+const MyArticles = () => {
 	const user = useReactiveVar(userVar);
-	const [searchCommunity, setSearchCommunity] = useState({
-		...initialInput,
-		search: { memberId: user._id },
-	});
-	const [boardArticles, setBoardArticles] = useState<BoardArticle[]>([]);
-	const [totalCount, setTotalCount] = useState<number>(0);
+	const [page, setPage] = useState<number>(1);
 
 	/** APOLLO REQUESTS **/
 
-	const [likeTargetBoardArticle] = useMutation(LIKE_TARGET_BOARD_ARTICLE);
-
-	const {
-		refetch: boardArticlesRefetch,
-	} = useQuery(GET_BOARD_ARTICLES, {
+	const { data, loading } = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'network-only',
-		variables: { input: searchCommunity },
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setBoardArticles(data?.getBoardArticles?.list);
-			setTotalCount(data?.getBoardArticles?.metaCounter[0]?.total);
+		variables: {
+			input: { page, limit: PAGE_SIZE, sort: 'createdAt', direction: Direction.DESC, search: { memberId: user?._id } },
 		},
+		skip: !user?._id,
+		notifyOnNetworkStatusChange: true,
 	});
+	const articles: BoardArticle[] = data?.getBoardArticles?.list ?? [];
+	const total: number = data?.getBoardArticles?.metaCounter?.[0]?.total ?? 0;
+	const writeHref = { pathname: '/mypage', query: { category: 'writeArticle' } };
 
-	/** HANDLERS **/
-
-	const paginationHandler = (e: T, value: number) => {
-		setSearchCommunity({ ...searchCommunity, page: value });
-	};
-
-	const likeBoArticleHandler = async (e: T, user: any, id: string) => {
-		try {
-			e.stopPropagation();
-			if (!id) return;
-			if (!user._id) throw new Error(Message.NOT_AUTHENTICATED);
-
-			await likeTargetBoardArticle({
-				variables: { input: id },
-			});
-
-			await boardArticlesRefetch({ input: searchCommunity });
-			await sweetTopSmallSuccessAlert('Success', 750);
-		} catch (err: any) {
-			console.log('Error, likeBoArticleHandler', err.message);
-			sweetMixinErrorAlert(err.message).then();
-		}
-	};
-
-	if (device === 'mobile') {
-		return <>ARTICLE PAGE MOBILE</>;
-	} else
-		return (
-			<div id="my-articles-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">Article</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="article-list-box">
-					{boardArticles?.length > 0 ? (
-						boardArticles?.map((boardArticle: BoardArticle) => {
-							return (
-								<CommunityCard
-								boardArticle={boardArticle}
-								key={boardArticle?._id}
-								size={'small'}
-								likeArticleHandler={likeBoArticleHandler}
-								/>
-							);
-						})
-					) : (
-						<div className={'no-data'}>
-							<img src="/img/icons/icoAlert.svg" alt="" />
-							<p>No Articles found!</p>
-						</div>
-					)}
-				</Stack>
-
-				{boardArticles?.length > 0 && (
-					<Stack className="pagination-conf">
-						<Stack className="pagination-box">
-							<Pagination
-								count={Math.ceil(totalCount / searchCommunity.limit)}
-								page={searchCommunity.page}
-								shape="circular"
-								color="primary"
-								onChange={paginationHandler}
-							/>
-						</Stack>
-						<Stack className="total">
-							<Typography>Total {totalCount ?? 0} article(s) available</Typography>
-						</Stack>
-					</Stack>
+	return (
+		<section className={'my-section'} aria-labelledby="posts-title">
+			<div className={'section-row'}>
+				<div>
+					<h2 id="posts-title" className={'detail-title'}>
+						My posts
+					</h2>
+					<p className={'section-note'}>Your posts in the community.</p>
+				</div>
+				{articles.length > 0 && (
+					<Link href={writeHref} className={'button-secondary'}>
+						Write a post
+					</Link>
 				)}
 			</div>
-		);
-};
-
-MyArticles.defaultProps = {
-	initialInput: {
-		page: 1,
-		limit: 6,
-		sort: 'createdAt',
-		direction: 'DESC',
-		search: {},
-	},
+			{loading && articles.length === 0 ? (
+				<div className={'my-grid three'} aria-busy="true">
+					{[0, 1, 2].map((i) => (
+						<Skeleton key={i} variant="rectangular" className={'skeleton res-skeleton'} />
+					))}
+				</div>
+			) : articles.length === 0 ? (
+				<div className={'empty-box my-empty'}>
+					<p>You haven&apos;t written any posts yet.</p>
+					<Link href={writeHref} className={'button-primary'}>
+						Write a post
+					</Link>
+				</div>
+			) : (
+				<ul className={'my-grid three'}>
+					{articles.map((article) => (
+						<li key={article._id}>
+							<CommunityCard article={article} />
+						</li>
+					))}
+				</ul>
+			)}
+			{total > PAGE_SIZE && <ResultsPagination page={page} limit={PAGE_SIZE} total={total} onPage={setPage} noun="posts" />}
+		</section>
+	);
 };
 
 export default MyArticles;

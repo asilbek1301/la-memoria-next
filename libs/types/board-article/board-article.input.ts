@@ -10,8 +10,10 @@ export interface BoardArticleInput {
 }
 
 interface BAISearch {
-	articleCategory: BoardArticleCategory;
+	/** optional: no category means every category (the All tab) */
+	articleCategory?: BoardArticleCategory;
 	text?: string;
+	memberId?: string;
 }
 
 export interface BoardArticlesInquiry {

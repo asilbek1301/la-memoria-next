@@ -246,7 +246,7 @@ const PackageDetail: NextPage = () => {
 								<button
 									type="button"
 									className={`icon-action ${isLiked ? 'liked' : ''}`}
-									aria-label={isLiked ? 'Remove from saved packages' : 'Save this package'}
+									aria-label={isLiked ? 'Unlike this package' : 'Like this package'}
 									aria-pressed={isLiked}
 									onClick={() => likePackageHandler(user, pkg._id)}
 								>

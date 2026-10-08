@@ -33,7 +33,7 @@ const StudioCard = (props: StudioCardProps) => {
 				<button
 					type="button"
 					className={`like-btn ${isLiked ? 'liked' : ''}`}
-					aria-label={isLiked ? `Remove ${name} from saved studios` : `Save ${name}`}
+					aria-label={isLiked ? `Unlike ${name}` : `Like ${name}`}
 					aria-pressed={isLiked}
 					onClick={() => likeMemberHandler(user, studio?._id)}
 				>

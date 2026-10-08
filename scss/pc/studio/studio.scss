@@ -52,6 +52,7 @@
 			.spotlight-name {
 				@include text-display-hero;
 			}
+			.spotlight-why,
 			.spotlight-desc {
 				max-width: 560px;
 			}

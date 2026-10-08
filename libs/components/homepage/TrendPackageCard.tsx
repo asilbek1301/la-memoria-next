@@ -39,7 +39,7 @@ const TrendPackageCard = (props: TrendPackageCardProps) => {
 		<button
 			type="button"
 			className={`like-btn ${isLiked ? 'liked' : ''}`}
-			aria-label={isLiked ? `Remove ${pkg?.packageTitle} from saved packages` : `Save ${pkg?.packageTitle}`}
+			aria-label={isLiked ? `Unlike ${pkg?.packageTitle}` : `Like ${pkg?.packageTitle}`}
 			aria-pressed={isLiked}
 			onClick={() => likePackageHandler(user, pkg?._id)}
 		>

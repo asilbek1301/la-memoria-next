@@ -94,6 +94,7 @@
 .home-page,
 .package-page,
 .studio-page,
+.community-page,
 .detail-page,
 .filter-panel,
 .filter-sheet,
@@ -505,6 +506,7 @@
 .home-page,
 .package-page,
 .studio-page,
+.community-page,
 .detail-page,
 .filter-panel,
 .filter-sheet,
@@ -673,6 +675,7 @@
 .home-page,
 .package-page,
 .studio-page,
+.community-page,
 .detail-page {
 	background: $ivory;
 	color: $espresso;
@@ -1309,6 +1312,320 @@
 	}
 }
 
+/** COMMUNITY PAGE LOOKS (pages/community/index.tsx, libs/components/community/*); layout is in pc/community/community.scss
+    and mobile/main.scss. The cards, search field, sort menu and pagination come from the shared blocks above **/
+.community-page {
+	/** category tabs: plain text on one hairline, the active one underlined **/
+	.category-tabs {
+		display: flex;
+		border-bottom: 1px solid $line;
+	}
+	.category-tab {
+		position: relative;
+		padding: 0 0 16px;
+		display: inline-flex;
+		align-items: baseline;
+		gap: 6px;
+		border: none;
+		background: transparent;
+		color: $muted;
+		font-family: $font;
+		@include text-label-uppercase;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: color 0.3s ease;
+		@include focus-ring;
+		&::after {
+			content: '';
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: -1px;
+			height: 2px;
+			background: $espresso;
+			transform: scaleX(0);
+			transform-origin: left;
+			transition: transform 0.35s $ease-out;
+		}
+		&:hover {
+			color: $espresso;
+		}
+		&.active {
+			color: $espresso;
+			&::after {
+				transform: scaleX(1);
+			}
+		}
+		.tab-count {
+			color: $muted;
+			font-weight: 400;
+			letter-spacing: 0.06em;
+		}
+	}
+
+	/** front page: the lead story and "Most read" **/
+	.front-lead {
+		min-width: 0;
+		&:hover .lead-media img {
+			transform: scale(1.03);
+		}
+	}
+	.lead-media {
+		display: block;
+		overflow: hidden;
+		aspect-ratio: 16 / 9;
+		// no photo: a shorter sand band, so the title still sits near the top
+		&.no-image {
+			aspect-ratio: 21 / 9;
+		}
+		border-radius: $radius-tile;
+		background: $sand;
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+			transition: transform 0.6s $ease-out;
+		}
+	}
+	// post without an image: its category name in the heading font on sand
+	.img-placeholder.category {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $mocha;
+		font-family: $font-heading;
+		font-size: 40px;
+	}
+	.lead-category {
+		@include eyebrow;
+		margin: 0;
+		color: $espresso;
+	}
+	.lead-title {
+		@include text-headline-md;
+		margin: 0;
+		overflow-wrap: anywhere;
+		a {
+			color: $espresso;
+			text-decoration: none;
+			white-space: normal;
+			@include focus-ring;
+			&:hover {
+				text-decoration: underline;
+				text-decoration-thickness: 1px;
+				text-underline-offset: 6px;
+			}
+		}
+	}
+	.lead-excerpt {
+		margin: 0;
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		color: $muted;
+		font-size: 15px;
+		line-height: 1.65;
+	}
+	.lead-foot {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px 24px;
+		padding-top: 20px;
+		border-top: 1px solid $line;
+	}
+	.front-read {
+		min-width: 0;
+		border-radius: $radius-card;
+		background: $ivory-deep;
+	}
+	.read-title {
+		@include eyebrow;
+		margin: 0;
+		color: $espresso;
+	}
+	.read-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.read-item {
+		display: flex;
+		gap: 18px;
+		padding: 18px 0;
+		border-top: 1px solid $line;
+		&:first-child {
+			border-top: none;
+		}
+	}
+	.read-number {
+		min-width: 22px;
+		color: $mocha;
+		font-family: $font-heading;
+		font-size: 24px;
+		line-height: 1.1;
+	}
+	.read-text {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.read-link {
+		overflow: hidden;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 17px;
+		line-height: 1.4;
+		text-decoration: none;
+		white-space: normal;
+		overflow-wrap: anywhere;
+		transition: color 0.3s ease;
+		@include focus-ring;
+		&:hover {
+			color: $mocha;
+		}
+	}
+	.read-meta {
+		@include text-label-meta;
+		margin: 0;
+		color: $muted;
+	}
+
+	/** latest posts: the homepage article card with the author and counts underneath **/
+	.latest-title {
+		@include text-headline-sm;
+		margin: 0;
+		color: $espresso;
+	}
+	.article-grid {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
+		// real cards stretch to the row height so authors line up; skeleton cards stay stacked blocks
+		> li:not(.card-skeleton) {
+			display: flex;
+		}
+	}
+	.article-card {
+		position: relative; // anchors the like button on the photo
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		> .like-btn {
+			position: absolute;
+			top: 14px;
+			right: 14px;
+			z-index: 1;
+		}
+		.card-title {
+			height: 2lh;
+		}
+		.card-excerpt {
+			-webkit-line-clamp: 1;
+		}
+		// pinned to the bottom so authors line up across a grid row
+		.card-foot {
+			margin-top: auto;
+			padding-top: 18px;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+		}
+	}
+	.card-skeleton {
+		min-width: 0;
+		.MuiSkeleton-text {
+			background-color: rgba(239, 230, 218, 0.7);
+		}
+	}
+
+	/** author and counts, shared by the lead story and the cards **/
+	.article-author {
+		min-width: 0;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
+	.author-avatar {
+		width: $community-avatar;
+		height: $community-avatar;
+		flex-shrink: 0;
+		overflow: hidden;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		background: $sand;
+		color: $mocha;
+		font-family: $font-heading;
+		font-size: 14px;
+		text-decoration: none;
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+	.author-text {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.author-name {
+		overflow: hidden;
+		color: $espresso;
+		font-size: 14px;
+		font-weight: 500;
+		text-decoration: none;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		@include focus-ring;
+		&:hover {
+			text-decoration: underline;
+			text-underline-offset: 3px;
+		}
+	}
+	.author-date {
+		@include text-label-meta;
+		color: $muted;
+	}
+	.article-counts {
+		margin: 0;
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		color: $muted;
+		font-size: 13px;
+		> span {
+			display: inline-flex;
+			align-items: center;
+			gap: 5px;
+		}
+		svg {
+			display: block;
+			font-size: 16px;
+		}
+	}
+
+	.community-guidelines {
+		margin: 0;
+		text-align: center;
+	}
+}
+
 /** ROUNDED SHAPES (Stitch "remaked sample"): same homepage, rounded boxes, pill tabs and tags, circular icon buttons **/
 /** hero CTA on the photo: ivory pill with a round espresso arrow chip **/
 .button-primary.on-dark {
@@ -1344,6 +1661,7 @@
 .home-page,
 .package-page,
 .studio-page,
+.community-page,
 .detail-page {
 	.filter-tabs {
 		gap: 8px;
@@ -1405,6 +1723,7 @@
 /** PACKAGES PAGE LOOKS (pages/package/index.tsx, libs/components/package/*); layout is in pc/package/package.scss and mobile/main.scss **/
 .package-page,
 .studio-page,
+.community-page,
 .detail-page {
 	background: $ivory;
 	color: $espresso;
@@ -1768,7 +2087,8 @@
 /** STUDIOS PAGE LOOKS (pages/studio/index.tsx, libs/components/studio/*); layout is in pc/studio/studio.scss and mobile/main.scss.
     .studio-detail reuses them for its arch portrait and the "More studios" tiles **/
 .studio-page,
-.studio-detail {
+.studio-detail,
+.community-page {
 	.header-label {
 		@include eyebrow;
 	}
@@ -1892,6 +2212,12 @@
 		font-size: 16px;
 		line-height: 1.7;
 	}
+	// why this studio is first, in one plain sentence
+	.spotlight-why {
+		@include text-body-lg;
+		margin: 0;
+		color: $espresso;
+	}
 	.spotlight-stats {
 		@include text-label-uppercase;
 		margin: 0;
@@ -1899,6 +2225,10 @@
 		border-top: 1px solid $line;
 		border-bottom: 1px solid $line;
 		color: $muted;
+		// the number behind the reason
+		.lead {
+			color: $espresso;
+		}
 	}
 	.mini-label {
 		@include eyebrow;
@@ -2886,6 +3216,30 @@
 		.button-secondary.following {
 			background: transparent;
 		}
+		// opens the followers panel; looks like an outlined Follow button
+		.followers-btn {
+			@include button-secondary;
+			gap: 6px;
+			strong {
+				color: inherit;
+				font-weight: 600;
+			}
+		}
+		// compact: Follow, the heart and the follower count share one small size
+		.button-primary,
+		.button-secondary,
+		.followers-btn {
+			min-height: $btn-height-sm;
+			padding: 0 $btn-pad-x-sm;
+		}
+		.icon-action {
+			min-width: $btn-height-sm;
+			height: $btn-height-sm;
+			padding: 0 12px;
+			svg {
+				font-size: 18px;
+			}
+		}
 		// Follow is a toggle, not a way forward: no arrow
 		.button-primary::after {
 			content: none;
@@ -3042,6 +3396,962 @@
 		height: 180px;
 		margin: 56px 0 0;
 		border-radius: $radius-card;
+	}
+}
+
+/** MY PAGE LOOKS (pages/mypage/index.tsx, libs/components/mypage/*); also uses the .detail-page looks.
+    Layout is in pc/mypage/mypage.scss and mobile/main.scss **/
+.my-page {
+	/** header: "your album cover" **/
+	.my-hero {
+		position: relative;
+		overflow: hidden;
+		border: 1px solid $line;
+		border-radius: $radius-card;
+		background: $ivory-deep;
+		&:hover {
+			.print-1 {
+				transform: translate(-14px, 4px) rotate(-12deg);
+			}
+			.print-2 {
+				transform: translateY(-10px) rotate(2deg);
+			}
+			.print-3 {
+				transform: translate(14px, 6px) rotate(13deg);
+			}
+		}
+	}
+	.hero-copy {
+		position: relative;
+		z-index: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.hero-who {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+	.my-avatar {
+		flex-shrink: 0;
+		padding: 3px;
+		box-sizing: border-box;
+		border-radius: 999px 999px $radius-menu $radius-menu;
+		background: #ffffff;
+		box-shadow: $studio-frame-shadow;
+		img,
+		.arch-initial {
+			width: 100%;
+			aspect-ratio: 4 / 5;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			border-radius: 999px 999px 8px 8px;
+			background: $sand;
+			color: $mocha;
+			font-family: $font-heading;
+			font-size: 20px;
+			object-fit: cover;
+		}
+	}
+	.my-since {
+		@include text-label-uppercase;
+		color: $muted;
+	}
+	.my-greeting {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.03em;
+		line-height: 1.04;
+	}
+	.greeting-name {
+		display: block;
+		color: $mocha;
+	}
+	.my-stats {
+		@include text-label-uppercase;
+		margin: 0;
+		color: $muted;
+	}
+	.stat-dot {
+		margin: 0 10px;
+	}
+	.hero-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 20px;
+	}
+	.hero-follows {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+	.follow-pill {
+		height: 40px;
+		padding: 0 18px;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: #ffffff;
+		color: $muted;
+		font-family: $font;
+		font-size: 14px;
+		cursor: pointer;
+		transition: border-color 0.3s ease, color 0.3s ease;
+		@include focus-ring;
+		strong {
+			color: $espresso;
+			font-weight: 500;
+		}
+		&:hover {
+			border-color: $espresso;
+			color: $espresso;
+		}
+	}
+	// a fan of printed photos
+	.hero-prints {
+		position: relative;
+	}
+	.print {
+		position: absolute;
+		padding: 8px 8px 22px;
+		box-sizing: border-box;
+		border-radius: 4px;
+		background: #ffffff;
+		box-shadow: $print-shadow;
+		transition: transform 0.7s $ease-out;
+		img {
+			width: 100%;
+			aspect-ratio: 4 / 5;
+			display: block;
+			border-radius: 2px;
+			object-fit: cover;
+		}
+	}
+	.print-empty img {
+		padding: 28%;
+		box-sizing: border-box;
+		background: $sand;
+		object-fit: contain;
+	}
+	.count-3 {
+		.print-1 {
+			left: 0;
+			top: 34px;
+			transform: rotate(-9deg);
+		}
+		.print-2 {
+			left: 50%;
+			top: 0;
+			z-index: 2;
+			margin-left: calc(#{$print-width} / -2);
+			transform: rotate(3deg);
+		}
+		.print-3 {
+			right: 0;
+			top: 44px;
+			z-index: 1;
+			transform: rotate(10deg);
+		}
+	}
+	.count-2 {
+		.print-1 {
+			left: 8%;
+			top: 20px;
+			transform: rotate(-7deg);
+		}
+		.print-2 {
+			right: 8%;
+			top: 4px;
+			transform: rotate(5deg);
+		}
+	}
+	.count-1 .print-1 {
+		left: 50%;
+		top: 10px;
+		margin-left: calc(#{$print-width} / -2);
+		transform: rotate(-4deg);
+	}
+
+	/** tabs: a soft pill bar, the active tab raised in white **/
+	.my-tabs {
+		width: fit-content;
+		max-width: 100%;
+		padding: 6px;
+		display: flex;
+		gap: 4px;
+		overflow-x: auto;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: $ivory-deep;
+		scrollbar-width: none;
+		&::-webkit-scrollbar {
+			display: none;
+		}
+	}
+	.my-tab {
+		flex-shrink: 0;
+		padding: 10px 18px;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		border-radius: $radius-pill;
+		color: $muted;
+		font-family: $font;
+		font-size: 14px;
+		text-decoration: none;
+		white-space: nowrap;
+		transition: color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+		@include focus-ring;
+		&:hover {
+			color: $espresso;
+		}
+		&.active {
+			background: #ffffff;
+			color: $espresso;
+			box-shadow: $tab-raise;
+		}
+	}
+	.tab-count {
+		min-width: 20px;
+		height: 20px;
+		padding: 0 6px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		border-radius: $radius-pill;
+		background: $sand;
+		color: $espresso;
+		font-size: 11px;
+	}
+
+	/** sections **/
+	.section-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-end;
+		justify-content: space-between;
+		gap: 16px 32px;
+		.detail-title {
+			margin: 0;
+		}
+		.button-link svg {
+			font-size: 16px;
+		}
+	}
+	.section-note {
+		margin: 6px 0 0;
+		color: $muted;
+		font-size: 14px;
+	}
+	.my-grid {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
+		.popular-card .card-title {
+			@include text-title-editorial;
+			height: 2lh;
+		}
+		.skeleton.portrait {
+			margin: 0;
+		}
+	}
+
+	/** your next shoot: an invitation card and the photo in an arch window **/
+	.invite {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		border-radius: $radius-card;
+		background: #ffffff;
+		box-shadow: $soft-shadow;
+		// a thin double line, like a printed invitation
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			pointer-events: none;
+			border-radius: calc(#{$radius-card} - 8px);
+		}
+		&::before {
+			inset: 12px;
+			border: 1px solid $invite-line;
+		}
+		&::after {
+			inset: 17px;
+			border: 1px solid $invite-line-soft;
+		}
+		> * {
+			position: relative;
+			z-index: 1;
+		}
+	}
+	.shoot-label {
+		@include text-label-uppercase;
+		margin: 0;
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		color: $mocha;
+		&::before,
+		&::after {
+			content: '';
+			width: 18px;
+			height: 1px;
+			background: $champagne;
+		}
+	}
+	.invite-date {
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.date-month,
+	.date-weekday {
+		@include text-label-uppercase;
+		color: $muted;
+	}
+	.date-day {
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.04em;
+		line-height: 1;
+	}
+	.invite-rule {
+		width: 48px;
+		height: 1px;
+		background: $champagne;
+	}
+	.shoot-title {
+		margin: 0;
+		font-family: $font-heading;
+		font-weight: 400;
+		a {
+			color: $espresso;
+			text-decoration: none;
+			white-space: normal;
+			@include focus-ring;
+		}
+	}
+	.shoot-meta {
+		margin: 0;
+		color: $muted;
+		font-size: 14px;
+	}
+	.status-pill {
+		@include text-label-uppercase;
+		padding: 5px 12px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: #ffffff;
+		color: $espresso;
+		white-space: nowrap;
+	}
+	.invite-photo {
+		display: block;
+		border-radius: 999px 999px $radius-card $radius-card;
+		background: $sand;
+		img,
+		.img-placeholder {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+		@include portrait-light($line-inset: 16px);
+		&:hover {
+			@include portrait-light-on;
+		}
+	}
+	.shoot-track {
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		list-style: none;
+		li {
+			position: relative;
+			padding-top: 22px;
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			// the line to the next step
+			&::before {
+				content: '';
+				position: absolute;
+				top: 6px;
+				left: 0;
+				right: 0;
+				height: 2px;
+				background: $line;
+			}
+			&:last-child::before {
+				right: auto;
+				width: 14px;
+			}
+			&.done::before {
+				background: $espresso;
+			}
+		}
+		.track-dot {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 14px;
+			height: 14px;
+			box-sizing: border-box;
+			border: 2px solid $line;
+			border-radius: 50%;
+			background: #ffffff;
+		}
+		li.done .track-dot {
+			border-color: $espresso;
+			background: $espresso;
+		}
+		li.current .track-dot {
+			border-color: $mocha;
+			box-shadow: 0 0 0 4px rgba(107, 78, 61, 0.14);
+		}
+		.track-label {
+			color: $muted;
+			font-size: 11px;
+			letter-spacing: 0.12em;
+			text-transform: uppercase;
+		}
+		li.done .track-label,
+		li.current .track-label {
+			color: $espresso;
+		}
+		.track-date {
+			color: $muted;
+			font-size: 12px;
+		}
+	}
+	.shoot-track {
+		width: 100%;
+		text-align: left;
+	}
+	.shoot-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 12px 24px;
+	}
+
+	/** reservation cards **/
+	.reservation-list {
+		display: grid;
+		gap: 16px;
+	}
+	.reservation-card {
+		display: grid;
+		align-items: start;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-card;
+		background: #ffffff;
+		&.status-confirmed .status-pill {
+			border-color: $espresso;
+			background: $espresso;
+			color: $ivory;
+		}
+		&.status-completed .status-pill {
+			background: $sand;
+		}
+		&.status-cancelled {
+			.status-pill,
+			.res-title a,
+			.res-date {
+				color: $muted;
+			}
+		}
+	}
+	.res-thumb {
+		display: block;
+		aspect-ratio: 4 / 5;
+		overflow: hidden;
+		border-radius: $radius-tile;
+		background: $sand;
+		img,
+		.img-placeholder {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+	}
+	.res-body {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+	.res-top {
+		margin-bottom: 4px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+	.res-title {
+		margin: 0;
+		font-family: $font-heading;
+		font-size: 22px;
+		font-weight: 400;
+		a {
+			color: $espresso;
+			text-decoration: none;
+			white-space: normal;
+			@include focus-ring;
+		}
+	}
+	.res-meta {
+		@include eyebrow;
+		margin: 0;
+	}
+	.res-date {
+		margin: 4px 0 0;
+		color: $espresso;
+		font-size: 15px;
+	}
+	.res-couple {
+		margin: 0;
+		color: $muted;
+		font-size: 13px;
+		a {
+			color: $espresso;
+		}
+	}
+	.res-note {
+		margin: 0;
+		color: $muted;
+		font-size: 14px;
+		line-height: 1.6;
+		overflow-wrap: anywhere;
+	}
+	.res-actions {
+		margin-top: 8px;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 20px;
+	}
+	.skeleton.res-skeleton {
+		height: 180px;
+		margin: 0;
+		border-radius: $radius-card;
+	}
+}
+
+/** MY PAGE, PHASE 2 LOOKS: follow lists, forms (profile, add package), editor frame.
+    .follow-panel is the Following / Followers side panel (a portal outside .my-page) **/
+.my-page,
+.follow-panel {
+	.section-tools {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px 24px;
+	}
+	.button-link.danger {
+		color: $error-ink;
+	}
+
+	/** follow lists **/
+	.follow-list {
+		margin: 0;
+		padding: 0;
+		display: grid;
+		list-style: none;
+		border-top: 1px solid $line;
+	}
+	.follow-row {
+		padding: 18px 0;
+		display: grid;
+		grid-template-columns: 56px minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 18px;
+		border-bottom: 1px solid $line;
+	}
+	.follow-avatar {
+		width: 56px;
+		height: 56px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border-radius: 50%;
+		background: $sand;
+		color: $mocha;
+		font-family: $font-heading;
+		font-size: 22px;
+		text-decoration: none;
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+	.follow-name {
+		color: $espresso;
+		font-family: $font-heading;
+		font-size: 20px;
+		text-decoration: none;
+		@include focus-ring;
+		&:hover {
+			color: $mocha;
+		}
+	}
+	.follow-meta {
+		margin: 4px 0 0;
+		color: $muted;
+		font-size: 13px;
+	}
+	// small and quiet: an outlined "Follow", or a soft filled "Following" with a check
+	.follow-toggle {
+		height: 34px;
+		padding: 0 14px;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: transparent;
+		color: $espresso;
+		font-family: $font;
+		font-size: 13px;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: border-color 0.3s ease, background-color 0.3s ease;
+		@include focus-ring;
+		svg {
+			font-size: 15px;
+		}
+		&:hover {
+			border-color: $espresso;
+		}
+		&.following {
+			border-color: $sand;
+			background: $sand;
+			&:hover {
+				border-color: $line;
+				background: transparent;
+			}
+		}
+	}
+	.follow-switch {
+		margin: 20px 0 8px;
+		padding: 4px;
+		display: flex;
+		gap: 4px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: $ivory-deep;
+		button {
+			flex: 1;
+			padding: 9px 14px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 8px;
+			border: none;
+			border-radius: $radius-pill;
+			background: transparent;
+			color: $muted;
+			font-family: $font;
+			font-size: 14px;
+			cursor: pointer;
+			@include focus-ring;
+			&.active {
+				background: #ffffff;
+				color: $espresso;
+				box-shadow: $tab-raise;
+			}
+		}
+	}
+	.follow-section .follow-list {
+		border-top: none;
+	}
+	.tab-count {
+		min-width: 20px;
+		height: 20px;
+		padding: 0 6px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		border-radius: $radius-pill;
+		background: $sand;
+		color: $espresso;
+		font-size: 11px;
+	}
+	.empty-box {
+		padding: 40px 20px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 20px;
+		border: 1px solid $line;
+		border-radius: $radius-card;
+		background: $ivory-deep;
+		text-align: center;
+		p {
+			margin: 0;
+			color: $espresso;
+			font-family: $font-heading;
+			font-size: 20px;
+		}
+	}
+	.skeleton.follow-skeleton {
+		height: 76px;
+		margin: 0;
+		border-radius: $radius-tile;
+	}
+
+	/** forms **/
+	.my-form {
+		display: flex;
+		flex-direction: column;
+	}
+	.form-group {
+		margin: 0;
+		padding: 0;
+		border: none;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 16px;
+	}
+	.group-title {
+		@include text-title-editorial;
+		padding: 0;
+		color: $espresso;
+	}
+	.form-grid {
+		width: 100%;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 20px 24px;
+		.wide {
+			grid-column: 1 / -1;
+		}
+	}
+	.field {
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+	}
+	.field-label {
+		@include text-label-uppercase;
+		color: $muted;
+	}
+	.field-optional {
+		letter-spacing: 0.04em;
+		text-transform: none;
+	}
+	.field-help {
+		margin: 0;
+		color: $muted;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+	.my-form input:not([type='checkbox']):not([type='radio']):not([type='file']),
+	.my-form select,
+	.my-form textarea {
+		width: 100%;
+		padding: 13px 16px;
+		box-sizing: border-box;
+		border: 1px solid $line;
+		border-radius: $radius-tile;
+		background: #ffffff;
+		color: $espresso;
+		font-family: $font;
+		font-size: 15px;
+		&:focus {
+			border-color: $espresso;
+			outline: none;
+		}
+	}
+	.my-form textarea {
+		line-height: 1.6;
+		resize: vertical;
+	}
+	.my-form select {
+		appearance: none;
+		padding-right: 44px;
+		background: #ffffff $select-chevron no-repeat right 16px center / 12px 8px;
+		cursor: pointer;
+	}
+	.check-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+	.check-chip {
+		position: relative;
+		padding: 10px 18px;
+		border: 1px solid $line;
+		border-radius: $radius-pill;
+		background: #ffffff;
+		color: $espresso;
+		font-size: 14px;
+		cursor: pointer;
+		transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+		input {
+			position: absolute;
+			opacity: 0;
+			width: 1px;
+			height: 1px;
+		}
+		&:has(input:focus-visible) {
+			outline: 2px solid $mocha;
+			outline-offset: 2px;
+		}
+		&:hover {
+			border-color: $espresso;
+		}
+		&.active {
+			border-color: $espresso;
+			background: $espresso;
+			color: $ivory;
+		}
+	}
+	.photo-field {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+	}
+	.photo-actions {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+		.field-label {
+			margin: 0;
+		}
+	}
+	.my-avatar.large {
+		width: 120px;
+	}
+	.photo-previews {
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		list-style: none;
+		li {
+			position: relative;
+			width: 120px;
+			aspect-ratio: 4 / 5;
+			overflow: hidden;
+			border-radius: $radius-tile;
+			background: $sand;
+		}
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+	}
+	.cover-tag {
+		@include text-label-uppercase;
+		position: absolute;
+		left: 8px;
+		bottom: 8px;
+		padding: 4px 10px;
+		border-radius: $radius-pill;
+		background: rgba(253, 249, 243, 0.92);
+		color: $espresso;
+	}
+	.form-foot {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 12px 24px;
+		border-top: 1px solid $line;
+	}
+	/** the post editor (Toast UI) in our frame: hairlines, ivory toolbar, site fonts **/
+	.editor-frame {
+		width: 100%;
+		overflow: hidden;
+		border: 1px solid $line;
+		border-radius: $radius-tile;
+		background: #ffffff;
+		transition: border-color 0.3s ease;
+		&:focus-within {
+			border-color: $espresso;
+		}
+		.toastui-editor-defaultUI {
+			border: none;
+			border-radius: 0;
+			font-family: $font;
+		}
+		.toastui-editor-defaultUI-toolbar {
+			padding: 0 12px;
+			border-bottom: 1px solid $line;
+			background: $ivory-deep;
+		}
+		.toastui-editor-toolbar-divider {
+			background-color: $line;
+		}
+		// background-color only: the icons themselves are a background-image sprite
+		.toastui-editor-toolbar-icons {
+			border-color: transparent;
+			border-radius: 8px;
+			background-color: transparent;
+			&:not(:disabled):hover {
+				border-color: $line;
+				background-color: #ffffff;
+			}
+		}
+		.toastui-editor-contents,
+		.toastui-editor-contents p {
+			color: $espresso;
+			font-family: $font;
+			font-size: 15px;
+			line-height: 1.7;
+		}
+		.ProseMirror .placeholder {
+			color: $muted;
+		}
+	}
+	.write-form {
+		.form-group legend {
+			margin-bottom: 4px;
+		}
+		.field-help.over {
+			color: $error-ink;
+		}
+	}
+	.skeleton.editor-skeleton {
+		height: 640px;
+		border-radius: $radius-tile;
+	}
+	.package-row {
+		&.status-pause .status-pill,
+		&.status-hold .status-pill {
+			background: $sand;
+		}
 	}
 }
 
@@ -3332,6 +4642,16 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.community-page {
+		.lead-media img,
+		.read-link,
+		.category-tab {
+			transition: none;
+		}
+		.front-lead:hover .lead-media img {
+			transform: none;
+		}
+	}
 	.studio-card .card-media,
 	.arch-media,
 	.block-portrait,
@@ -3391,11 +4711,15 @@
 	}
 	.package-page,
 	.studio-page,
+	.community-page,
 	.detail-page,
 	.home-page {
 		.popular-card .details-text {
 			transition: none;
 		}
+	}
+	.my-page .print {
+		transition: none;
 	}
 	.studio-detail {
 		.hero-portrait img,
@@ -3444,6 +4768,7 @@
 	.home-page,
 	.package-page,
 	.studio-page,
+	.community-page,
 	.detail-page {
 		.trend-card,
 		.popular-card,

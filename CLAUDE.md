@@ -134,7 +134,7 @@ Reuse these before writing anything new. Looks live in `scss/pc/general.scss`; e
 
 - Buttons: `.button-primary` (main action, with a CSS arrow), `.button-secondary` (outline), `.button-link` (quiet text link; also used for "View studio →" with an arrow icon). Use one primary per area.
 - Icon buttons: `.like-btn` is a round white button with a heart; `.like-btn.outlined` adds a hairline border on ivory.
-- Package card: `PopularPackageCard` (tier tag, location and style, price, 2-line title, details line that underlines on card hover). Pass `likePackageHandler` to show the save button.
+- Package card: `PopularPackageCard` (tier tag, location and style, price, 2-line title, details line that underlines on card hover). Pass `likePackageHandler` to show the like (heart) button.
 - Studio tile: `libs/components/studio/StudioCard` (framed arch portrait in full colour, location, name, counts, "View studio").
 - Studio photos everywhere use `@include portrait-light` and, on hover, `portrait-light-on`: a champagne arch line rises inside the photo, a light sweep crosses it and it zooms slightly. Use `$line: false` for square photos. Never grey them out.
 - Lists:

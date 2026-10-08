@@ -56,8 +56,12 @@ export const studioLocation = (address?: string) => {
 export const plural = (count: number, word: string) =>
 	`${count.toLocaleString('en-US')} ${count === 1 ? word : `${word}s`}`;
 
-export const studioImage = (studio: Member) =>
-	studio?.memberImage ? `${REACT_APP_API_URL}/${studio.memberImage}` : '';
+/** a member photo URL, or '' when there is none. Login stores a local placeholder path for members without a
+    photo ('/img/profile/defaultUser.svg'); that is not an uploaded file, so it counts as no photo **/
+export const memberPhoto = (image?: string | null) =>
+	image && !image.startsWith('/img/') ? `${REACT_APP_API_URL}/${image}` : '';
+
+export const studioImage = (studio: Member) => memberPhoto(studio?.memberImage);
 
 /** "2 packages · 120 followers": only counts above 0 **/
 export const studioStats = (studio: Member) => {

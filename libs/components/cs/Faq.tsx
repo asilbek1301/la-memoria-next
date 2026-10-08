@@ -91,7 +91,7 @@ const Faq = () => {
 			{
 				id: '00f5a45ed8897f8090116a27',
 				subject: 'Can I save packages to compare later?',
-				content: 'Yes, like a package to add it to Saved Packages in My Page.',
+				content: 'Yes, like a package to add it to Liked packages in My Page.',
 			},
 			{
 				id: '00f5a45ed8897f8090116b99',

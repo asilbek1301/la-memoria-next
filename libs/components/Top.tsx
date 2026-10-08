@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { memberPhoto } from './studio/studioSearch';
 import { useRouter, withRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
@@ -14,7 +15,6 @@ import { motion, MotionConfig } from 'framer-motion';
 import { getJwtToken, logOut, updateUserInfo } from '../auth';
 import { userVar } from '../../apollo/store';
 import { GET_FAVORITES } from '../../apollo/user/query';
-import { REACT_APP_API_URL } from '../config';
 import AnimatedLogo from './common/AnimatedLogo';
 import { itemFadeUp, navbarVariants, springSnappy } from './common/motion';
 
@@ -138,7 +138,7 @@ const Top = () => {
 						<Link
 							href={savedHref}
 							className={'icon-btn saved-btn'}
-							aria-label={savedTotal ? `Saved packages (${savedTotal})` : 'Saved packages'}
+							aria-label={savedTotal ? `Liked packages (${savedTotal})` : 'Liked packages'}
 						>
 							<FavoriteBorderRoundedIcon />
 							{savedTotal > 0 && <span className={'saved-badge'}>{savedTotal > 99 ? '99+' : savedTotal}</span>}
@@ -179,7 +179,7 @@ const Top = () => {
 								>
 									<img
 										src={
-											user?.memberImage ? `${REACT_APP_API_URL}/${user?.memberImage}` : '/img/profile/defaultUser.svg'
+											memberPhoto(user?.memberImage) || '/img/profile/defaultUser.svg'
 										}
 										alt=""
 									/>

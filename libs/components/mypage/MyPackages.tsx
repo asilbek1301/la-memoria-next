@@ -1,183 +1,176 @@
 import React, { useState } from 'react';
-import { NextPage } from 'next';
-import { Pagination, Stack, Typography } from '@mui/material';
-import useDeviceDetect from '../../hooks/useDeviceDetect';
-import { PackageCard } from './PackageCard';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import Link from 'next/link';
+import { useMutation, useQuery } from '@apollo/client';
+import { Skeleton } from '@mui/material';
 import { Package } from '../../types/package/package';
 import { StudioPackagesInquiry } from '../../types/package/package.input';
-import { T } from '../../types/common';
 import { PackageStatus } from '../../enums/package.enum';
-import { userVar } from '../../../apollo/store';
-import { useRouter } from 'next/router';
+import { Direction } from '../../enums/common.enum';
 import { UPDATE_PACKAGE } from '../../../apollo/user/mutation';
 import { GET_STUDIO_PACKAGES } from '../../../apollo/user/query';
+import { REACT_APP_API_URL } from '../../config';
+import { formatKRW } from '../../utils';
 import { sweetConfirmAlert, sweetErrorHandling } from '../../sweetAlert';
+import { FilterTabs } from '../homepage/HomeSection';
+import { ResultsPagination } from '../common/ListControls';
+import { plural } from '../studio/studioSearch';
 
-const MyPackages: NextPage = ({ initialInput, ...props }: any) => {
-	const device = useDeviceDetect();
+type StatusTab = PackageStatus.ACTIVE | PackageStatus.PAUSE | PackageStatus.HOLD;
+
+const statusTabs: { value: StatusTab; label: string }[] = [
+	{ value: PackageStatus.ACTIVE, label: 'Published' },
+	{ value: PackageStatus.PAUSE, label: 'Paused' },
+	{ value: PackageStatus.HOLD, label: 'On hold' },
+];
+
+const initialInput: StudioPackagesInquiry = {
+	page: 1,
+	limit: 5,
+	sort: 'createdAt',
+	direction: Direction.DESC,
+	search: { packageStatus: PackageStatus.ACTIVE },
+};
+
+/** a studio's own packages: publish, pause, edit or delete (same UPDATE_PACKAGE calls as before) **/
+const MyPackages = () => {
 	const [searchFilter, setSearchFilter] = useState<StudioPackagesInquiry>(initialInput);
-	const [studioPackages, setStudioPackages] = useState<Package[]>([]);
-	const [total, setTotal] = useState<number>(0);
-	const user = useReactiveVar(userVar);
-	const router = useRouter();
 
 	/** APOLLO REQUESTS **/
 
 	const [updatePackage] = useMutation(UPDATE_PACKAGE);
-
-	const {
-		refetch: getStudioPackagesRefetch,
-	} = useQuery(GET_STUDIO_PACKAGES, {
+	const { data, loading, refetch } = useQuery(GET_STUDIO_PACKAGES, {
 		fetchPolicy: 'network-only',
 		variables: { input: searchFilter },
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: T) => {
-			setStudioPackages(data?.getStudioPackages?.list);
-			setTotal(data?.getStudioPackages?.metaCounter[0]?.total ?? 0);
-		},
 	});
+	const packages: Package[] = data?.getStudioPackages?.list ?? [];
+	const total: number = data?.getStudioPackages?.metaCounter?.[0]?.total ?? 0;
+	const active = (searchFilter.search.packageStatus ?? PackageStatus.ACTIVE) as StatusTab;
 
 	/** HANDLERS **/
-	const paginationHandler = (e: T, value: number) => {
-		setSearchFilter({ ...searchFilter, page: value });
-	};
 
-	const changeStatusHandler = (value: PackageStatus) => {
-		setSearchFilter({ ...searchFilter, search: { packageStatus: value } });
-	};
-
-	const deletePackageHandler = async (id: string) => {
+	const changeStatus = async (id: string, status: PackageStatus, question: string) => {
 		try {
-			if (await sweetConfirmAlert('Are you sure to delete this package?')) {
-				await updatePackage({
-					variables: {
-						input: {
-							_id: id,
-							packageStatus: 'DELETE',
-						},
-					},
-				});
-				await getStudioPackagesRefetch({ input: searchFilter });
-			}
-		} catch (err: any) {
-			await sweetErrorHandling(err);
-		}
-	};
-	const updatePackageHandler = async (status: string, id: string) => {
-		try {
-			if (await sweetConfirmAlert(`Are you sure to change ${status} status?`)) {
-				await updatePackage({
-					variables: {
-						input: {
-							_id: id,
-							packageStatus: status,
-						},
-					},
-				});
-				await getStudioPackagesRefetch({ input: searchFilter });
-			}
+			if (!(await sweetConfirmAlert(question))) return;
+			await updatePackage({ variables: { input: { _id: id, packageStatus: status } } });
+			await refetch({ input: searchFilter });
 		} catch (err: any) {
 			await sweetErrorHandling(err);
 		}
 	};
 
-	if (user?.memberType !== 'STUDIO') {
-		router.back();
-	}
-
-	if (device === 'mobile') {
-		return <div>LA MEMORIA PACKAGES MOBILE</div>;
-	} else {
-		return (
-			<div id="my-package-page">
-				<Stack className="main-title-box">
-					<Stack className="right-box">
-						<Typography className="main-title">My Packages</Typography>
-						<Typography className="sub-title">We are glad to see you again!</Typography>
-					</Stack>
-				</Stack>
-				<Stack className="package-list-box">
-					<Stack className="tab-name-box">
-						<Typography
-							onClick={() => changeStatusHandler(PackageStatus.ACTIVE)}
-							className={searchFilter.search.packageStatus === 'ACTIVE' ? 'active-tab-name' : 'tab-name'}
-						>
-							Active
-						</Typography>
-						<Typography
-							onClick={() => changeStatusHandler(PackageStatus.PAUSE)}
-							className={searchFilter.search.packageStatus === 'PAUSE' ? 'active-tab-name' : 'tab-name'}
-						>
-							Paused
-						</Typography>
-						<Typography
-							onClick={() => changeStatusHandler(PackageStatus.HOLD)}
-							className={searchFilter.search.packageStatus === 'HOLD' ? 'active-tab-name' : 'tab-name'}
-						>
-							On Hold
-						</Typography>
-					</Stack>
-					<Stack className="list-box">
-						<Stack className="listing-title-box">
-							<Typography className="title-text">Package title</Typography>
-							<Typography className="title-text">Date Published</Typography>
-							<Typography className="title-text">Status</Typography>
-							<Typography className="title-text">View</Typography>
-							{searchFilter.search.packageStatus !== 'DELETE' && (
-								<Typography className="title-text">Action</Typography>
-							)}
-						</Stack>
-
-						{studioPackages?.length === 0 ? (
-							<div className={'no-data'}>
-								<img src="/img/icons/icoAlert.svg" alt="" />
-								<p>No Package found!</p>
-							</div>
-						) : (
-							studioPackages.map((pkg: Package) => {
-								return (
-									<PackageCard
-										pkg={pkg}
-										deletePackageHandler={deletePackageHandler}
-										updatePackageHandler={updatePackageHandler}
-									/>
-								);
-							})
-						)}
-
-						{studioPackages.length !== 0 && (
-							<Stack className="pagination-config">
-								<Stack className="pagination-box">
-									<Pagination
-										count={Math.ceil(total / searchFilter.limit)}
-										page={searchFilter.page}
-										shape="circular"
-										color="primary"
-										onChange={paginationHandler}
-									/>
-								</Stack>
-								<Stack className="total-result">
-									<Typography>{total} package available</Typography>
-								</Stack>
-							</Stack>
-						)}
-					</Stack>
-				</Stack>
+	return (
+		<section className={'my-section'} aria-labelledby="packages-title">
+			<div className={'section-row'}>
+				<div>
+					<h2 id="packages-title" className={'detail-title'}>
+						My packages
+					</h2>
+					<p className={'section-note'}>Published packages are visible to couples. Paused ones are hidden.</p>
+				</div>
+				<div className={'section-tools'}>
+					<FilterTabs
+						label="Filter by status"
+						options={statusTabs}
+						value={active}
+						onChange={(value) => setSearchFilter({ ...searchFilter, page: 1, search: { packageStatus: value as PackageStatus } })}
+					/>
+					<Link href={{ pathname: '/mypage', query: { category: 'addPackage' } }} className={'button-primary'}>
+						Add package
+					</Link>
+				</div>
 			</div>
-		);
-	}
-};
 
-MyPackages.defaultProps = {
-	initialInput: {
-		page: 1,
-		limit: 5,
-		sort: 'createdAt',
-		search: {
-			packageStatus: 'ACTIVE',
-		},
-	},
+			{loading && packages.length === 0 ? (
+				<div className={'reservation-list'} aria-busy="true">
+					{[0, 1].map((i) => (
+						<Skeleton key={i} variant="rectangular" className={'skeleton res-skeleton'} />
+					))}
+				</div>
+			) : packages.length === 0 ? (
+				<div className={'empty-box my-empty'}>
+					<p>No {statusTabs.find((tab) => tab.value === active)?.label.toLowerCase()} packages.</p>
+					{active === PackageStatus.ACTIVE && (
+						<Link href={{ pathname: '/mypage', query: { category: 'addPackage' } }} className={'button-primary'}>
+							Add your first package
+						</Link>
+					)}
+				</div>
+			) : (
+				<div className={'reservation-list'}>
+					{packages.map((pkg) => {
+						const image = pkg.packageImages?.[0] ? `${REACT_APP_API_URL}/${pkg.packageImages[0]}` : '';
+						const href = { pathname: '/package/detail', query: { id: pkg._id } };
+						const stats = [
+							(pkg.packageViews ?? 0) > 0 && plural(pkg.packageViews, 'view'),
+							(pkg.packageLikes ?? 0) > 0 && plural(pkg.packageLikes, 'like'),
+						]
+							.filter(Boolean)
+							.join(' · ');
+						return (
+							<article className={`reservation-card package-row status-${String(pkg.packageStatus).toLowerCase()}`} key={pkg._id}>
+								<Link href={href} className={'res-thumb'} tabIndex={-1} aria-hidden="true">
+									{image ? <img src={image} alt="" loading="lazy" /> : <span className={'img-placeholder'} />}
+								</Link>
+								<div className={'res-body'}>
+									<div className={'res-top'}>
+										<span className={'status-pill'}>{statusTabs.find((tab) => tab.value === pkg.packageStatus)?.label ?? pkg.packageStatus}</span>
+										<span className={'price'}>{formatKRW(pkg.packagePrice)}</span>
+									</div>
+									<h3 className={'res-title'}>
+										<Link href={href}>{pkg.packageTitle}</Link>
+									</h3>
+									{stats && <p className={'res-meta'}>{stats}</p>}
+									<div className={'res-actions'}>
+										<Link
+											href={{ pathname: '/mypage', query: { category: 'addPackage', packageId: pkg._id } }}
+											className={'button-secondary'}
+										>
+											Edit
+										</Link>
+										{pkg.packageStatus === PackageStatus.ACTIVE ? (
+											<button
+												type="button"
+												className={'button-link'}
+												onClick={() => changeStatus(pkg._id, PackageStatus.PAUSE, 'Pause this package? Couples will not see it.')}
+											>
+												Pause
+											</button>
+										) : (
+											<button
+												type="button"
+												className={'button-link'}
+												onClick={() => changeStatus(pkg._id, PackageStatus.ACTIVE, 'Publish this package?')}
+											>
+												Publish
+											</button>
+										)}
+										<button
+											type="button"
+											className={'button-link danger'}
+											onClick={() => changeStatus(pkg._id, PackageStatus.DELETE, 'Delete this package? This cannot be undone.')}
+										>
+											Delete
+										</button>
+									</div>
+								</div>
+							</article>
+						);
+					})}
+				</div>
+			)}
+
+			{total > searchFilter.limit && (
+				<ResultsPagination
+					page={searchFilter.page}
+					limit={searchFilter.limit}
+					total={total}
+					onPage={(page) => setSearchFilter({ ...searchFilter, page })}
+					noun="packages"
+				/>
+			)}
+		</section>
+	);
 };
 
 export default MyPackages;

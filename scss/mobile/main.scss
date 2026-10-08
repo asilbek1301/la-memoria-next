@@ -366,6 +366,105 @@
   }
 
   /** STUDIOS PAGE LAYOUT (phone); looks are in pc/general.scss under .studio-page **/
+  #community-list-page {
+    width: 100%;
+    .container {
+      @include page-container-mobile;
+    }
+    .community-header {
+      padding-top: calc(#{$nav-height-mobile} + 36px);
+      .header-row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+      }
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .page-title {
+        @include text-headline-lg-mobile;
+      }
+      .page-intro {
+        font-size: 14px;
+      }
+    }
+    // tabs scroll sideways; search and sort sit under them
+    .community-toolbar {
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      .category-tabs {
+        gap: 26px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+      .toolbar-tools {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+      .search-field {
+        width: 100%;
+      }
+      .sort-box {
+        margin-left: 0;
+      }
+    }
+    .community-front {
+      margin-top: 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      .front-lead {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .lead-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .lead-title {
+        @include text-headline-sm;
+      }
+      .front-read {
+        padding: 28px 20px 12px;
+        .read-title {
+          margin-bottom: 8px;
+        }
+      }
+    }
+    .community-latest {
+      padding: 56px 0 $section-space-mobile;
+      .latest-title {
+        margin-bottom: 28px;
+      }
+      .article-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 48px;
+      }
+      .results-pagination {
+        margin-top: 48px;
+        padding-top: 24px;
+        border-top: 1px solid $line;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .community-guidelines {
+        margin-top: 48px;
+      }
+    }
+  }
   #studio-list-page {
     width: 100%;
     .container {
@@ -626,7 +725,8 @@
     .hero-actions {
       width: 100%;
       > .button-primary,
-      > .button-secondary {
+      > .button-secondary,
+      > .followers-btn {
         flex: 1;
       }
     }
@@ -689,6 +789,158 @@
     .studio-no-packages,
     .detail-missing {
       margin-top: 40px;
+    }
+  }
+
+  /** MY PAGE LAYOUT (phone); looks are in pc/general.scss under .my-page and .detail-page **/
+  #my-page {
+    width: 100%;
+    padding: calc(#{$nav-height-mobile} + 28px) 0 $section-space-mobile;
+    .container {
+      @include page-container-mobile;
+    }
+    .my-hero {
+      padding: 28px 22px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 24px;
+    }
+    .hero-copy {
+      gap: 14px;
+    }
+    .my-avatar {
+      width: 40px;
+    }
+    .my-greeting {
+      font-size: $my-greeting-size-mobile;
+    }
+    .hero-prints {
+      height: 200px;
+    }
+    .print {
+      width: 124px;
+      padding: 6px 6px 16px;
+    }
+    .count-3 .print-2,
+    .count-1 .print-1 {
+      margin-left: -62px;
+    }
+    .my-tabs {
+      margin-top: 28px;
+    }
+    .my-panel {
+      padding-top: 32px;
+    }
+    .next-shoot {
+      margin-bottom: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .invite-photo {
+      order: -1;
+      height: 280px;
+    }
+    .invite {
+      padding: 40px 22px;
+      gap: 14px;
+    }
+    .date-day {
+      font-size: 80px;
+    }
+    .shoot-title {
+      font-size: 26px;
+      line-height: 1.25;
+    }
+    .shoot-track {
+      width: 100%;
+      margin: 8px 0;
+      .track-label {
+        letter-spacing: 0.06em;
+      }
+    }
+    .shoot-actions {
+      width: 100%;
+      .button-primary {
+        flex: 1;
+      }
+    }
+    .my-section + .my-section {
+      margin-top: 48px;
+    }
+    .section-row {
+      margin-bottom: 20px;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .reservation-list.two {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .reservation-card {
+      padding: 16px;
+      grid-template-columns: 88px minmax(0, 1fr);
+      gap: 16px;
+    }
+    .res-title {
+      font-size: 19px;
+    }
+    .res-top {
+      flex-wrap: wrap;
+      gap: 6px 12px;
+    }
+    .my-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+      .popular-card .card-title {
+        height: auto;
+        max-height: 2lh;
+      }
+    }
+    .results-pagination {
+      margin-top: 32px;
+      flex-direction: column-reverse;
+    }
+  }
+
+  /** MY PAGE, PHASE 2 (phone) **/
+  #my-page {
+    .my-form {
+      gap: 36px;
+    }
+    .form-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .photo-field {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .photo-previews li {
+      width: calc(50% - 6px);
+    }
+    .form-foot {
+      padding-top: 20px;
+      .button-primary {
+        width: 100%;
+      }
+    }
+    .follow-row {
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      gap: 14px;
+    }
+    .follow-avatar {
+      width: 48px;
+      height: 48px;
+    }
+    .section-tools {
+      width: 100%;
+    }
+    .write-form {
+      gap: 28px;
+    }
+    .skeleton.editor-skeleton {
+      height: 520px;
     }
   }
 }

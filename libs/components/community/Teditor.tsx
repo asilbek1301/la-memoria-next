@@ -1,35 +1,40 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Box, Button, FormControl, MenuItem, Stack, Typography, Select, TextField } from '@mui/material';
-import { BoardArticleCategory } from '../../enums/board-article.enum';
+import React, { useRef, useState } from 'react';
 import { Editor } from '@toast-ui/react-editor';
 import { getJwtToken } from '../../auth';
 import { REACT_APP_API_URL } from '../../config';
 import { useRouter } from 'next/router';
 import axios from 'axios';
-import { T } from '../../types/common';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import { useMutation } from '@apollo/client';
+import { BoardArticleCategory } from '../../enums/board-article.enum';
 import { CREATE_BOARD_ARTICLE } from '../../../apollo/user/mutation';
 import { sweetErrorHandling, sweetTopSuccessAlert } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
+import { categoryLabels } from './communitySearch';
 
+// the backend's limits (BoardArticleInput): title 3–50, content 3–250 characters of the editor's HTML
+const TITLE_MIN = 3;
+const TITLE_MAX = 50;
+const CONTENT_MIN = 3;
+const CONTENT_MAX = 250;
+
+/** an empty editor still returns '<p><br></p>'; treat that as no text **/
+const isBlank = (html: string) => html.replace(/<p><br><\/p>/g, '').replace(/<[^>]+>/g, '').trim() === '' && !/<img/i.test(html);
+
+/** the community post form: category, title and the editor; publishes with CREATE_BOARD_ARTICLE **/
 const TuiEditor = () => {
 	const editorRef = useRef<Editor>(null),
 		token = getJwtToken(),
 		router = useRouter();
 	const [articleCategory, setArticleCategory] = useState<BoardArticleCategory>(BoardArticleCategory.FREE);
+	const [articleTitle, setArticleTitle] = useState<string>('');
+	const [articleContent, setArticleContent] = useState<string>('');
+	const [articleImage, setArticleImage] = useState<string>('');
+	const [saving, setSaving] = useState<boolean>(false);
 
 	/** APOLLO REQUESTS **/
 
 	const [createBoardArticle] = useMutation(CREATE_BOARD_ARTICLE);
-
-	const memoizedValues = useMemo(() => {
-		const articleTitle = '',
-			articleContent = '',
-			articleImage = '';
-
-		return { articleTitle, articleContent, articleImage };
-	}, []);
 
 	/** HANDLERS **/
 
@@ -40,7 +45,7 @@ const TuiEditor = () => {
 				'operations',
 				JSON.stringify({
 					query: `mutation ImageUploader($file: Upload!, $target: String!) {
-						imageUploader(file: $file, target: $target) 
+						imageUploader(file: $file, target: $target)
 				  }`,
 					variables: {
 						file: null,
@@ -65,8 +70,8 @@ const TuiEditor = () => {
 			});
 
 			const responseImage = response.data.data.imageUploader;
-			console.log('=responseImage: ', responseImage);
-			memoizedValues.articleImage = responseImage;
+			// the first photo becomes the post's cover in the community list
+			setArticleImage((current) => current || responseImage);
 
 			return `${REACT_APP_API_URL}/${responseImage}`;
 		} catch (err) {
@@ -74,32 +79,30 @@ const TuiEditor = () => {
 		}
 	};
 
-	const changeCategoryHandler = (e: any) => {
-		setArticleCategory(e.target.value);
+	const contentChangeHandler = () => {
+		const html = editorRef.current?.getInstance().getHTML() ?? '';
+		setArticleContent(isBlank(html) ? '' : html);
 	};
 
-	const articleTitleHandler = (e: T) => {
-		console.log(e.target.value);
-		memoizedValues.articleTitle = e.target.value;
-	};
+	const title = articleTitle.trim();
+	const titleShort = title.length < TITLE_MIN;
+	const contentShort = articleContent.length < CONTENT_MIN;
+	const contentLong = articleContent.length > CONTENT_MAX;
+	const blocked = titleShort || contentShort || contentLong;
 
-	const handleRegisterButton = async () => {
+	const submitHandler = async (e: React.FormEvent) => {
+		e.preventDefault();
 		try {
-			const editor = editorRef.current;
-			const articleContent = editor?.getInstance().getHTML() as string;
-			memoizedValues.articleContent = articleContent;
-
-			if (memoizedValues.articleContent === '' && memoizedValues.articleTitle === '') {
-				throw new Error(Message.INSERT_ALL_INPUTS);
-			}
+			if (blocked) throw new Error(Message.INSERT_ALL_INPUTS);
+			setSaving(true);
 
 			await createBoardArticle({
 				variables: {
-					input: { ...memoizedValues, articleCategory },
+					input: { articleCategory, articleTitle: title, articleContent, articleImage },
 				},
 			});
 
-			await sweetTopSuccessAlert('Article is created successfully', 700);
+			await sweetTopSuccessAlert('Your post is published', 700);
 			await router.push({
 				pathname: '/mypage',
 				query: {
@@ -107,84 +110,95 @@ const TuiEditor = () => {
 				},
 			});
 		} catch (err: any) {
-			console.log(err);
-			sweetErrorHandling(new Error(Message.INSERT_ALL_INPUTS)).then();
+			console.log('Error, submitHandler:', err);
+			sweetErrorHandling(err).then();
+		} finally {
+			setSaving(false);
 		}
 	};
 
-
 	return (
-		<Stack>
-			<Stack direction="row" style={{ margin: '40px' }} justifyContent="space-evenly">
-				<Box component={'div'} className={'form_row'} style={{ width: '300px' }}>
-					<Typography style={{ color: '#7f838d', margin: '10px' }} variant="h3">
-						Category
-					</Typography>
-					<FormControl sx={{ width: '100%', background: 'white' }}>
-						<Select
-							value={articleCategory}
-							onChange={changeCategoryHandler}
-							displayEmpty
-							inputProps={{ 'aria-label': 'Without label' }}
-						>
-							<MenuItem value={BoardArticleCategory.FREE}>
-								<span>Free</span>
-							</MenuItem>
-							<MenuItem value={BoardArticleCategory.HUMOR}>Humor</MenuItem>
-							<MenuItem value={BoardArticleCategory.NEWS}>News</MenuItem>
-							<MenuItem value={BoardArticleCategory.RECOMMEND}>Recommendation</MenuItem>
-						</Select>
-					</FormControl>
-				</Box>
-				<Box component={'div'} style={{ width: '300px', flexDirection: 'column' }}>
-					<Typography style={{ color: '#7f838d', margin: '10px' }} variant="h3">
-						Title
-					</Typography>
-					<TextField
-						onChange={articleTitleHandler}
-						id="filled-basic"
-						label="Type Title"
-						style={{ width: '300px', background: 'white' }}
+		<form className={'my-form write-form'} onSubmit={submitHandler}>
+			<fieldset className={'form-group'}>
+				<legend className={'field-label'}>Category</legend>
+				<div className={'check-row'} role="radiogroup" aria-label="Category">
+					{Object.values(BoardArticleCategory).map((value) => (
+						<label key={value} className={`check-chip ${articleCategory === value ? 'active' : ''}`}>
+							<input
+								type="radio"
+								name="articleCategory"
+								value={value}
+								checked={articleCategory === value}
+								onChange={() => setArticleCategory(value)}
+							/>
+							{categoryLabels[value]}
+						</label>
+					))}
+				</div>
+			</fieldset>
+
+			<label className={'field'}>
+				<span className={'field-label'}>Title</span>
+				<input
+					type="text"
+					value={articleTitle}
+					maxLength={TITLE_MAX}
+					placeholder="Give your post a short title"
+					onChange={(e) => setArticleTitle(e.target.value)}
+				/>
+				<span className={'field-help'}>
+					{title.length} / {TITLE_MAX}
+				</span>
+			</label>
+
+			<div className={'field'}>
+				<span className={'field-label'} id="post-label">
+					Your post
+				</span>
+				<div className={'editor-frame'} aria-labelledby="post-label">
+					<Editor
+						// not '': an empty value makes Toast UI load the container's old HTML (its own labels) as the post
+						initialValue={' '}
+						placeholder={'Share your preparations, a question or a recommendation.'}
+						previewStyle={'vertical'}
+						height={'480px'}
+						// @ts-ignore
+						initialEditType={'wysiwyg'}
+						hideModeSwitch
+						autofocus={false}
+						toolbarItems={[
+							['heading', 'bold', 'italic', 'strike'],
+							['image', 'link'],
+							['ul', 'ol'],
+						]}
+						ref={editorRef}
+						onChange={contentChangeHandler}
+						hooks={{
+							addImageBlobHook: async (image: any, callback: any) => {
+								const uploadedImageURL = await uploadImage(image);
+								callback(uploadedImageURL);
+								return false;
+							},
+						}}
 					/>
-				</Box>
-			</Stack>
+				</div>
+				<span className={`field-help ${contentLong ? 'over' : ''}`} aria-live="polite">
+					{articleContent.length} / {CONTENT_MAX} characters, photos and formatting included. The first photo
+					becomes the cover.
+				</span>
+			</div>
 
-			<Editor
-				initialValue={'Type here'}
-				placeholder={'Type here'}
-				previewStyle={'vertical'}
-				height={'640px'}
-				// @ts-ignore
-				initialEditType={'WYSIWYG'}
-				toolbarItems={[
-					['heading', 'bold', 'italic', 'strike'],
-					['image', 'table', 'link'],
-					['ul', 'ol', 'task'],
-				]}
-				ref={editorRef}
-				hooks={{
-					addImageBlobHook: async (image: any, callback: any) => {
-						const uploadedImageURL = await uploadImage(image);
-						callback(uploadedImageURL);
-						return false;
-					},
-				}}
-				events={{
-					load: function (param: any) { },
-				}}
-			/>
-
-			<Stack direction="row" justifyContent="center">
-				<Button
-					variant="contained"
-					color="primary"
-					style={{ margin: '30px', width: '250px', height: '45px' }}
-					onClick={handleRegisterButton}
-				>
-					Register
-				</Button>
-			</Stack>
-		</Stack>
+			<div className={'form-foot'}>
+				{titleShort || contentShort ? (
+					<p className={'field-help'}>Add a title and write your post to publish it.</p>
+				) : contentLong ? (
+					<p className={'field-help over'}>Your post is too long. Shorten it or remove a photo.</p>
+				) : null}
+				<button type="submit" className={'button-primary'} disabled={blocked || saving}>
+					{saving ? 'Publishing…' : 'Publish post'}
+				</button>
+			</div>
+		</form>
 	);
 };
 
