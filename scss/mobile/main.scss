@@ -724,6 +724,27 @@
   }
 
   /** PACKAGE DETAIL LAYOUT (phone); looks are in pc/general.scss under .detail-page **/
+  // community chat: the launcher sits above the booking bar; the open panel takes the whole screen
+  .chat-widget {
+    .chat-launcher {
+      position: fixed;
+      right: calc(#{$chat-offset-mobile} + env(safe-area-inset-right));
+      bottom: calc(#{$chat-bottom-mobile} + env(safe-area-inset-bottom));
+      z-index: $chat-layer;
+    }
+    .chat-panel {
+      position: fixed;
+      inset: 0;
+      z-index: $chat-layer + 1;
+      height: 100dvh;
+      border: none;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    &.open .chat-launcher {
+      display: none;
+    }
+  }
+
   // community post: one column; the sheet, its comments, then the author and the category
   #community-detail-page {
     width: 100%;

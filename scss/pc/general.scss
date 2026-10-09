@@ -91,6 +91,7 @@
 .nav-drawer,
 .nav-menu,
 .notification-panel,
+.chat-widget,
 .home-hero,
 .home-page,
 .package-page,
@@ -435,6 +436,293 @@
 		padding: 28px 20px 32px;
 		@include text-body-md;
 		color: $muted;
+	}
+}
+
+/** COMMUNITY CHAT (Chat.tsx); position and size are in pc/main.scss and mobile/main.scss **/
+.chat-widget {
+	color: $espresso;
+	font-family: $font;
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.chat-launcher {
+		width: $chat-launcher-size;
+		height: $chat-launcher-size;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: $espresso;
+		color: $ivory;
+		cursor: pointer;
+		box-shadow: $chat-shadow;
+		transition: background-color 0.3s ease, transform 0.3s $ease-out;
+		@include focus-ring;
+		svg {
+			font-size: 26px;
+		}
+		&:hover {
+			background: $mocha;
+			transform: translateY(-2px);
+		}
+	}
+	.launcher-badge {
+		position: absolute;
+		top: -2px;
+		right: -2px;
+		min-width: 22px;
+		height: 22px;
+		padding: 0 6px;
+		box-sizing: border-box;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: 2px solid $ivory;
+		border-radius: $radius-pill;
+		background: $champagne;
+		color: $espresso;
+		font-size: 11px;
+		font-weight: 600;
+	}
+	// closed: hidden in place, out of the tab order; open: fades and rises in
+	.chat-panel {
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		border: 1px solid $line;
+		background: $ivory;
+		box-shadow: $chat-shadow;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(12px);
+		// hidden only after the fade-out; visible at once when opening, so the message box can take the cursor
+		transition: opacity 0.3s ease, transform 0.35s $ease-out, visibility 0s linear 0.35s;
+	}
+	&.open .chat-panel {
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+		transition: opacity 0.3s ease, transform 0.35s $ease-out, visibility 0s;
+	}
+
+	/** header **/
+	.chat-head {
+		padding: 16px 16px 14px 20px;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		border-bottom: 1px solid $line;
+		background: $sheet-bg;
+	}
+	.chat-title {
+		margin: 0;
+		@include text-title-editorial;
+	}
+	.chat-status {
+		margin: 2px 0 0;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		color: $muted;
+		font-size: 12px;
+	}
+	.status-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: $line;
+	}
+	.chat-status.open .status-dot {
+		background: $mocha;
+	}
+	.chat-close {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: transparent;
+		color: $espresso;
+		cursor: pointer;
+		transition: background-color 0.3s ease;
+		@include focus-ring;
+		&:hover {
+			background: $sand;
+		}
+	}
+
+	/** messages **/
+	.chat-log {
+		flex: 1;
+		min-height: 0;
+		padding: 16px;
+		overflow-y: auto;
+		overscroll-behavior: contain; // scrolling the chat never scrolls the page
+		display: flex;
+		flex-direction: column;
+		gap: 14px;
+	}
+	.chat-empty {
+		margin: auto;
+		color: $muted;
+		font-size: 14px;
+	}
+	.chat-group {
+		max-width: 85%;
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+		&.mine {
+			align-self: flex-end;
+			.group-body {
+				align-items: flex-end;
+			}
+			.chat-bubble {
+				border-color: $espresso;
+				background: $espresso;
+				color: $ivory;
+			}
+		}
+	}
+	.chat-avatar {
+		width: 32px;
+		height: 32px;
+		flex: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border-radius: 50%;
+		background: $sand;
+		color: $mocha;
+		font-family: $font-heading;
+		font-size: 14px;
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+	.group-body {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+	}
+	.chat-name {
+		margin-left: 4px;
+		color: $muted;
+		font-size: 12px;
+		font-weight: 500;
+	}
+	.chat-bubble {
+		margin: 0;
+		padding: 9px 14px;
+		border: 1px solid $line;
+		border-radius: $radius-tile;
+		background: $sheet-bg;
+		color: $espresso;
+		font-size: 14px;
+		line-height: 1.5;
+		white-space: pre-wrap; // keeps the lines a message was written with
+		overflow-wrap: anywhere;
+	}
+	.chat-new {
+		position: absolute;
+		left: 50%;
+		bottom: 84px;
+		height: 32px;
+		padding: 0 8px 0 14px;
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+		border: none;
+		border-radius: $radius-pill;
+		background: $espresso;
+		color: $ivory;
+		font-family: $font;
+		font-size: 12px;
+		cursor: pointer;
+		box-shadow: $soft-shadow;
+		transform: translateX(-50%);
+		@include focus-ring;
+		svg {
+			font-size: 18px;
+		}
+	}
+
+	/** writing **/
+	.chat-composer {
+		padding: 12px;
+		border-top: 1px solid $line;
+		background: $sheet-bg;
+	}
+	.composer-form {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+		textarea {
+			flex: 1;
+			min-height: 44px;
+			padding: 11px 16px;
+			box-sizing: border-box;
+			border: 1px solid $line;
+			border-radius: 22px;
+			background: $ivory;
+			color: $espresso;
+			font-family: $font;
+			font-size: 15px;
+			line-height: 1.4;
+			resize: none;
+			&:focus {
+				border-color: $espresso;
+				outline: none;
+			}
+		}
+	}
+	.chat-send {
+		width: 44px;
+		height: 44px;
+		flex: none;
+		padding: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		border: none;
+		border-radius: 50%;
+		background: $espresso;
+		color: $ivory;
+		cursor: pointer;
+		transition: background-color 0.3s ease, opacity 0.3s ease;
+		@include focus-ring;
+		&:hover:not(:disabled) {
+			background: $mocha;
+		}
+		&:disabled {
+			opacity: 0.35;
+			cursor: default;
+		}
+	}
+	.chat-login {
+		margin: 0;
+		display: flex;
+		justify-content: center;
 	}
 }
 
@@ -5797,6 +6085,18 @@
 @media (prefers-reduced-motion: reduce) {
 	.notification-panel .notification-item {
 		transition: none;
+	}
+	.chat-widget {
+		.chat-launcher,
+		.chat-panel,
+		.chat-send,
+		.chat-close {
+			transition: none;
+		}
+		.chat-launcher:hover,
+		.chat-panel {
+			transform: none;
+		}
 	}
 	.community-detail {
 		.meta-author,

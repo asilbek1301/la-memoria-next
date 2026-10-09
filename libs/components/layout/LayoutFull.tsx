@@ -39,6 +39,8 @@ const withLayoutFull = (Component: any, { footer = true }: { footer?: boolean } 
 							<Component {...props} />
 						</Stack>
 
+						<Chat />
+
 						{footer && (
 							<Stack id={'footer'}>
 								<Footer />

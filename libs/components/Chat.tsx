@@ -1,171 +1,248 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Avatar, Box, Stack } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import CloseFullscreenIcon from '@mui/icons-material/CloseFullscreen';
-import MarkChatUnreadIcon from '@mui/icons-material/MarkChatUnread';
+import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import ScrollableFeed from 'react-scrollable-feed';
-import { RippleBadge } from '../../scss/MaterialTheme/styled';
 import { useReactiveVar } from '@apollo/client';
-import { socketVar, userVar } from '../../apollo/store';
+import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import ArrowUpwardRoundedIcon from '@mui/icons-material/ArrowUpwardRounded';
+import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
+import { userVar } from '../../apollo/store';
+import {
+	ChatMessage,
+	chatMessagesVar,
+	chatOnlineVar,
+	chatOpenVar,
+	chatStatusVar,
+	chatUnreadVar,
+	connectChat,
+	sendChatMessage,
+	setChatOpen,
+} from '../chat/chatSocket';
 import { Member } from '../types/member/member';
-import { Messages, REACT_APP_API_URL } from '../config';
-import { sweetErrorAlert } from '../sweetAlert';
+import { memberPhoto, studioName } from './studio/studioSearch';
 
+const MESSAGE_MAX = 500;
+const NEAR_BOTTOM = 80; // px from the end that still counts as "reading the newest"
+const INPUT_MAX_HEIGHT = 120; // the message box grows up to this, then scrolls
 
-interface MessagePayload {
-	event: string;
-	text: string;
-	memberData: Member;
+interface MessageGroup {
+	key: string;
+	senderId: string;
+	member: Member | null;
+	mine: boolean;
+	texts: string[];
 }
 
-interface InfoPayload {
-	event: string;
-	totalClients: number;
-	memberData: Member;
-	action: string;
-}
+/** messages in a row from the same person share one name and photo **/
+const groupMessages = (messages: ChatMessage[], myId: string) =>
+	messages.reduce<MessageGroup[]>((groups, message, index) => {
+		const senderId = message.memberData?._id ?? 'guest';
+		const last = groups[groups.length - 1];
+		if (last && last.senderId === senderId) last.texts.push(message.text);
+		else
+			groups.push({
+				key: `${index}-${senderId}`,
+				senderId,
+				member: message.memberData,
+				mine: Boolean(myId) && senderId === myId,
+				texts: [message.text],
+			});
+		return groups;
+	}, []);
 
+/** the community chat: a round button in the corner and a panel with the live room. Everyone can read;
+    logged-in members can write (the socket lives in libs/chat/chatSocket.ts) **/
 const Chat = () => {
-	const chatContentRef = useRef<HTMLDivElement>(null);
-	const [messagesList, setMessagesList] = useState<MessagePayload[]>([]);
-	const [onlineUsers, setOnlineUsers] = useState<number>(0);
-	const [messageInput, setMessageInput] = useState<string>('');
-	const [open, setOpen] = useState(false);
-	const [openButton, setOpenButton] = useState(false);
 	const router = useRouter();
 	const user = useReactiveVar(userVar);
-	const socket = useReactiveVar(socketVar);
+	const messages = useReactiveVar(chatMessagesVar);
+	const online = useReactiveVar(chatOnlineVar);
+	const status = useReactiveVar(chatStatusVar);
+	const open = useReactiveVar(chatOpenVar);
+	const unread = useReactiveVar(chatUnreadVar);
+	const [draft, setDraft] = useState<string>('');
+	const [newBelow, setNewBelow] = useState<boolean>(false);
+	const logRef = useRef<HTMLDivElement>(null);
+	const inputRef = useRef<HTMLTextAreaElement>(null);
+	const launcherRef = useRef<HTMLButtonElement>(null);
+	const closeRef = useRef<HTMLButtonElement>(null);
+	const stickToBottom = useRef<boolean>(true);
+	const myId = user?._id ?? '';
 
 	/** LIFECYCLES **/
 
-	useEffect(() => {
-		socket.onmessage = (msg) => {
-			const data = JSON.parse(msg.data);
-			console.log('WebSocket message:', data);
+	// connect once, and again after a login or logout
+	useEffect(() => connectChat(myId), [myId]);
 
-			switch (data.event) {
-				case 'info':
-					const newInfo: InfoPayload = data;
-					setOnlineUsers(newInfo.totalClients);
-					break;
-				case 'getMessages':
-					const list: MessagePayload[] = data.list;
-					setMessagesList(list);
-					break;
-				case 'message':
-					const newMessage: MessagePayload = data;
-					messagesList.push(newMessage);
-					setMessagesList([...messagesList]);
-					break;
-			}
-		};
-	}, [socket, messagesList]);
-
+	// opening: start at the newest message and move focus into the panel. With a mouse the cursor goes to the
+	// message box; on touch screens to the close button, so the keyboard doesn't cover the chat straight away
 	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			setOpenButton(true);
-		}, 100);
-		return () => clearTimeout(timeoutId);
-	}, []);
+		if (!open) return;
+		stickToBottom.current = true;
+		scrollToEnd('auto');
+		const touch = window.matchMedia('(pointer: coarse)').matches;
+		(touch ? closeRef.current : inputRef.current ?? closeRef.current)?.focus();
+	}, [open]);
 
+	// a new message: follow it when reading the newest, otherwise offer "New messages"
 	useEffect(() => {
-		setOpenButton(false);
-	}, [router.pathname]);
+		if (!open) return;
+		if (stickToBottom.current) scrollToEnd('smooth');
+		else setNewBelow(true);
+	}, [messages, open]);
+
+	// the message box grows with its text
+	useEffect(() => {
+		const input = inputRef.current;
+		if (!input) return;
+		input.style.height = 'auto';
+		input.style.height = `${Math.min(input.scrollHeight, INPUT_MAX_HEIGHT)}px`;
+	}, [draft]);
 
 	/** HANDLERS **/
 
-	const handleOpenChat = () => {
-		setOpen((prevState) => !prevState);
+	function scrollToEnd(behavior: ScrollBehavior) {
+		const log = logRef.current;
+		if (log) log.scrollTo({ top: log.scrollHeight, behavior });
+		setNewBelow(false);
+	}
+
+	const onScroll = () => {
+		const log = logRef.current;
+		if (!log) return;
+		stickToBottom.current = log.scrollHeight - log.scrollTop - log.clientHeight < NEAR_BOTTOM;
+		if (stickToBottom.current) setNewBelow(false);
 	};
 
-	const getInputMessageHandler = useCallback(
-		(e: any) => {
-			const text = e.target.value;
-			setMessageInput(text);
-		},
-		[messageInput],
-	);
+	const close = () => {
+		setChatOpen(false);
+		launcherRef.current?.focus();
+	};
 
-	const getKeyHandler = (e: any) => {
-		try {
-			if (e.key == 'Enter') {
-				onClickHandler();
-			}
-		} catch (err: any) {
-			console.log(err);
+	const send = (e?: React.FormEvent) => {
+		e?.preventDefault();
+		const text = draft.trim();
+		if (!text || !sendChatMessage(text)) return;
+		setDraft('');
+		stickToBottom.current = true; // your own message always scrolls into view
+	};
+
+	// Enter sends, Shift+Enter adds a line; not while a Korean (or other) IME is still composing
+	const onInputKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+			e.preventDefault();
+			send();
 		}
 	};
 
-	const onClickHandler = () => {
-		if (!messageInput) sweetErrorAlert(Messages.error4);
-		else {
-			socket.send(JSON.stringify({ event: 'message', data: messageInput }));
-			setMessageInput('');
-		}
-	};
+	const groups = groupMessages(messages, myId);
+	const statusText =
+		status === 'open' ? `${online} online` : status === 'connecting' ? 'Connecting…' : 'Reconnecting…';
 
 	return (
-		<Stack className="chatting">
-			{openButton ? (
-				<button className="chat-button" onClick={handleOpenChat}>
-					{open ? <CloseFullscreenIcon /> : <MarkChatUnreadIcon />}
-				</button>
-			) : null}
-			<Stack className={`chat-frame ${open ? 'open' : ''}`}>
-				<Box className={'chat-top'} component={'div'}>
-					<div>Online Chat</div>
-					<RippleBadge style={{ margin: '-18px 0 0 21px' }} badgeContent={onlineUsers} />
-				</Box>
-				<Box className={'chat-content'} id="chat-content" ref={chatContentRef} component={'div'}>
-					<ScrollableFeed>
-						<Stack className={'chat-main'}>
-							<Box flexDirection={'row'} style={{ display: 'flex' }} sx={{ m: '10px 0px' }} component={'div'}>
-								<div className={'welcome'}>Welcome to Live chat!</div>
-							</Box>
-							{messagesList.map((ele: MessagePayload) => {
-								const { text, memberData } = ele;
-								const memberImage = memberData?.memberImage
-									? `${REACT_APP_API_URL}/${memberData.memberImage}`
-									: `/img/profile/defaultUser.svg`;
+		<div className={`chat-widget ${open ? 'open' : ''}`}>
+			<button
+				ref={launcherRef}
+				type="button"
+				className={'chat-launcher'}
+				aria-expanded={open}
+				aria-controls="chat-panel"
+				aria-label={open ? 'Close the chat' : unread ? `Open the chat (${unread} new)` : 'Open the chat'}
+				onClick={() => (open ? close() : setChatOpen(true))}
+			>
+				{open ? <CloseRoundedIcon /> : <ChatBubbleOutlineRoundedIcon />}
+				{!open && unread > 0 && <span className={'launcher-badge'}>{unread > 99 ? '99+' : unread}</span>}
+			</button>
 
-								return memberData?._id === user?._id ? (
-									<Box
-										component={'div'}
-										flexDirection={'row'}
-										style={{ display: 'flex' }}
-										alignItems={'flex-end'}
-										justifyContent={'flex-end'}
-										sx={{ m: '10px 0px' }}
-									>
-										<div className={'msg-right'}>{text}</div>
-									</Box>
-								) : (
-									<Box flexDirection={'row'} style={{ display: 'flex' }} sx={{ m: '10px 0px' }} component={'div'}>
-										<Avatar alt={'jonik'} src={memberImage} />
-										<div className={'msg-left'}>{text}</div>
-									</Box>
-								);
-							})}
-						</Stack>
-					</ScrollableFeed>
-				</Box>
-				<Box className={'chat-bott'} component={'div'}>
-					<input
-						type={'text'}
-						name={'message'}
-						className={'msg-input'}
-						placeholder={'Type message'}
-						value={messageInput}
-						onChange={getInputMessageHandler}
-						onKeyDown={getKeyHandler}
-					/>
-					<button className={'send-msg-btn'} onClick={onClickHandler}>
-						<SendIcon style={{ color: '#fff' }} />
+			<section
+				id="chat-panel"
+				className={'chat-panel'}
+				role="dialog"
+				aria-label="Community chat"
+				aria-hidden={!open}
+				onKeyDown={(e) => e.key === 'Escape' && close()}
+			>
+				<header className={'chat-head'}>
+					<div>
+						<h2 className={'chat-title'}>Community chat</h2>
+						<p className={`chat-status ${status}`}>
+							<span className={'status-dot'} aria-hidden="true" />
+							{statusText}
+						</p>
+					</div>
+					<button ref={closeRef} type="button" className={'chat-close'} aria-label="Close the chat" onClick={close}>
+						<CloseRoundedIcon />
 					</button>
-				</Box>
-			</Stack>
-		</Stack>
+				</header>
+
+				<div className={'chat-log'} ref={logRef} role="log" aria-live="polite" onScroll={onScroll}>
+					{groups.length === 0 ? (
+						<p className={'chat-empty'}>No messages yet.</p>
+					) : (
+						groups.map((group) => {
+							const name = group.member ? studioName(group.member) : 'Guest';
+							const photo = memberPhoto(group.member?.memberImage);
+							return (
+								<div key={group.key} className={`chat-group ${group.mine ? 'mine' : ''}`}>
+									{!group.mine && (
+										<span className={'chat-avatar'} aria-hidden="true">
+											{photo ? <img src={photo} alt="" /> : name.charAt(0)}
+										</span>
+									)}
+									<div className={'group-body'}>
+										<span className={group.mine ? 'visually-hidden' : 'chat-name'}>{group.mine ? 'You' : name}</span>
+										{group.texts.map((text, index) => (
+											<p key={index} className={'chat-bubble'}>
+												{text}
+											</p>
+										))}
+									</div>
+								</div>
+							);
+						})
+					)}
+				</div>
+				{newBelow && (
+					<button type="button" className={'chat-new'} onClick={() => scrollToEnd('smooth')}>
+						New messages <KeyboardArrowDownRoundedIcon />
+					</button>
+				)}
+
+				<footer className={'chat-composer'}>
+					{user?._id ? (
+						<form className={'composer-form'} onSubmit={send}>
+							<label className={'visually-hidden'} htmlFor="chat-input">
+								Message
+							</label>
+							<textarea
+								ref={inputRef}
+								id="chat-input"
+								rows={1}
+								maxLength={MESSAGE_MAX}
+								value={draft}
+								placeholder="Write a message"
+								onChange={(e) => setDraft(e.target.value)}
+								onKeyDown={onInputKey}
+							/>
+							<button
+								type="submit"
+								className={'chat-send'}
+								aria-label="Send"
+								disabled={!draft.trim() || status !== 'open'}
+							>
+								<ArrowUpwardRoundedIcon />
+							</button>
+						</form>
+					) : (
+						<p className={'chat-login'}>
+							<Link href={`/account/join?referrer=${encodeURIComponent(router.asPath)}`} className={'button-link'}>
+								Log in to chat
+							</Link>
+						</p>
+					)}
+				</footer>
+			</section>
+		</div>
 	);
 };
 

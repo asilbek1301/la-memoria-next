@@ -84,6 +84,16 @@ $booking-panel-width: clamp(320px, 28vw, 380px); // narrower on tablets so the c
 $detail-column-gap: clamp(40px, 5vw, 80px);
 $fact-min-width: 190px; // a fact column never gets narrower: 4 across on desktop, 2x2 when space is short
 
+/** COMMUNITY CHAT (Chat.tsx) **/
+$chat-launcher-size: 56px;
+$chat-offset: 32px; // launcher distance from the screen edges on desktop
+$chat-offset-mobile: 16px;
+$chat-bottom-mobile: 88px; // phones: above the fixed booking bar on package pages
+$chat-panel-width: 380px;
+$chat-panel-height: 560px;
+$chat-shadow: 0 24px 60px -20px rgba(62, 44, 35, 0.35);
+$chat-layer: 900; // above the page and the navbar, below MUI dialogs
+
 /** COMMUNITY POST **/
 $reading-width: 720px; // longest line of post text
 $reading-size: 18px;
