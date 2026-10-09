@@ -84,6 +84,18 @@ $booking-panel-width: clamp(320px, 28vw, 380px); // narrower on tablets so the c
 $detail-column-gap: clamp(40px, 5vw, 80px);
 $fact-min-width: 190px; // a fact column never gets narrower: 4 across on desktop, 2x2 when space is short
 
+/** COMMUNITY POST **/
+$reading-width: 720px; // longest line of post text
+$reading-size: 18px;
+$reading-line: 1.7;
+$sheet-bg: #ffffff; // the post sits on a white sheet over the ivory page
+$sheet-pad: clamp(32px, 4.5vw, 64px);
+$sheet-pad-mobile: 20px;
+$sheet-cover-height: 440px;
+$sheet-cover-height-mobile: 240px;
+$post-aside-width: clamp(280px, 24vw, 340px); // the side column: author, then the rest of the category
+$post-column-gap: clamp(32px, 4vw, 64px);
+
 /** STUDIO PORTRAIT LIGHT: studio photos stay in full colour. On hover a thin champagne arch line rises
     inside the photo (light filling a doorway), a soft light sweeps across, and the photo zooms a little. **/
 $portrait-line: rgba(201, 168, 124, 0.95);

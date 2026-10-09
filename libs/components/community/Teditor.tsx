@@ -12,11 +12,11 @@ import { sweetErrorHandling, sweetTopSuccessAlert } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
 import { categoryLabels } from './communitySearch';
 
-// the backend's limits (BoardArticleInput): title 3–50, content 3–250 characters of the editor's HTML
+// the backend's limits (BoardArticleInput): title 3–50, content 3–5000 characters of the editor's HTML
 const TITLE_MIN = 3;
 const TITLE_MAX = 50;
 const CONTENT_MIN = 3;
-const CONTENT_MAX = 250;
+const CONTENT_MAX = 5000;
 
 /** an empty editor still returns '<p><br></p>'; treat that as no text **/
 const isBlank = (html: string) => html.replace(/<p><br><\/p>/g, '').replace(/<[^>]+>/g, '').trim() === '' && !/<img/i.test(html);

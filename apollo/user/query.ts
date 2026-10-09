@@ -403,6 +403,7 @@ export const GET_BOARD_ARTICLE = gql`
 				memberWarnings
 				memberBlocks
 				memberPackages
+				memberArticles
 				memberRank
 				memberPoints
 				memberLikes
@@ -415,6 +416,24 @@ export const GET_BOARD_ARTICLE = gql`
 				memberId
 				likeRefId
 				myFavorite
+			}
+		}
+	}
+`;
+
+/** the posts just before (older) and after (newer) one post, in the same category **/
+export const GET_BOARD_ARTICLE_NEIGHBORS = gql`
+	query GetBoardArticleNeighbors($input: String!) {
+		getBoardArticleNeighbors(articleId: $input) {
+			previous {
+				_id
+				articleCategory
+				articleTitle
+			}
+			next {
+				_id
+				articleCategory
+				articleTitle
 			}
 		}
 	}

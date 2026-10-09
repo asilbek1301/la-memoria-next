@@ -19,3 +19,9 @@ export interface BoardArticle {
 	meLiked?: MeLiked[];
 	memberData?: Member;
 }
+
+/** getBoardArticleNeighbors: the next older and the next newer post in the same category */
+export interface BoardArticleNeighbors {
+	previous?: Pick<BoardArticle, '_id' | 'articleCategory' | 'articleTitle'> | null;
+	next?: Pick<BoardArticle, '_id' | 'articleCategory' | 'articleTitle'> | null;
+}

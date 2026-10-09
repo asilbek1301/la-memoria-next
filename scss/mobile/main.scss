@@ -724,6 +724,64 @@
   }
 
   /** PACKAGE DETAIL LAYOUT (phone); looks are in pc/general.scss under .detail-page **/
+  // community post: one column; the sheet, its comments, then the author and the category
+  #community-detail-page {
+    width: 100%;
+    padding: calc(#{$nav-height-mobile} + 20px) 0 $section-space-mobile;
+    .container {
+      @include page-container-mobile;
+    }
+    .breadcrumb,
+    .crumb-skeleton {
+      margin-bottom: 20px;
+    }
+    .detail-missing {
+      margin-top: 32px;
+    }
+    .post-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+    }
+    .sheet-cover {
+      height: $sheet-cover-height-mobile;
+    }
+    .sheet-text {
+      padding: 28px $sheet-pad-mobile;
+    }
+    .article-head {
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .article-title {
+      @include text-headline-lg-mobile;
+    }
+    .sheet-foot {
+      padding: 16px $sheet-pad-mobile;
+    }
+    .action-pill {
+      padding: 0 14px;
+    }
+    .comments-section {
+      margin-top: 40px;
+      padding-top: 0;
+      border-top: none;
+    }
+    .post-aside {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .aside-box {
+      padding: 22px;
+    }
+    .aside-skeleton {
+      height: 160px;
+    }
+  }
+
   #package-detail-page {
     width: 100%;
     padding: calc(#{$nav-height-mobile} + 16px) 0 120px; // room for the fixed booking bar

@@ -1,62 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import '@toast-ui/editor/dist/toastui-editor.css';
+import React, { useEffect, useRef } from 'react';
+import '@toast-ui/editor/dist/toastui-editor-viewer.css';
 import { Viewer } from '@toast-ui/react-editor';
-import { Box, Stack, CircularProgress } from '@mui/material';
 
-const TViewer = (props: any) => {
-	const [editorLoaded, setEditorLoaded] = useState(false);
+/** a photo that can't load (deleted file, bad address) is hidden instead of showing a broken-image icon **/
+const hideBroken = (img: HTMLImageElement) => img.classList.add('broken');
 
-	/** LIFECYCLES **/
+/**
+ * Shows a post's HTML (written with the Toast UI editor). The viewer cleans it with DOMPurify before it reaches the page:
+ * no scripts, styles, forms, iframes or on… attributes. Don't add custom renderers for iframe or embed: Toast UI
+ * would then let those tags through the cleaner.
+ * The viewer reads its content once, so give it a `key` that changes with the post.
+ **/
+const TViewer = ({ content }: { content: string }) => {
+	const box = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
-		if (props.markdown) {
-			setEditorLoaded(true);
-		} else {
-			setEditorLoaded(false);
-		}
-	}, [props.markdown]);
+		const el = box.current;
+		if (!el) return;
+		// a load error doesn't bubble, but a listener in the capture phase still hears it from the photos inside
+		const onError = (e: Event) => {
+			if (e.target instanceof HTMLImageElement) hideBroken(e.target);
+		};
+		el.addEventListener('error', onError, true);
+		el.querySelectorAll('img').forEach((img) => img.complete && img.naturalWidth === 0 && hideBroken(img));
+		return () => el.removeEventListener('error', onError, true);
+	}, []);
 
 	return (
-		<Stack sx={{ background: 'white', mt: '30px', borderRadius: '10px' }}>
-			<Box component={'div'} sx={{ m: '40px' }}>
-				{editorLoaded ? (
-					<Viewer
-						initialValue={props.markdown}
-						customHTMLRenderer={{
-							htmlBlock: {
-								iframe(node: any) {
-									return [
-										{
-											type: 'openTag',
-											tagName: 'iframe',
-											outerNewLine: true,
-											attributes: node.attrs,
-										},
-										{ type: 'html', content: node.childrenHTML ?? '' },
-										{ type: 'closeTag', tagName: 'iframe', outerNewLine: true },
-									];
-								},
-								div(node: any) {
-									return [
-										{ type: 'openTag', tagName: 'div', outerNewLine: true, attributes: node.attrs },
-										{ type: 'html', content: node.childrenHTML ?? '' },
-										{ type: 'closeTag', tagName: 'div', outerNewLine: true },
-									];
-								},
-							},
-							htmlInline: {
-								big(node: any, { entering }: any) {
-									return entering
-										? { type: 'openTag', tagName: 'big', attributes: node.attrs }
-										: { type: 'closeTag', tagName: 'big' };
-								},
-							},
-						}}
-					/>
-				) : (
-					<CircularProgress />
-				)}
-			</Box>
-		</Stack>
+		<div ref={box}>
+			<Viewer initialValue={content} />
+		</div>
 	);
 };
 

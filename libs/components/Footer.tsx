@@ -4,6 +4,7 @@ import moment from 'moment';
 import AnimatedLogo from './common/AnimatedLogo';
 import { packageSearchHref, prettyEnum } from '../utils';
 import { PackageLocation, PackageType } from '../enums/package.enum';
+import { SUPPORT_PHONE, SUPPORT_TEL } from './cs/helpContent';
 
 const footerColumns = [
 	{
@@ -53,8 +54,8 @@ const Footer = () => {
 						reserve your shoot in one place.
 					</p>
 					<span className={'label'}>Customer care</span>
-					<a className={'phone'} href="tel:+821048672909">
-						+82 10 4867 2909
+					<a className={'phone'} href={SUPPORT_TEL}>
+						{SUPPORT_PHONE}
 					</a>
 				</div>
 

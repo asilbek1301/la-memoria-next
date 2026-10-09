@@ -50,11 +50,6 @@ const withLayoutBasic = (Component: any) => {
 					desc = 'Home / La Memoria';
 					bgImage = '/img/banner/header2.svg';
 					break;
-				case '/community/detail':
-					title = 'Community Detail';
-					desc = 'Home / La Memoria';
-					bgImage = '/img/banner/header2.svg';
-					break;
 				case '/cs':
 					title = 'CS';
 					desc = 'We are glad to see you again!';

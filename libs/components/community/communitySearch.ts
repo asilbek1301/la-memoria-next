@@ -59,7 +59,7 @@ export const parseCommunityInput = (raw: unknown, legacyCategory?: unknown): Boa
 	}
 };
 
-export const articleHref = (article: BoardArticle) =>
+export const articleHref = (article: Pick<BoardArticle, '_id' | 'articleCategory'>) =>
 	`/community/detail?articleCategory=${article?.articleCategory}&id=${article?._id}`;
 
 /** a studio author opens the studio page; anyone else opens their member page **/
@@ -76,3 +76,17 @@ export const articleExcerpt = (html?: string) =>
 		.replace(/&amp;/g, '&')
 		.replace(/\s+/g, ' ')
 		.trim();
+
+/** a category's list page: /community with that board selected **/
+export const categoryHref = (category?: BoardArticleCategory) =>
+	communityHref({ ...defaultCommunityInput, search: category ? { articleCategory: category } : {} });
+
+/** the editor puts the cover photo inside the post as well; the post page shows it above the text, so the copy in
+    the text (with the paragraph around it) is left out once **/
+export const withoutCover = (html: string, image?: string) => {
+	if (!image) return html;
+	const src = image.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const photo = `<img[^>]*src="[^"]*${src}"[^>]*>`;
+	const inParagraph = new RegExp(`<p>\\s*${photo}\\s*(<br\\s*/?>)?\\s*</p>`);
+	return inParagraph.test(html) ? html.replace(inParagraph, '') : html.replace(new RegExp(photo), '');
+};

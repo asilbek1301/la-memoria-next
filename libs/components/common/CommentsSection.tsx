@@ -6,10 +6,10 @@ import { Skeleton } from '@mui/material';
 import moment from 'moment';
 import { Comment } from '../../types/comment/comment';
 import { CommentsInquiry } from '../../types/comment/comment.input';
-import { CommentGroup } from '../../enums/comment.enum';
+import { CommentGroup, CommentStatus } from '../../enums/comment.enum';
 import { Direction, Message } from '../../enums/common.enum';
 import { GET_COMMENTS } from '../../../apollo/user/query';
-import { CREATE_COMMENT } from '../../../apollo/user/mutation';
+import { CREATE_COMMENT, UPDATE_COMMENT } from '../../../apollo/user/mutation';
 import { REACT_APP_API_URL } from '../../config';
 import { sweetErrorHandling } from '../../sweetAlert';
 import { ResultsPagination } from './ListControls';
@@ -19,17 +19,127 @@ const COMMENT_MAX = 100;
 const PAGE_SIZE = 5;
 
 interface CommentsSectionProps {
-	/** the package or studio the comments belong to */
+	/** the package, studio or post the comments belong to */
 	refId: string;
 	group: CommentGroup;
 	user: any;
 	/** shown instead of the form, e.g. on your own studio */
 	formNote?: string;
-	/** called after a new comment, so the page can refresh its count */
+	/** called after a comment is added or deleted, so the page can refresh its count */
 	onCommented?: () => void;
 }
 
-/** comments (not reviews) for a package or a studio: list, pagination and a form for logged-in members **/
+interface CommentItemProps {
+	comment: Comment;
+	isMine: boolean;
+	authorHref: string;
+	onSave: (comment: Comment, text: string) => Promise<boolean>;
+	onDelete: (comment: Comment) => Promise<void>;
+}
+
+/** one comment; your own can be edited in place or deleted after a second click **/
+const CommentItem = ({ comment, isMine, authorHref, onSave, onDelete }: CommentItemProps) => {
+	const [mode, setMode] = useState<'read' | 'edit' | 'confirm'>('read');
+	const [draft, setDraft] = useState<string>(comment.commentContent);
+	const [busy, setBusy] = useState<boolean>(false);
+	const author = comment?.memberData;
+	const avatar = author?.memberImage ? `${REACT_APP_API_URL}/${author.memberImage}` : '/img/profile/defaultUser.svg';
+	const editId = `comment-edit-${comment._id}`;
+
+	const save = async (e: React.FormEvent) => {
+		e.preventDefault();
+		const text = draft.trim();
+		if (!text || busy) return;
+		if (text === comment.commentContent) return setMode('read');
+		setBusy(true);
+		if (await onSave(comment, text)) setMode('read');
+		setBusy(false);
+	};
+
+	const remove = async () => {
+		setBusy(true);
+		await onDelete(comment); // the list refreshes without this comment
+		setBusy(false);
+	};
+
+	return (
+		<li className={'comment'}>
+			<img className={'comment-avatar'} src={avatar} alt="" loading="lazy" />
+			<div className={'comment-body'}>
+				<p className={'comment-meta'}>
+					<Link href={authorHref} className={'comment-author'}>
+						{author?.memberFullName || author?.memberNick}
+					</Link>
+					<time dateTime={String(comment.createdAt)}>{moment(comment.createdAt).format('D MMMM YYYY')}</time>
+				</p>
+
+				{mode === 'edit' ? (
+					<form className={'comment-form comment-edit'} onSubmit={save}>
+						<label className={'visually-hidden'} htmlFor={editId}>
+							Edit your comment
+						</label>
+						<textarea
+							id={editId}
+							rows={2}
+							maxLength={COMMENT_MAX}
+							value={draft}
+							autoFocus
+							onChange={(e) => setDraft(e.target.value)}
+							onKeyDown={(e) => e.key === 'Escape' && setMode('read')}
+						/>
+						<div className={'comment-form-foot'}>
+							<span className={'field-count'} aria-hidden="true">
+								{draft.length} / {COMMENT_MAX}
+							</span>
+							<span className={'comment-actions'}>
+								<button type="button" className={'button-link'} onClick={() => setMode('read')}>
+									Cancel
+								</button>
+								<button type="submit" className={'button-secondary'} disabled={!draft.trim() || busy}>
+									{busy ? 'Saving…' : 'Save'}
+								</button>
+							</span>
+						</div>
+					</form>
+				) : (
+					<p className={'comment-text'}>{comment.commentContent}</p>
+				)}
+
+				{isMine && mode === 'read' && (
+					<span className={'comment-actions'}>
+						<button
+							type="button"
+							className={'button-link'}
+							onClick={() => {
+								setDraft(comment.commentContent);
+								setMode('edit');
+							}}
+						>
+							Edit
+						</button>
+						<button type="button" className={'button-link'} onClick={() => setMode('confirm')}>
+							Delete
+						</button>
+					</span>
+				)}
+				{isMine && mode === 'confirm' && (
+					<span className={'comment-actions'} role="group" aria-label="Delete this comment?">
+						<span className={'confirm-text'}>Delete this comment?</span>
+						<button type="button" className={'button-link danger'} disabled={busy} onClick={remove}>
+							{busy ? 'Deleting…' : 'Delete'}
+						</button>
+						<button type="button" className={'button-link'} onClick={() => setMode('read')}>
+							Cancel
+						</button>
+					</span>
+				)}
+			</div>
+		</li>
+	);
+};
+
+/** comments (not reviews) for a package, studio or post: list, pagination, a form for logged-in members, and
+    edit / delete for your own comments **/
 const CommentsSection = (props: CommentsSectionProps) => {
 	const { refId, group, user, formNote, onCommented } = props;
 	const router = useRouter();
@@ -54,9 +164,12 @@ const CommentsSection = (props: CommentsSectionProps) => {
 		notifyOnNetworkStatusChange: true,
 	});
 	const [createComment] = useMutation(CREATE_COMMENT);
+	const [updateComment] = useMutation(UPDATE_COMMENT);
 
 	const comments: Comment[] = data?.getComments?.list ?? [];
 	const total: number = data?.getComments?.metaCounter?.[0]?.total ?? 0;
+
+	/** HANDLERS **/
 
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -79,11 +192,35 @@ const CommentsSection = (props: CommentsSectionProps) => {
 		}
 	};
 
+	const saveComment = async (comment: Comment, text: string) => {
+		try {
+			await updateComment({ variables: { input: { _id: comment._id, commentContent: text } } });
+			await refetch();
+			return true;
+		} catch (err) {
+			await sweetErrorHandling(err);
+			return false;
+		}
+	};
+
+	const deleteComment = async (comment: Comment) => {
+		try {
+			await updateComment({ variables: { input: { _id: comment._id, commentStatus: CommentStatus.DELETE } } });
+			// the last comment on a later page: go back one page
+			const lastOnPage = comments.length === 1 && page > 1;
+			if (lastOnPage) setPage(page - 1);
+			await refetch({ input: { ...inquiry, page: lastOnPage ? page - 1 : page } });
+			onCommented?.();
+		} catch (err) {
+			await sweetErrorHandling(err);
+		}
+	};
+
 	const authorHref = (comment: Comment) =>
 		comment?.memberData?._id === user?._id ? '/mypage' : `/member?memberId=${comment?.memberData?._id}`;
 
 	return (
-		<section className={'detail-section comments-section'} aria-labelledby="comments-title">
+		<section id="comments" className={'detail-section comments-section'} aria-labelledby="comments-title">
 			<h2 id="comments-title" className={'detail-title'}>
 				Comments{total > 0 ? ` (${total})` : ''}
 			</h2>
@@ -139,26 +276,17 @@ const CommentsSection = (props: CommentsSectionProps) => {
 				<p className={'comment-empty'}>No comments yet.</p>
 			) : (
 				<ul className={'comment-list'}>
-					{comments.map((comment) => {
-						const author = comment?.memberData;
-						const avatar = author?.memberImage
-							? `${REACT_APP_API_URL}/${author.memberImage}`
-							: '/img/profile/defaultUser.svg';
-						return (
-							<li className={'comment'} key={comment._id}>
-								<img className={'comment-avatar'} src={avatar} alt="" loading="lazy" />
-								<div className={'comment-body'}>
-									<p className={'comment-meta'}>
-										<Link href={authorHref(comment)} className={'comment-author'}>
-											{author?.memberFullName || author?.memberNick}
-										</Link>
-										<time dateTime={String(comment.createdAt)}>{moment(comment.createdAt).format('D MMMM YYYY')}</time>
-									</p>
-									<p className={'comment-text'}>{comment.commentContent}</p>
-								</div>
-							</li>
-						);
-					})}
+					{comments.map((comment) => (
+						<CommentItem
+							// a new key after an edit, so the item starts again from the saved text
+							key={`${comment._id}-${comment.updatedAt}`}
+							comment={comment}
+							isMine={Boolean(user?._id) && comment.memberId === user._id}
+							authorHref={authorHref(comment)}
+							onSave={saveComment}
+							onDelete={deleteComment}
+						/>
+					))}
 				</ul>
 			)}
 

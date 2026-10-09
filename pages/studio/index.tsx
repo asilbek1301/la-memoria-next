@@ -26,6 +26,7 @@ import { LIKE_TARGET_MEMBER } from '../../apollo/user/mutation';
 import { T } from '../../libs/types/common';
 import { Messages } from '../../libs/config';
 import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { SUPPORT_PHONE, SUPPORT_TEL } from '../../libs/components/cs/helpContent';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -252,8 +253,8 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 							</p>
 						</div>
 						<div className={'help-actions'}>
-							<a className={'button-link'} href="tel:+821048672909">
-								+82 10 4867 2909
+							<a className={'button-link'} href={SUPPORT_TEL}>
+								{SUPPORT_PHONE}
 							</a>
 							<Link href={'/cs'} className={'button-primary'}>
 								Contact us

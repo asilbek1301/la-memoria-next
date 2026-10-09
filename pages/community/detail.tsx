@@ -1,533 +1,270 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
-import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
-import withLayoutBasic from '../../libs/components/layout/LayoutBasic';
-import { Button, Stack, Typography, Tab, Tabs, IconButton, Backdrop, Pagination } from '@mui/material';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import Moment from 'react-moment';
-import { userVar } from '../../apollo/store';
-import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import ChatIcon from '@mui/icons-material/Chat';
-import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
-import { CommentInput, CommentsInquiry } from '../../libs/types/comment/comment.input';
-import { Comment } from '../../libs/types/comment/comment';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { CommentGroup, CommentStatus } from '../../libs/enums/comment.enum';
-import { T } from '../../libs/types/common';
-import EditIcon from '@mui/icons-material/Edit';
+import { useRouter } from 'next/router';
+import moment from 'moment';
+import { Skeleton } from '@mui/material';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { BoardArticle } from '../../libs/types/board-article/board-article';
-import { GET_BOARD_ARTICLE, GET_COMMENTS } from '../../apollo/user/query';
-import { CREATE_COMMENT, LIKE_TARGET_BOARD_ARTICLE, UPDATE_COMMENT } from '../../apollo/user/mutation';
-import { Messages } from '../../libs/config';
-import {
-	sweetConfirmAlert,
-	sweetMixinErrorAlert,
-	sweetMixinSuccessAlert,
-	sweetTopSmallSuccessAlert,
-} from '../../libs/sweetAlert';
-import { CommentUpdate } from '../../libs/types/comment/comment.update';
+import withLayoutFull from '../../libs/components/layout/LayoutFull';
+import CommentsSection from '../../libs/components/common/CommentsSection';
+import ArticleActions from '../../libs/components/community/ArticleActions';
+import PostAside from '../../libs/components/community/PostAside';
+import { authorHref, categoryHref, categoryLabel, withoutCover } from '../../libs/components/community/communitySearch';
+import { plural, studioName } from '../../libs/components/studio/studioSearch';
+import { userVar } from '../../apollo/store';
+import { GET_BOARD_ARTICLE, GET_BOARD_ARTICLE_NEIGHBORS, GET_BOARD_ARTICLES } from '../../apollo/user/query';
+import { LIKE_TARGET_BOARD_ARTICLE, UPDATE_BOARD_ARTICLE } from '../../apollo/user/mutation';
+import { BoardArticle, BoardArticleNeighbors } from '../../libs/types/board-article/board-article';
+import { BoardArticleStatus } from '../../libs/enums/board-article.enum';
+import { CommentGroup } from '../../libs/enums/comment.enum';
+import { Direction } from '../../libs/enums/common.enum';
+import { REACT_APP_API_URL } from '../../libs/config';
+import { sweetErrorHandling } from '../../libs/sweetAlert';
 
-const ToastViewerComponent = dynamic(() => import('../../libs/components/community/TViewer'), { ssr: false });
+// the viewer needs the browser; text-shaped lines show while it loads
+const TViewer = dynamic(() => import('../../libs/components/community/TViewer'), {
+	ssr: false,
+	loading: () => (
+		<div aria-hidden="true">
+			<Skeleton width="100%" />
+			<Skeleton width="92%" />
+			<Skeleton width="60%" />
+		</div>
+	),
+});
+
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
 		...(await serverSideTranslations(locale, ['common'])),
 	},
 });
 
-const CommunityDetail: NextPage = ({ initialInput, ...props }: T) => {
-	const device = useDeviceDetect();
+const LATEST_LIMIT = 4; // newest posts listed in the side column
+
+/** One community post: the post on a sheet with its actions and comments; beside it the author and the rest of the
+    category. The URL is /community/detail?id=… (older links also carry ?articleCategory=, which is no longer needed) **/
+const CommunityDetail: NextPage = () => {
 	const router = useRouter();
-	const { query } = router;
-
-	const articleId = query?.id as string;
-
-	const [comment, setComment] = useState<string>('');
-	const [wordsCnt, setWordsCnt] = useState<number>(0);
-	const [updatedCommentWordsCnt, setUpdatedCommentWordsCnt] = useState<number>(0);
 	const user = useReactiveVar(userVar);
-	const [comments, setComments] = useState<Comment[]>([]);
-	const [total, setTotal] = useState<number>(0);
-	const [searchFilter, setSearchFilter] = useState<CommentsInquiry>({
-		...initialInput,
-	});
-	const [memberImage, setMemberImage] = useState<string>('/img/community/articleImg.png');
-	const [] = useState<any | null>(null);
-	const [openBackdrop, setOpenBackdrop] = useState<boolean>(false);
-	const [updatedComment, setUpdatedComment] = useState<string>('');
-	const [updatedCommentId, setUpdatedCommentId] = useState<string>('');
-	const [likeLoading, setLikeLoading] = useState<boolean>(false);
-	const [boardArticle, setBoardArticle] = useState<BoardArticle>();
-	// links that carry only ?id= (e.g. from a notification) take the board from the post itself
-	const articleCategory = (query?.articleCategory as string) ?? boardArticle?.articleCategory;
+	const articleId = typeof router.query.id === 'string' ? router.query.id : '';
+	const [liking, setLiking] = useState<boolean>(false);
+	const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
+	const [deleting, setDeleting] = useState<boolean>(false);
 
 	/** APOLLO REQUESTS **/
 
-	const [likeTargetBoardArticle] = useMutation(LIKE_TARGET_BOARD_ARTICLE);
-	const [createComment] = useMutation(CREATE_COMMENT);
-	const [updateComment] = useMutation(UPDATE_COMMENT);
-
-	const {
-		refetch: boardArticleRefetch,
-	} = useQuery(GET_BOARD_ARTICLE, {
+	// getBoardArticle also records the view (once per logged-in member). A missing post shows this page's own
+	// message, so its error stays quiet instead of opening the global popup
+	const { data, loading, error, refetch } = useQuery(GET_BOARD_ARTICLE, {
+		context: { quiet: true },
 		fetchPolicy: 'network-only',
 		variables: { input: articleId },
+		skip: !articleId,
 		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: any) => {
-			setBoardArticle(data?.getBoardArticle);
-			if (data?.getBoardArticle?.memberData?.memberImage) {
-				setMemberImage(`${process.env.REACT_APP_API_URL}/${data?.getBoardArticle?.memberData?.memberImage}`);
-			}
-		},
 	});
+	const article: BoardArticle | undefined = data?.getBoardArticle;
+	const category = article?.articleCategory;
 
-	const {
-		refetch: getCommentsRefetch,
-	} = useQuery(GET_COMMENTS, {
+	const { data: neighborData } = useQuery(GET_BOARD_ARTICLE_NEIGHBORS, {
+		context: { quiet: true },
 		fetchPolicy: 'cache-and-network',
-		variables: { input: searchFilter },
-		notifyOnNetworkStatusChange: true,
-		onCompleted: (data: any) => {
-			setComments(data?.getComments?.list);
-			setTotal(data?.getComments?.metaCounter?.[0]?.total || 0);
-		},
+		variables: { input: articleId },
+		skip: !article,
 	});
+	const neighbors: BoardArticleNeighbors = neighborData?.getBoardArticleNeighbors ?? {};
 
-	/** LIFECYCLES **/
+	// a few extra, because this post and its neighbours are left out of the list
+	const { data: latestData } = useQuery(GET_BOARD_ARTICLES, {
+		fetchPolicy: 'cache-and-network',
+		variables: {
+			input: {
+				page: 1,
+				limit: LATEST_LIMIT + 3,
+				sort: 'createdAt',
+				direction: Direction.DESC,
+				search: { articleCategory: category },
+			},
+		},
+		skip: !category,
+	});
+	const shownIds = [article?._id, neighbors.previous?._id, neighbors.next?._id];
+	const latest: BoardArticle[] = (latestData?.getBoardArticles?.list ?? [])
+		.filter((item: BoardArticle) => !shownIds.includes(item._id))
+		.slice(0, LATEST_LIMIT);
 
-	useEffect(() => {
-		if (articleId) setSearchFilter({ ...searchFilter, search: { commentRefId: articleId } });
-	}, [articleId]);
+	const [likeTargetBoardArticle] = useMutation(LIKE_TARGET_BOARD_ARTICLE);
+	const [updateBoardArticle] = useMutation(UPDATE_BOARD_ARTICLE);
 
 	/** HANDLERS **/
 
-	const tabChangeHandler = (event: React.SyntheticEvent, value: string) => {
-		router.replace(
-			{
-				pathname: '/community',
-				query: { articleCategory: value },
-			},
-			'/community',
-			{ shallow: true },
-		);
-	};
-
-	const likeBoArticleHandler = async (user: any, id: any) => {
+	// logged out: log in first, then come back to this post
+	const likeHandler = async () => {
+		if (!article || liking) return;
+		if (!user?._id) return router.push(`/account/join?referrer=${encodeURIComponent(router.asPath)}`);
+		setLiking(true);
 		try {
-			if (likeLoading) return;
-			if (!id) return;
-			if (!user._id) throw new Error(Messages.error2);
-
-			setLikeLoading(true);
-
-			await likeTargetBoardArticle({
-				variables: {
-					input: id,
-				},
-			});
-
-			await boardArticleRefetch({ input: articleId });
-			await sweetTopSmallSuccessAlert('success', 800);
-		} catch (err: any) {
-			console.log('ERROR, likePackageHandler:', err.message);
-			sweetMixinErrorAlert(err.message).then();
+			await likeTargetBoardArticle({ variables: { input: article._id } });
+			await refetch();
+		} catch (err) {
+			await sweetErrorHandling(err);
 		} finally {
-			setLikeLoading(false);
+			setLiking(false);
 		}
 	};
 
-	const creteCommentHandler = async () => {
-		if (!comment) return;
+	const deleteHandler = async () => {
+		if (!article) return;
+		setDeleting(true);
 		try {
-			if (!user._id) throw new Error(Messages.error2);
-			const commentInput: CommentInput = {
-				commentGroup: CommentGroup.ARTICLE,
-				commentRefId: articleId,
-				commentContent: comment,
-			};
-
-			await createComment({
-				variables: {
-					input: commentInput,
-				},
-			});
-
-			await getCommentsRefetch({ input: searchFilter });
-			await boardArticleRefetch({ input: articleId });
-			setComment('');
-			await sweetMixinSuccessAlert('Successfully commented!');
-		} catch (error: any) {
-			sweetMixinErrorAlert(error.message);
+			await updateBoardArticle({ variables: { input: { _id: article._id, articleStatus: BoardArticleStatus.DELETE } } });
+			await router.replace(categoryHref(article.articleCategory));
+		} catch (err) {
+			setDeleting(false);
+			await sweetErrorHandling(err);
 		}
 	};
 
-	const updateButtonHandler = async (commentId: string, commentStatus?: CommentStatus.DELETE) => {
-		try {
-			if (!user?._id) throw new Error(Messages.error2);
-			if (!commentId) throw new Error('Select a comment to update!');
-			if (updatedComment === comments?.find((comment) => comment?._id === commentId)?.commentContent) return;
+	/** STATES **/
 
-			const updateData: CommentUpdate = {
-				_id: commentId,
-				...(commentStatus && { commentStatus: commentStatus }),
-				...(updatedComment && { commentContent: updatedComment }),
-			};
+	const notFound = router.isReady && (!articleId || Boolean(error) || (!loading && !article));
 
-			if (!updateData?.commentContent && !updateData?.commentStatus)
-				throw new Error('Provide data to update your comment!');
-
-			if (commentStatus) {
-				if (await sweetConfirmAlert('Do you want to delete the comment?')) {
-					await updateComment({
-						variables: {
-							input: updateData,
-						},
-					});
-				} else return;
-			} else {
-				await updateComment({
-					variables: {
-						input: updateData,
-					},
-				});
-				await sweetMixinSuccessAlert('Successfully updated!');
-			}
-			await getCommentsRefetch({ input: searchFilter });
-		} catch (error: any) {
-			sweetMixinErrorAlert(error.message);
-		} finally {
-			setOpenBackdrop(false);
-			setUpdatedComment('');
-			setUpdatedCommentWordsCnt(0);
-			setUpdatedCommentId('');
-		}
-	};
-
-	const getCommentMemberImage = (imageUrl: string | undefined) => {
-		if (imageUrl) return `${process.env.REACT_APP_API_URL}/${imageUrl}`;
-		else return '/img/community/articleImg.png';
-	};
-
-	const goMemberPage = (id: any) => {
-		if (id === user?._id) router.push('/mypage');
-		else router.push(`/member?memberId=${id}`);
-	};
-
-	const cancelButtonHandler = () => {
-		setOpenBackdrop(false);
-		setUpdatedComment('');
-		setUpdatedCommentWordsCnt(0);
-	};
-
-	const updateCommentInputHandler = (value: string) => {
-		if (value.length > 100) return;
-		setUpdatedCommentWordsCnt(value.length);
-		setUpdatedComment(value);
-	};
-
-	const paginationHandler = (e: T, value: number) => {
-		setSearchFilter({ ...searchFilter, page: value });
-	};
-
-	if (device === 'mobile') {
-		return <div>COMMUNITY DETAIL PAGE MOBILE</div>;
-	} else {
+	if (notFound) {
 		return (
-			<div id="community-detail-page">
-				<div className="container">
-					<Stack className="main-box">
-						<Stack className="left-config">
-							<Stack className={'image-info'}>
-								<img src={'/img/logo/logoText.svg'} />
-								<Stack className={'community-name'}>
-									<Typography className={'name'}>Community Board Article</Typography>
-								</Stack>
-							</Stack>
-							<Tabs
-								orientation="vertical"
-								aria-label="lab API tabs example"
-								TabIndicatorProps={{
-									style: { display: 'none' },
-								}}
-								onChange={tabChangeHandler}
-								value={articleCategory}
-							>
-								<Tab
-									value={'FREE'}
-									label={'Free Board'}
-									className={`tab-button ${articleCategory === 'FREE' ? 'active' : ''}`}
-								/>
-								<Tab
-									value={'RECOMMEND'}
-									label={'Recommendation'}
-									className={`tab-button ${articleCategory === 'RECOMMEND' ? 'active' : ''}`}
-								/>
-								<Tab
-									value={'NEWS'}
-									label={'News'}
-									className={`tab-button ${articleCategory === 'NEWS' ? 'active' : ''}`}
-								/>
-								<Tab
-									value={'HUMOR'}
-									label={'Humor'}
-									className={`tab-button ${articleCategory === 'HUMOR' ? 'active' : ''}`}
-								/>
-							</Tabs>
-						</Stack>
-						<div className="community-detail-config">
-							<Stack className="title-box">
-								<Stack className="left">
-									<Typography className="title">{articleCategory} BOARD</Typography>
-									<Typography className="sub-title">
-										Express your opinions freely here without content restrictions
-									</Typography>
-								</Stack>
-								<Button
-									onClick={() =>
-										router.push({
-											pathname: '/mypage',
-											query: {
-												category: 'writeArticle',
-											},
-										})
-									}
-									className="right"
-								>
-									Write
-								</Button>
-							</Stack>
-							<div className="config">
-								<Stack className="first-box-config">
-									<Stack className="content-and-info">
-										<Stack className="content">
-											<Typography className="content-data">{boardArticle?.articleTitle}</Typography>
-											<Stack className="member-info">
-												<img
-													src={memberImage}
-													alt=""
-													className="member-img"
-													onClick={() => goMemberPage(boardArticle?.memberData?._id)}
-												/>
-												<Typography className="member-nick" onClick={() => goMemberPage(boardArticle?.memberData?._id)}>
-													{boardArticle?.memberData?.memberNick}
-												</Typography>
-												<Stack className="divider"></Stack>
-												<Moment className={'time-added'} format={'DD.MM.YY HH:mm'}>
-													{boardArticle?.createdAt}
-												</Moment>
-											</Stack>
-										</Stack>
-										<Stack className="info">
-											<Stack className="icon-info">
-												{boardArticle?.meLiked && boardArticle?.meLiked[0]?.myFavorite ? (
-													<ThumbUpAltIcon onClick={() => likeBoArticleHandler(user, boardArticle?._id)} />
-												) : (
-													<ThumbUpOffAltIcon onClick={() => likeBoArticleHandler(user, boardArticle?._id)} />
-												)}
-
-												<Typography className="text">{boardArticle?.articleLikes}</Typography>
-											</Stack>
-											<Stack className="divider"></Stack>
-											<Stack className="icon-info">
-												<VisibilityIcon />
-												<Typography className="text">{boardArticle?.articleViews}</Typography>
-											</Stack>
-											<Stack className="divider"></Stack>
-											<Stack className="icon-info">
-												{total > 0 ? <ChatIcon /> : <ChatBubbleOutlineRoundedIcon />}
-												<Typography className="text">{total}</Typography>
-											</Stack>
-										</Stack>
-									</Stack>
-									<Stack>
-										<ToastViewerComponent markdown={boardArticle?.articleContent} className={'ytb_play'} />
-									</Stack>
-									<Stack className="like-and-dislike">
-										<Stack className="top">
-											<Button onClick={() => likeBoArticleHandler(user, boardArticle?._id)}>
-												{boardArticle?.meLiked && boardArticle?.meLiked[0]?.myFavorite ? (
-													<ThumbUpAltIcon />
-												) : (
-													<ThumbUpOffAltIcon />
-												)}
-												<Typography className="text">{boardArticle?.articleLikes}</Typography>
-											</Button>
-										</Stack>
-									</Stack>
-								</Stack>
-								<Stack
-									className="second-box-config"
-									sx={{ borderBottom: total > 0 ? 'none' : '1px solid #eee', border: '1px solid #eee' }}
-								>
-									<Typography className="title-text">Comments ({total})</Typography>
-									<Stack className="leave-comment">
-										<input
-											type="text"
-											placeholder="Leave a comment"
-											value={comment}
-											onChange={(e) => {
-												if (e.target.value.length > 100) return;
-												setWordsCnt(e.target.value.length);
-												setComment(e.target.value);
-											}}
-										/>
-										<Stack className="button-box">
-											<Typography>{wordsCnt}/100</Typography>
-											<Button onClick={creteCommentHandler}>comment</Button>
-										</Stack>
-									</Stack>
-								</Stack>
-								{total > 0 && (
-									<Stack className="comments">
-										<Typography className="comments-title">Comments</Typography>
-									</Stack>
-								)}
-								{comments?.map((commentData, index) => {
-									return (
-										<Stack className="comments-box" key={commentData?._id}>
-											<Stack className="main-comment">
-												<Stack className="member-info">
-													<Stack
-														className="name-date"
-														onClick={() => goMemberPage(commentData?.memberData?._id as string)}
-													>
-														<img src={getCommentMemberImage(commentData?.memberData?.memberImage)} alt="" />
-														<Stack className="name-date-column">
-															<Typography className="name">{commentData?.memberData?.memberNick}</Typography>
-															<Typography className="date">
-																<Moment className={'time-added'} format={'DD.MM.YY HH:mm'}>
-																	{commentData?.createdAt}
-																</Moment>
-															</Typography>
-														</Stack>
-													</Stack>
-													{commentData?.memberId === user?._id && (
-														<Stack className="buttons">
-															<IconButton
-																onClick={() => {
-																	setUpdatedCommentId(commentData?._id);
-																	updateButtonHandler(commentData?._id, CommentStatus.DELETE);
-																}}
-															>
-																<DeleteForeverIcon sx={{ color: '#757575', cursor: 'pointer' }} />
-															</IconButton>
-															<IconButton
-																onClick={(e) => {
-																	setUpdatedComment(commentData?.commentContent);
-																	setUpdatedCommentWordsCnt(commentData?.commentContent?.length);
-																	setUpdatedCommentId(commentData?._id);
-																	setOpenBackdrop(true);
-																}}
-															>
-																<EditIcon sx={{ color: '#757575' }} />
-															</IconButton>
-															<Backdrop
-																sx={{
-																	top: '40%',
-																	right: '25%',
-																	left: '25%',
-																	width: '1000px',
-																	height: 'fit-content',
-																	borderRadius: '10px',
-																	color: '#ffffff',
-																	zIndex: 999,
-																}}
-																open={openBackdrop}
-															>
-																<Stack
-																	sx={{
-																		width: '100%',
-																		height: '100%',
-																		background: 'white',
-																		border: '1px solid #b9b9b9',
-																		padding: '15px',
-																		gap: '10px',
-																		borderRadius: '10px',
-																		boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
-																	}}
-																>
-																	<Typography variant="h4" color={'#b9b9b9'}>
-																		Update comment
-																	</Typography>
-																	<Stack gap={'20px'}>
-																		<input
-																			autoFocus
-																			value={updatedComment}
-																			onChange={(e) => updateCommentInputHandler(e.target.value)}
-																			type="text"
-																			style={{
-																				border: '1px solid #b9b9b9',
-																				outline: 'none',
-																				height: '40px',
-																				padding: '0px 10px',
-																				borderRadius: '5px',
-																			}}
-																		/>
-																		<Stack width={'100%'} flexDirection={'row'} justifyContent={'space-between'}>
-																			<Typography variant="subtitle1" color={'#b9b9b9'}>
-																				{updatedCommentWordsCnt}/100
-																			</Typography>
-																			<Stack sx={{ flexDirection: 'row', alignSelf: 'flex-end', gap: '10px' }}>
-																				<Button
-																					variant="outlined"
-																					color="inherit"
-																					onClick={() => cancelButtonHandler()}
-																				>
-																					Cancel
-																				</Button>
-																				<Button
-																					variant="contained"
-																					color="inherit"
-																					onClick={() => updateButtonHandler(updatedCommentId, undefined)}
-																				>
-																					Update
-																				</Button>
-																			</Stack>
-																		</Stack>
-																	</Stack>
-																</Stack>
-															</Backdrop>
-														</Stack>
-													)}
-												</Stack>
-												<Stack className="content">
-													<Typography>{commentData?.commentContent}</Typography>
-												</Stack>
-											</Stack>
-										</Stack>
-									);
-								})}
-								{total > 0 && (
-									<Stack className="pagination-box">
-										<Pagination
-											count={Math.ceil(total / searchFilter.limit) || 1}
-											page={searchFilter.page}
-											shape="circular"
-											color="primary"
-											onChange={paginationHandler}
-										/>
-									</Stack>
-								)}
-							</div>
-						</div>
-					</Stack>
+			<div id="community-detail-page" className={'detail-page community-detail'}>
+				<div className={'container'}>
+					<div className={'empty-box detail-missing'}>
+						<p>This post doesn&apos;t exist or was removed.</p>
+						<Link href={'/community'} className={'button-primary'}>
+							Back to Community
+						</Link>
+					</div>
 				</div>
 			</div>
 		);
 	}
-};
-CommunityDetail.defaultProps = {
-	initialInput: {
-		page: 1,
-		limit: 5,
-		sort: 'createdAt',
-		direction: 'DESC',
-		search: { commentRefId: '' },
-	},
+
+	if (!article) {
+		return (
+			<div id="community-detail-page" className={'detail-page community-detail'} aria-busy="true" aria-label="Loading post">
+				<div className={'container'}>
+					<Skeleton width={200} className={'crumb-skeleton'} />
+					<div className={'post-layout'}>
+						<div className={'post-sheet'}>
+							<div className={'sheet-text'}>
+								<Skeleton width="20%" />
+								<Skeleton width="70%" height={64} />
+								<Skeleton width="40%" />
+								<Skeleton width="100%" />
+								<Skeleton width="85%" />
+							</div>
+						</div>
+						<div className={'post-aside'}>
+							<Skeleton variant="rectangular" className={'skeleton aside-skeleton'} />
+							<Skeleton variant="rectangular" className={'skeleton aside-skeleton'} />
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	const author = article.memberData;
+	const isMine = Boolean(user?._id) && user._id === article.memberId;
+	const views = article.articleViews ?? 0;
+	const label = categoryLabel(category);
+	const cover = article.articleImage ? `${REACT_APP_API_URL}/${article.articleImage}` : '';
+
+	return (
+		<div id="community-detail-page" className={'detail-page community-detail'}>
+			<div className={'container'}>
+				<nav className={'breadcrumb'} aria-label="Breadcrumb">
+					<ol>
+						<li>
+							<Link href={'/community'}>Community</Link>
+						</li>
+						<li>
+							<Link href={categoryHref(category)}>{label}</Link>
+						</li>
+					</ol>
+				</nav>
+
+				<div className={'post-layout'}>
+					<div className={'post-main'}>
+						<article className={'post-sheet'} aria-labelledby="article-title">
+							{cover && (
+								<figure className={'sheet-cover'}>
+									<img src={cover} alt="" />
+								</figure>
+							)}
+							<div className={'sheet-text'}>
+								<header className={'article-head'}>
+									<p className={'article-category'}>{label}</p>
+									<h1 id="article-title" className={'article-title'}>
+										{article.articleTitle}
+									</h1>
+									<p className={'article-meta'}>
+										<span>
+											By{' '}
+											<Link href={authorHref(article)} className={'meta-author'}>
+												{author ? studioName(author) : 'Member'}
+											</Link>
+										</span>
+										<time dateTime={new Date(article.createdAt).toISOString()}>
+											{moment(article.createdAt).format('MMMM D, YYYY')}
+										</time>
+										{views > 0 && <span>{plural(views, 'view')}</span>}
+									</p>
+								</header>
+
+								<div className={'article-body'}>
+									<TViewer key={article._id} content={withoutCover(article.articleContent, article.articleImage)} />
+								</div>
+							</div>
+
+							<footer className={'sheet-foot'}>
+								<ArticleActions
+									liked={Boolean(article.meLiked?.[0]?.myFavorite)}
+									likes={article.articleLikes ?? 0}
+									comments={article.articleComments ?? 0}
+									onLike={likeHandler}
+								/>
+								{isMine &&
+									(confirmDelete ? (
+										<span className={'owner-actions'} role="group" aria-label="Delete this post?">
+											<span className={'confirm-text'}>Delete this post?</span>
+											<button type="button" className={'button-link danger'} disabled={deleting} onClick={deleteHandler}>
+												{deleting ? 'Deleting…' : 'Delete'}
+											</button>
+											<button type="button" className={'button-link'} onClick={() => setConfirmDelete(false)}>
+												Cancel
+											</button>
+										</span>
+									) : (
+										<span className={'owner-actions'}>
+											<button type="button" className={'button-link'} onClick={() => setConfirmDelete(true)}>
+												Delete post
+											</button>
+										</span>
+									))}
+							</footer>
+						</article>
+
+						<CommentsSection
+							key={article._id}
+							refId={article._id}
+							group={CommentGroup.ARTICLE}
+							user={user}
+							onCommented={() => refetch()}
+						/>
+					</div>
+
+					<PostAside article={article} neighbors={neighbors} latest={latest} />
+				</div>
+			</div>
+		</div>
+	);
 };
 
-export default withLayoutBasic(CommunityDetail);
+export default withLayoutFull(CommunityDetail);
