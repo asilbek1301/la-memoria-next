@@ -100,12 +100,12 @@ const Join: NextPage = () => {
 					))}
 				</div>
 
-				<GoogleButton onCredential={googleHandler} />
+				{/* <GoogleButton onCredential={googleHandler} />
 				{googleError && (
 					<p className={'form-error'} role="alert">
 						{googleError}
 					</p>
-				)}
+				)} */}
 
 				{mode === 'login' ? (
 					<LoginForm onSuccess={() => goNext()} onSwitch={() => switchMode('signup')} />
