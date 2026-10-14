@@ -231,7 +231,7 @@
 		color: $espresso;
 		font-size: 14px;
 		font-weight: 500;
-		letter-spacing: 0.16em;
+		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		text-decoration: none;
 		@include focus-ring;
@@ -282,7 +282,7 @@
 		font-family: $font;
 		font-size: 14px;
 		font-weight: 500;
-		letter-spacing: 0.14em;
+		letter-spacing: 0.08em;
 		cursor: pointer;
 		@include focus-ring;
 	}
@@ -311,7 +311,7 @@
 		color: $espresso;
 		font-size: 14px;
 		font-weight: 500;
-		letter-spacing: 0.14em;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 		text-decoration: none;
 		@include focus-ring;
@@ -569,7 +569,7 @@
 		align-items: center;
 		gap: 6px;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 	}
 	.status-dot {
 		width: 7px;
@@ -661,7 +661,7 @@
 	.chat-name {
 		margin-left: 4px;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 		font-weight: 500;
 	}
 	.chat-bubble {
@@ -690,7 +690,7 @@
 		background: $espresso;
 		color: $ivory;
 		font-family: $font;
-		font-size: 12px;
+		font-size: 13px;
 		cursor: pointer;
 		box-shadow: $soft-shadow;
 		transform: translateX(-50%);
@@ -913,7 +913,7 @@
 			color: $espresso;
 			font-family: $font;
 			font-size: 13px;
-			letter-spacing: 0.14em;
+			letter-spacing: 0.08em;
 			cursor: pointer;
 			@include focus-ring;
 			&.active {
@@ -945,7 +945,7 @@
 		margin-bottom: 8px;
 		display: block;
 		@include eyebrow;
-		font-size: 12px;
+		font-size: 13px;
 	}
 	.phone {
 		color: $espresso;
@@ -964,7 +964,7 @@
 			font-family: $font;
 			font-size: 13px;
 			font-weight: 600;
-			letter-spacing: 0.16em;
+			letter-spacing: 0.08em;
 			text-transform: uppercase;
 		}
 		ul {
@@ -1243,9 +1243,9 @@
 			background: transparent;
 			color: $muted;
 			font-family: $font;
-			font-size: 12px;
+			font-size: 13px;
 			font-weight: 500;
-			letter-spacing: 0.12em;
+			letter-spacing: 0.08em;
 			cursor: pointer;
 			transition: color 0.3s ease, border-color 0.3s ease;
 			@include focus-ring;
@@ -1294,9 +1294,9 @@
 		background: #ffffff;
 		color: $espresso;
 		font-family: $font;
-		font-size: 11px;
+		font-size: 12px;
 		font-weight: 600;
-		letter-spacing: 0.16em;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 	}
 	.like-btn {
@@ -1544,7 +1544,7 @@
 			align-items: center;
 			gap: 4px;
 			color: $muted;
-			font-size: 12px;
+			font-size: 13px;
 			svg {
 				font-size: 14px;
 			}
@@ -1808,7 +1808,7 @@
 		}
 		.card-count {
 			color: $muted;
-			font-size: 12px;
+			font-size: 13px;
 			white-space: nowrap;
 		}
 		.card-location {
@@ -2436,7 +2436,7 @@
 	.field-count {
 		flex-shrink: 0;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 	}
 	// hidden from people (a filled value marks a bot); not display: none, which some bots skip
 	.form-trap {
@@ -3079,7 +3079,7 @@
 		background: #ffffff;
 		color: $espresso;
 		font-family: $font;
-		font-size: 12px;
+		font-size: 13px;
 		letter-spacing: 0.02em;
 		cursor: pointer;
 		transition: border-color 0.3s ease;
@@ -3408,8 +3408,8 @@
 		margin-top: 8px;
 		display: block;
 		overflow: hidden;
-		font-size: 11px;
-		letter-spacing: 0.12em;
+		font-size: 12px;
+		letter-spacing: 0.08em;
 		text-overflow: ellipsis;
 		text-transform: uppercase;
 		white-space: nowrap;
@@ -3494,8 +3494,8 @@
 	.tile-stats {
 		margin: 8px 0 0;
 		color: $muted;
-		font-size: 11px;
-		letter-spacing: 0.14em;
+		font-size: 12px;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
 	}
 	.tile-skeleton {
@@ -3665,7 +3665,7 @@
 		-webkit-backdrop-filter: blur(8px);
 		backdrop-filter: blur(8px);
 		color: $ivory;
-		font-size: 12px;
+		font-size: 13px;
 		letter-spacing: 0.06em;
 		svg {
 			flex-shrink: 0;
@@ -3819,7 +3819,7 @@
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 		line-height: 1.5;
 	}
 
@@ -3977,7 +3977,7 @@
 	}
 	.field-count {
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 	}
 	.comment-login,
 	.comment-empty {
@@ -4019,7 +4019,7 @@
 		gap: 4px 12px;
 		time {
 			color: $muted;
-			font-size: 12px;
+			font-size: 13px;
 		}
 	}
 	.comment-author {
@@ -4173,7 +4173,7 @@
 	.field-count {
 		align-self: flex-end;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 	}
 	.booking-btn {
 		width: 100%;
@@ -4284,7 +4284,7 @@
 		color: $ivory;
 		font-family: $font;
 		font-size: 13px;
-		letter-spacing: 0.14em;
+		letter-spacing: 0.08em;
 	}
 	.lightbox-btn {
 		width: 48px;
@@ -4511,8 +4511,8 @@
 		-webkit-backdrop-filter: blur(8px);
 		backdrop-filter: blur(8px);
 		color: $ivory;
-		font-size: 11px;
-		letter-spacing: 0.12em;
+		font-size: 12px;
+		letter-spacing: 0.08em;
 		text-overflow: ellipsis;
 		text-transform: uppercase;
 		white-space: nowrap;
@@ -5407,8 +5407,8 @@
 		}
 		.track-label {
 			color: $muted;
-			font-size: 11px;
-			letter-spacing: 0.12em;
+			font-size: 12px;
+			letter-spacing: 0.08em;
 			text-transform: uppercase;
 		}
 		li.done .track-label,
@@ -5417,7 +5417,7 @@
 		}
 		.track-date {
 			color: $muted;
-			font-size: 12px;
+			font-size: 13px;
 		}
 	}
 	.shoot-track {
@@ -5770,7 +5770,7 @@
 	.field-help {
 		margin: 0;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 		line-height: 1.5;
 	}
 	.my-form input:not([type='checkbox']):not([type='radio']):not([type='file']),
@@ -6229,7 +6229,7 @@
 		display: flex;
 		justify-content: space-between;
 		color: $muted;
-		font-size: 12px;
+		font-size: 13px;
 	}
 	.panel-foot {
 		padding: 18px 28px calc(18px + env(safe-area-inset-bottom));

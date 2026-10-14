@@ -144,7 +144,6 @@ const Top = () => {
 							aria-label={savedTotal ? `Liked packages (${savedTotal})` : 'Liked packages'}
 						>
 							<FavoriteBorderRoundedIcon />
-							{savedTotal > 0 && <span className={'count-badge'}>{savedTotal > 99 ? '99+' : savedTotal}</span>}
 						</Link>
 
 						<button

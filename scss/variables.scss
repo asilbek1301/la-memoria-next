@@ -32,12 +32,12 @@ $ivory: #fdf9f3;
 $ivory-deep: #f5f1ea;
 $sand: #efe6da;
 $blush: #f6ebe3;
-$line: #e5dacd;
+$line: #d8c8b6; // hairlines; stronger than the Stitch #e5dacd so sections and cards keep their edges
 $mocha: #6b4e3d;
 $mocha-deep: #553c2d;
 $espresso: #3e2c23;
 $champagne: #c9a87c;
-$muted: #6e5a4d; // darker than Stitch #8c7465 for readable contrast on ivory
+$muted: #5c4a3f; // secondary text, about 8:1 on ivory (Stitch #8c7465 and the earlier #6e5a4d read too faint in small sizes)
 
 $soft-shadow: 0 12px 36px -8px rgba(62, 44, 35, 0.07), 0 2px 8px -2px rgba(62, 44, 35, 0.04);
 $ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -214,9 +214,9 @@ $faq-sign: 32px; // the plus / minus circle on Help questions
 $community-avatar: 36px; // author photo on community posts
 $btn-height-sm: 40px; // compact buttons, e.g. Follow on the studio page
 $btn-pad-x-sm: 20px;
-$btn-font-size: 11px; // Stitch label-uppercase
+$btn-font-size: 13px; // button labels (uppercase): large enough to read at a glance
 $btn-weight: 500;
-$btn-tracking: 0.18em;
+$btn-tracking: 0.08em;
 $btn-radius: $radius-pill; // pill buttons (Stitch "remaked sample")
 $btn-primary-bg: $espresso;
 $btn-primary-bg-hover: $mocha;
@@ -386,23 +386,24 @@ $btn-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' vi
 	@include type-style($font-heading, 24px, 32px, 0.01em);
 }
 @mixin text-title-editorial {
-	@include type-style($font-heading, 20px, 28px, 0.02em);
+	@include type-style($font-heading, 20px, 28px, 0);
 }
 @mixin text-body-lg {
-	@include type-style($font, 16px, 26px, 0.01em);
+	@include type-style($font, 16px, 26px, 0);
 }
 @mixin text-body-md {
-	@include type-style($font, 14px, 22px, 0.015em);
+	@include type-style($font, 15px, 24px, 0);
 }
 @mixin text-body-sm {
-	@include type-style($font, 12px, 18px, 0.02em);
+	@include type-style($font, 13px, 20px, 0);
 }
+// small labels: 12px is the smallest size; light tracking keeps uppercase words readable
 @mixin text-label-uppercase {
-	@include type-style($font, 11px, 16px, 0.18em, 500);
+	@include type-style($font, 12px, 16px, 0.1em, 500);
 	text-transform: uppercase;
 }
 @mixin text-label-meta {
-	@include type-style($font, 11px, 14px, 0.14em);
+	@include type-style($font, 12px, 16px, 0.08em);
 	text-transform: uppercase;
 }
 
