@@ -28,7 +28,7 @@ import { Message } from '../../libs/enums/common.enum';
 import { userVar } from '../../apollo/store';
 import { GET_BOARD_ARTICLES } from '../../apollo/user/query';
 import { LIKE_TARGET_BOARD_ARTICLE } from '../../apollo/user/mutation';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetMixinErrorAlert } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -184,7 +184,6 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 			});
 
 			await boardArticlesRefetch({ input: searchFilter });
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('Error:likeArticleHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();

@@ -7,7 +7,7 @@ import { PackageLocation, PackageStyle, PackageType } from '../../enums/package.
 import { REACT_APP_API_URL, packageDurations, packagePhotosList } from '../../config';
 import { PackageInput } from '../../types/package/package.input';
 import { getJwtToken } from '../../auth';
-import { sweetErrorHandling, sweetMixinErrorAlert, sweetMixinSuccessAlert } from '../../sweetAlert';
+import { sweetErrorHandling, sweetMixinErrorAlert } from '../../sweetAlert';
 import { CREATE_PACKAGE, UPDATE_PACKAGE } from '../../../apollo/user/mutation';
 import { GET_PACKAGE } from '../../../apollo/user/query';
 import { prettyEnum } from '../../utils';
@@ -147,10 +147,8 @@ const AddPackage = () => {
 			setSaving(true);
 			if (editing) {
 				await updatePackage({ variables: { input: { ...data, _id: editing._id } } });
-				await sweetMixinSuccessAlert('Your package is updated');
 			} else {
 				await createPackage({ variables: { input: data } });
-				await sweetMixinSuccessAlert('Your package is published');
 			}
 			await router.push({ pathname: '/mypage', query: { category: 'myPackages' } });
 		} catch (err: any) {

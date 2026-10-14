@@ -6,7 +6,7 @@ import { Member } from '../../../types/member/member';
 import { GET_MEMBER } from '../../../../apollo/user/query';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../../../apollo/user/mutation';
 import { Messages } from '../../../config';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../../sweetAlert';
+import { sweetMixinErrorAlert } from '../../../sweetAlert';
 import { studioHref, studioImage, studioLocation, studioName, studioStats } from '../../studio/studioSearch';
 
 interface StudioBlockProps {
@@ -43,7 +43,6 @@ const StudioBlock = (props: StudioBlockProps) => {
 			if (following) await unsubscribe({ variables: { input: studio._id } });
 			else await subscribe({ variables: { input: studio._id } });
 			await refetch({ input: studio._id });
-			await sweetTopSmallSuccessAlert(following ? 'Unfollowed' : 'Following', 800);
 		} catch (err: any) {
 			sweetMixinErrorAlert(err.message).then();
 		}

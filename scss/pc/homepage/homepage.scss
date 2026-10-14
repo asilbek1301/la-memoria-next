@@ -27,7 +27,9 @@
 			@include page-container;
 			position: relative;
 			z-index: 1;
-			margin-bottom: 200px;
+			// 200px between the text and the search bar; less on short screens, so the hero still fits and the bar
+			// stays above the floating chat button
+			margin-bottom: clamp(48px, calc(100vh - 700px), 200px);
 			.hero-title {
 				font-size: $hero-title-size;
 			}
@@ -36,7 +38,8 @@
 			@include page-container;
 			position: relative;
 			z-index: 2;
-			margin-bottom: 48px;
+			// high enough to clear the floating chat button in the bottom-right corner
+			margin-bottom: calc(#{$chat-offset} + #{$chat-launcher-size} - 55px);
 			.search-fields {
 				flex: 1;
 				display: grid;
@@ -44,6 +47,12 @@
 				.search-field + .search-field {
 					border-left: 1px solid $line;
 				}
+			}
+			// a list opens over its own field: a little in from the field's left edge, reaching below the bar
+			.field-menu {
+				top: auto;
+				bottom: -32px;
+				left: 12px;
 			}
 		}
 	}

@@ -7,7 +7,7 @@ import { PackageLocation } from '../../enums/package.enum';
 import { GET_PACKAGES } from '../../../apollo/user/query';
 import { LIKE_TARGET_PACKAGE } from '../../../apollo/user/mutation';
 import { T } from '../../types/common';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import { sweetMixinErrorAlert } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
 import { prettyEnum } from '../../utils';
 import TrendPackageCard from './TrendPackageCard';
@@ -65,7 +65,6 @@ const TrendPackages = (props: TrendPackagesProps) => {
 			//execute getPackagesRefetch
 			await getPackagesRefetch({ input });
 
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();

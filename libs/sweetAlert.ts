@@ -1,89 +1,61 @@
 import Swal from 'sweetalert2';
-import 'animate.css';
 
+/**
+ * Every pop-up uses the site's look instead of SweetAlert's own: an ivory card, the site fonts, a small icon and
+ * espresso buttons. The styles are `.alert-box` in scss/pc/general.scss (the pop-up is drawn outside the page wraps).
+ **/
+const siteAlert = Swal.mixin({
+	buttonsStyling: false,
+	customClass: {
+		container: 'alert-layer',
+		popup: 'alert-box',
+		icon: 'alert-icon',
+		title: 'alert-title',
+		htmlContainer: 'alert-text',
+		actions: 'alert-actions',
+		confirmButton: 'alert-confirm',
+		cancelButton: 'alert-cancel',
+	},
+	showClass: { popup: 'alert-in' },
+	hideClass: { popup: 'alert-out' },
+});
+
+// a small "!" in a soft circle replaces SweetAlert's large animated cross
+const errorIcon = { icon: 'error' as const, iconHtml: '!' };
+
+/** an error that stays until it is closed: a message and an OK button **/
 export const sweetErrorHandling = async (err: any) => {
-	await Swal.fire({
-		icon: 'error',
+	await siteAlert.fire({
+		...errorIcon,
 		text: err.message,
-		showConfirmButton: false,
+		confirmButtonText: 'OK',
 	});
 };
 
-export const sweetTopSuccessAlert = async (msg: string, duration: number = 2000) => {
-	await Swal.fire({
-		position: 'center',
-		icon: 'success',
-		title: msg.replace('Definer: ', ''),
-		showConfirmButton: false,
-		timer: duration,
-	});
-};
-
-export const sweetConfirmAlert = (msg: string) => {
-	return new Promise(async (resolve, reject) => {
-		await Swal.fire({
+/** asks before an action; resolves true for "Yes" **/
+export const sweetConfirmAlert = (msg: string) =>
+	siteAlert
+		.fire({
 			icon: 'question',
+			iconHtml: '?',
 			text: msg,
-			showClass: {
-				popup: 'animate__bounceIn',
-			},
 			showCancelButton: true,
-			showConfirmButton: true,
-			confirmButtonColor: '#e92C28',
-			cancelButtonColor: '#bdbdbd',
-		}).then((response) => {
-			if (response?.isConfirmed) resolve(true);
-			else resolve(false);
-		});
-	});
-};
+			confirmButtonText: 'Yes',
+			cancelButtonText: 'Cancel',
+			reverseButtons: true, // Cancel first, the action last
+			focusCancel: true,
+		})
+		.then((response) => Boolean(response?.isConfirmed));
 
+/** a short error that closes by itself after `duration` ms **/
 export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
-	await Swal.fire({
-		icon: 'error',
+	await siteAlert.fire({
+		...errorIcon,
 		title: msg,
 		showConfirmButton: false,
 		timer: duration,
 	});
 };
 
-export const sweetMixinErrorAlert = async (msg: string, duration: number = 3000) => {
-	await Swal.fire({
-		icon: 'error',
-		title: msg,
-		showConfirmButton: false,
-		timer: duration,
-	});
-};
-
-export const sweetMixinSuccessAlert = async (msg: string, duration: number = 2000) => {
-	await Swal.fire({
-		icon: 'success',
-		title: msg,
-		showConfirmButton: false,
-		timer: duration,
-	});
-};
-
-export const sweetTopSmallSuccessAlert = async (
-	msg: string,
-	duration: number = 2000,
-	enable_forward: boolean = false,
-) => {
-	const Toast = Swal.mixin({
-		toast: true,
-		position: 'top-end',
-		showConfirmButton: false,
-		timer: duration,
-		timerProgressBar: true,
-	});
-
-	Toast.fire({
-		icon: 'success',
-		title: msg,
-	}).then((data) => {
-		if (enable_forward) {
-			window.location.reload();
-		}
-	});
-};
+/** the same short error; kept so existing imports keep working **/
+export const sweetMixinErrorAlert = sweetErrorAlert;

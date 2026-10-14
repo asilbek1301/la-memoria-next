@@ -28,7 +28,7 @@ import { Message } from '../../libs/enums/common.enum';
 import { GET_PACKAGES } from '../../apollo/user/query';
 import { LIKE_TARGET_PACKAGE } from '../../apollo/user/mutation';
 import { T } from '../../libs/types/common';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetMixinErrorAlert } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -115,7 +115,6 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 			});
 			await getPackagesRefetch({ input: searchFilter });
 
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();

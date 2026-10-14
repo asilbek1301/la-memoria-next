@@ -27,7 +27,7 @@ import { SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { MemberType } from '../../libs/enums/member.enum';
 import { Member } from '../../libs/types/member/member';
 import { Messages } from '../../libs/config';
-import { sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetErrorHandling } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -115,7 +115,6 @@ const MyPage: NextPage = () => {
 			if (!id) throw new Error(Messages.error1);
 			if (!user._id) throw new Error(Messages.error2);
 			await subscribe({ variables: { input: id } });
-			await sweetTopSmallSuccessAlert('Following', 800);
 			await refetch({ input: query });
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
@@ -127,7 +126,6 @@ const MyPage: NextPage = () => {
 			if (!id) throw new Error(Messages.error1);
 			if (!user._id) throw new Error(Messages.error2);
 			await unsubscribe({ variables: { input: id } });
-			await sweetTopSmallSuccessAlert('Unfollowed', 800);
 			await refetch({ input: query });
 		} catch (err: any) {
 			sweetErrorHandling(err).then();

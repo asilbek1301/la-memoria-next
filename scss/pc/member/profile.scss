@@ -1,0 +1,58 @@
+/** MEMBER PROFILE LAYOUT (pages/member/index.tsx); looks are in pc/general.scss under .member-profile **/
+#pc-wrap {
+	#member-page {
+		width: 100%;
+		padding: calc(#{$nav-height} + 64px) 0 $section-space;
+		.container {
+			@include page-container;
+			display: block;
+		}
+		.detail-missing {
+			margin-top: 48px;
+		}
+		// photo on the left, name and actions beside it
+		.profile-head {
+			display: flex;
+			align-items: center;
+			gap: 48px;
+		}
+		.profile-photo,
+		.profile-photo-skeleton {
+			width: $profile-photo-size;
+			height: $profile-photo-size;
+		}
+		.profile-photo span {
+			font-size: 56px;
+		}
+		.profile-info {
+			min-width: 0;
+			flex: 1;
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 10px;
+		}
+		.profile-name {
+			@include text-headline-lg;
+		}
+		.profile-actions {
+			margin-top: 12px;
+		}
+		.profile-posts {
+			margin-top: 72px;
+			padding-top: 48px;
+		}
+		// three 340px cards fit the container, two on tablets: no breakpoints
+		.post-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+			gap: 48px 32px;
+		}
+		.post-skeleton {
+			height: 360px;
+		}
+		.results-pagination {
+			margin-top: 56px;
+		}
+	}
+}

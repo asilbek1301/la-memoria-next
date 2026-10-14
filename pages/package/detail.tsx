@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -33,7 +33,7 @@ import { formatKRW, packageSearchHref, prettyEnum } from '../../libs/utils';
 import { userVar } from '../../apollo/store';
 import { GET_PACKAGE, GET_PACKAGES } from '../../apollo/user/query';
 import { CREATE_RESERVATION, LIKE_TARGET_PACKAGE } from '../../apollo/user/mutation';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetMixinErrorAlert } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -59,6 +59,7 @@ const PackageDetail: NextPage = () => {
 	const packageId = typeof router.query.id === 'string' ? router.query.id : '';
 	const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 	const [descOpen, setDescOpen] = useState<boolean>(false);
+	const [copied, setCopied] = useState<boolean>(false); // the share button shows a check for a moment
 
 	/** APOLLO REQUESTS **/
 
@@ -104,7 +105,6 @@ const PackageDetail: NextPage = () => {
 			await likeTargetPackage({ variables: { input: id } });
 			if (id === pkg?._id) await getPackageRefetch({ input: id });
 			else await Promise.all([cityRefetch(), tierRefetch()]);
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
@@ -130,13 +130,19 @@ const PackageDetail: NextPage = () => {
 		}
 	};
 
+	useEffect(() => {
+		if (!copied) return;
+		const timer = setTimeout(() => setCopied(false), 2000);
+		return () => clearTimeout(timer);
+	}, [copied]);
+
 	const shareHandler = async () => {
 		const url = window.location.href;
 		try {
 			if (navigator.share) await navigator.share({ title: pkg?.packageTitle, url });
 			else {
 				await navigator.clipboard.writeText(url);
-				await sweetTopSmallSuccessAlert('Link copied', 1000);
+				setCopied(true);
 			}
 		} catch {
 			// the share sheet was closed: nothing to do
@@ -256,8 +262,13 @@ const PackageDetail: NextPage = () => {
 									{isLiked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
 									{likes > 0 && <span className={'action-count'}>{likes}</span>}
 								</button>
-								<button type="button" className={'icon-action'} aria-label="Share this package" onClick={shareHandler}>
-									<IosShareRoundedIcon />
+								<button
+									type="button"
+									className={'icon-action'}
+									aria-label={copied ? 'Link copied' : 'Share this package'}
+									onClick={shareHandler}
+								>
+									{copied ? <CheckRoundedIcon /> : <IosShareRoundedIcon />}
 								</button>
 							</div>
 						</header>

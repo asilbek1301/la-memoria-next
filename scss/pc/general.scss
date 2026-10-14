@@ -255,18 +255,19 @@
 	.bell-btn {
 		position: relative;
 	}
+	// centred on the icon's top-right corner; the ivory ring gives it a clean edge where it meets the heart or bell
 	.count-badge {
 		position: absolute;
-		top: 2px;
-		right: 0;
-		min-width: 18px;
-		height: 18px;
+		top: 3px;
+		right: 1px;
+		min-width: 15px;
+		height: 15px;
 		padding: 0 4px;
 		box-sizing: border-box;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 999px;
+		border-radius: $radius-pill;
 		background: $mocha;
 		color: $ivory;
 		font-size: 11px;
@@ -274,7 +275,7 @@
 		line-height: 1;
 	}
 	.lang-btn {
-		padding: 8px 6px;
+		padding: 8px;
 		border: none;
 		background: transparent;
 		color: $espresso;
@@ -321,20 +322,52 @@
 }
 
 /** MUI portals opened from the header (rendered outside the wrappers) **/
+/** language and account menus: rounded rows inside a rounded card; the chosen language has a check **/
 .nav-menu.MuiPaper-root {
-	margin-top: 8px;
-	min-width: 160px;
+	min-width: 200px;
+	margin-top: 10px;
 	border: 1px solid $line;
-	border-radius: 4px;
+	border-radius: $radius-menu;
 	background: $ivory;
 	box-shadow: $soft-shadow;
+	.MuiList-root {
+		padding: 6px;
+	}
 	.MuiMenuItem-root {
+		min-height: 44px;
+		padding: 8px 12px;
+		gap: 12px;
+		border-radius: $radius-menu-item;
 		color: $espresso;
 		font-family: $font;
 		font-size: 14px;
+		transition: background-color 0.2s ease;
+		&:hover,
+		&.Mui-focusVisible {
+			background: $ivory-deep;
+		}
+		& + .MuiMenuItem-root {
+			margin-top: 2px;
+		}
 	}
-	.MuiMenuItem-root.Mui-selected {
-		background: $sand;
+	.menu-icon {
+		color: $muted;
+		font-size: 18px;
+	}
+}
+
+/** the language menu is small: one centred code per row, the chosen one filled **/
+.lang-menu.MuiPaper-root {
+	min-width: 88px;
+	.MuiMenuItem-root {
+		min-height: 40px;
+		padding: 8px 12px;
+		justify-content: center;
+		font-weight: 500;
+		letter-spacing: 0.08em;
+		&.Mui-selected {
+			background: $ivory-deep;
+		}
 	}
 }
 
@@ -726,6 +759,103 @@
 	}
 }
 
+/** POP-UPS (libs/sweetAlert.ts): errors and "are you sure?" questions in the site's look instead of SweetAlert's own.
+    SweetAlert draws them at the end of <body>, outside the page wraps, so these rules are global **/
+.alert-layer.swal2-container {
+	padding: 16px;
+	&.swal2-backdrop-show {
+		background: $alert-backdrop;
+	}
+}
+.swal2-popup.alert-box {
+	width: min(#{$alert-width}, calc(100vw - 32px));
+	padding: 28px 28px 24px;
+	border: 1px solid $line;
+	border-radius: $radius-card;
+	background: $ivory;
+	box-shadow: $chat-shadow;
+	color: $espresso;
+	font-family: $font;
+	// a small "!" or "?" in a soft circle
+	.alert-icon.swal2-icon {
+		width: 44px;
+		height: 44px;
+		margin: 0 auto 14px;
+		border: none;
+		border-radius: 50%;
+		animation: none;
+		.swal2-icon-content {
+			font-family: $font-heading;
+			font-size: 22px;
+			font-weight: 500;
+		}
+		&.swal2-error {
+			background: $error-tint;
+			color: $error-ink;
+		}
+		&.swal2-question {
+			background: $ivory-deep;
+			color: $mocha;
+		}
+	}
+	.alert-title {
+		margin: 0;
+		padding: 0;
+		@include text-title-editorial;
+		color: $espresso;
+		overflow-wrap: anywhere;
+	}
+	.alert-text {
+		margin: 0;
+		padding: 0;
+		color: $espresso;
+		font-size: 15px;
+		line-height: 1.6;
+		overflow-wrap: anywhere;
+	}
+	.alert-actions {
+		width: 100%;
+		margin: 22px 0 0;
+		gap: 10px;
+	}
+	// compact buttons; "Yes" is a choice, not a way forward, so no arrow
+	.alert-confirm {
+		@include button-primary;
+		min-height: $btn-height-sm;
+		padding: 0 $btn-pad-x-sm;
+		&::after {
+			content: none;
+		}
+	}
+	.alert-cancel {
+		@include button-secondary;
+		min-height: $btn-height-sm;
+		padding: 0 $btn-pad-x-sm;
+	}
+	&.alert-in {
+		animation: alert-in 0.25s $ease-out;
+	}
+	&.alert-out {
+		animation: alert-out 0.15s ease forwards;
+	}
+}
+@keyframes alert-in {
+	from {
+		opacity: 0;
+		transform: translateY(8px) scale(0.98);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@keyframes alert-out {
+	to {
+		opacity: 0;
+		transform: translateY(4px) scale(0.98);
+	}
+}
+
 .nav-drawer.MuiPaper-root {
 	width: min(320px, 86vw);
 	padding: 16px 20px 28px;
@@ -975,12 +1105,12 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		min-height: 80px;
-		padding: 16px 48px 16px 28px;
+		min-height: $hero-field-height;
+		padding: 10px 44px 10px 24px;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
-		gap: 6px;
+		gap: 4px;
 		border: none;
 		background: transparent;
 		text-align: left;
@@ -1000,12 +1130,12 @@
 	}
 	.field-value {
 		color: $espresso;
-		@include text-title-editorial;
+		@include type-style($font-heading, 18px, 24px, -0.005em);
 	}
 	.field-chevron {
 		position: absolute;
 		top: 50%;
-		right: 20px;
+		right: 18px;
 		margin-top: -10px;
 		display: inline-flex;
 		color: $muted;
@@ -1013,44 +1143,51 @@
 			font-size: 20px;
 		}
 	}
+	// a white card with a soft shadow; rows run edge to edge and the chosen one is filled. It shows seven whole
+	// rows (no row cut in half); longer lists scroll
 	.field-menu {
 		position: absolute;
 		top: calc(100% + 6px);
 		left: 0;
-		right: 0;
 		z-index: 20;
-		max-height: 300px;
+		width: min(#{$hero-menu-width}, 100%);
+		max-height: calc(7 * #{$hero-menu-row} + 16px);
 		margin: 0;
-		padding: 6px;
+		padding: 8px 0;
 		overflow-y: auto;
-		border: 1px solid $line;
-		border-radius: 4px;
-		background: $ivory;
-		box-shadow: $soft-shadow;
+		border: none;
+		border-radius: $radius-tile;
+		background: $sheet-bg;
+		box-shadow: $hero-menu-shadow;
 		list-style: none;
 		button {
 			width: 100%;
-			padding: 10px 14px;
+			min-height: $hero-menu-row;
+			padding: 12px 22px;
 			border: none;
-			border-radius: 4px;
+			border-radius: 0;
 			background: transparent;
 			color: $espresso;
 			font-family: $font;
-			font-size: 14px;
+			font-size: 16px;
+			line-height: 24px;
 			text-align: left;
 			cursor: pointer;
-			@include focus-ring;
-			&:hover,
-			&.selected {
-				background: $sand;
+			transition: background-color 0.2s ease;
+			&:hover {
+				background: $ivory;
 			}
 			&.selected {
-				font-weight: 600;
+				background: $ivory-deep;
+			}
+			&:focus-visible {
+				outline: 2px solid $mocha;
+				outline-offset: -2px;
 			}
 		}
 	}
 	.search-actions {
-		padding: 16px 24px;
+		padding: 6px 16px;
 		display: flex;
 		align-items: center;
 		gap: 16px;
@@ -2645,17 +2782,11 @@
 		box-shadow: $hero-card-shadow;
 	}
 	.search-box {
-		padding: 8px;
+		padding: $hero-search-pad;
 		border-radius: $radius-tile;
 	}
 	.field-trigger {
 		border-radius: $radius-menu;
-	}
-	.field-menu {
-		border-radius: $radius-menu;
-		button {
-			border-radius: 8px;
-		}
 	}
 }
 .home-page,
@@ -4245,41 +4376,7 @@
 		color: $muted;
 	}
 	.hero-actions {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 12px;
-		.button-secondary.following {
-			background: transparent;
-		}
-		// opens the followers panel; looks like an outlined Follow button
-		.followers-btn {
-			@include button-secondary;
-			gap: 6px;
-			strong {
-				color: inherit;
-				font-weight: 600;
-			}
-		}
-		// compact: Follow, the heart and the follower count share one small size
-		.button-primary,
-		.button-secondary,
-		.followers-btn {
-			min-height: $btn-height-sm;
-			padding: 0 $btn-pad-x-sm;
-		}
-		.icon-action {
-			min-width: $btn-height-sm;
-			height: $btn-height-sm;
-			padding: 0 12px;
-			svg {
-				font-size: 18px;
-			}
-		}
-		// Follow is a toggle, not a way forward: no arrow
-		.button-primary::after {
-			content: none;
-		}
+		@include profile-actions;
 	}
 
 	/** packages by tier **/
@@ -4432,6 +4529,69 @@
 		height: 180px;
 		margin: 56px 0 0;
 		border-radius: $radius-card;
+	}
+}
+
+/** MEMBER PROFILE LOOKS (pages/member/index.tsx); also uses the .detail-page looks (sections, cards, empty box).
+    Layout is in pc/member/profile.scss and mobile/main.scss **/
+.member-profile {
+	// a round photo in a white frame, like the studio portraits
+	.profile-photo {
+		flex: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		box-sizing: border-box;
+		border: 6px solid $sheet-bg;
+		border-radius: 50%;
+		background: $sand;
+		color: $mocha;
+		font-family: $font-heading;
+		box-shadow: $studio-frame-shadow;
+		img {
+			width: 100%;
+			height: 100%;
+			display: block;
+			object-fit: cover;
+		}
+	}
+	.profile-kind {
+		@include eyebrow;
+		margin: 0;
+	}
+	.profile-name {
+		margin: 0;
+		color: $espresso;
+		font-family: $font-heading;
+		font-weight: 400;
+		letter-spacing: -0.02em;
+		overflow-wrap: anywhere;
+	}
+	.profile-since {
+		margin: 0;
+		color: $muted;
+		font-size: 14px;
+	}
+	.profile-desc {
+		max-width: 560px;
+		margin: 0;
+		color: $espresso;
+		font-size: 16px;
+		line-height: 1.7;
+		white-space: pre-line; // keeps the lines the member wrote
+		overflow-wrap: anywhere;
+	}
+	.profile-actions {
+		@include profile-actions;
+	}
+	.post-grid {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		> li {
+			min-width: 0;
+		}
 	}
 }
 
@@ -6084,6 +6244,16 @@
 
 @media (prefers-reduced-motion: reduce) {
 	.notification-panel .notification-item {
+		transition: none;
+	}
+	.home-hero .field-menu button {
+		transition: none;
+	}
+	.swal2-popup.alert-box.alert-in,
+	.swal2-popup.alert-box.alert-out {
+		animation: none;
+	}
+	.nav-menu .MuiMenuItem-root {
 		transition: none;
 	}
 	.chat-widget {

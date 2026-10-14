@@ -25,7 +25,7 @@ import { GET_STUDIOS } from '../../apollo/user/query';
 import { LIKE_TARGET_MEMBER } from '../../apollo/user/mutation';
 import { T } from '../../libs/types/common';
 import { Messages } from '../../libs/config';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetMixinErrorAlert } from '../../libs/sweetAlert';
 import { SUPPORT_PHONE, SUPPORT_TEL } from '../../libs/components/cs/helpContent';
 
 export const getStaticProps = async ({ locale }: any) => ({
@@ -119,7 +119,6 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 			});
 
 			await getStudiosRefetch({ input: searchFilter });
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('Error:likeMemberHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();

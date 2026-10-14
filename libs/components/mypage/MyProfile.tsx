@@ -6,7 +6,7 @@ import { MemberUpdate } from '../../types/member/member.update';
 import { MemberType } from '../../enums/member.enum';
 import { getJwtToken, updateStorage, updateUserInfo } from '../../auth';
 import { UPDATE_MEMBER } from '../../../apollo/user/mutation';
-import { sweetErrorHandling, sweetMixinSuccessAlert } from '../../sweetAlert';
+import { sweetErrorHandling } from '../../sweetAlert';
 import { Messages } from '../../config';
 import { memberPhoto } from '../studio/studioSearch';
 
@@ -22,6 +22,7 @@ const MyProfile = () => {
 	const [form, setForm] = useState<ProfileFields>({});
 	const [uploading, setUploading] = useState<boolean>(false);
 	const [saving, setSaving] = useState<boolean>(false);
+	const [saved, setSaved] = useState<boolean>(false); // "Saved" on the button for a moment after saving
 
 	/** APOLLO REQUESTS **/
 
@@ -79,6 +80,12 @@ const MyProfile = () => {
 		}
 	};
 
+	useEffect(() => {
+		if (!saved) return;
+		const timer = setTimeout(() => setSaved(false), 2000);
+		return () => clearTimeout(timer);
+	}, [saved]);
+
 	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		try {
@@ -95,7 +102,7 @@ const MyProfile = () => {
 			const jwtToken = result.data.updateMember?.accessToken;
 			await updateStorage({ jwtToken });
 			updateUserInfo(jwtToken);
-			await sweetMixinSuccessAlert('Your profile is updated');
+			setSaved(true);
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
 		} finally {
@@ -172,7 +179,7 @@ const MyProfile = () => {
 
 				<div className={'form-foot'}>
 					<button type="submit" className={'button-primary'} disabled={!canSave}>
-						{saving ? 'Saving…' : 'Save changes'}
+						{saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
 					</button>
 				</div>
 			</form>

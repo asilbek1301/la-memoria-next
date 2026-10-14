@@ -35,7 +35,7 @@ import { prettyEnum } from '../../libs/utils';
 import { userVar } from '../../apollo/store';
 import { GET_MEMBER, GET_PACKAGES, GET_STUDIOS } from '../../apollo/user/query';
 import { LIKE_TARGET_MEMBER, LIKE_TARGET_PACKAGE, SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../libs/sweetAlert';
+import { sweetMixinErrorAlert } from '../../libs/sweetAlert';
 
 export const getStaticProps = async ({ locale }: any) => ({
 	props: {
@@ -130,7 +130,6 @@ const StudioDetail: NextPage = () => {
 			if (following) await unsubscribe({ variables: { input: studioId } });
 			else await subscribe({ variables: { input: studioId } });
 			await getMemberRefetch({ input: studioId });
-			await sweetTopSmallSuccessAlert(following ? 'Unfollowed' : 'Following', 800);
 		} catch (err: any) {
 			sweetMixinErrorAlert(err.message).then();
 		}
@@ -143,7 +142,6 @@ const StudioDetail: NextPage = () => {
 			if (follow) await subscribe({ variables: { input: id } });
 			else await unsubscribe({ variables: { input: id } });
 			await refetch({ input: query });
-			await sweetTopSmallSuccessAlert(follow ? 'Following' : 'Unfollowed', 800);
 		} catch (err: any) {
 			sweetMixinErrorAlert(err.message).then();
 		}
@@ -156,7 +154,6 @@ const StudioDetail: NextPage = () => {
 			await likeTargetMember({ variables: { input: id } });
 			if (id === studioId) await getMemberRefetch({ input: studioId });
 			else await getStudiosRefetch();
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			sweetMixinErrorAlert(err.message).then();
 		}
@@ -168,7 +165,6 @@ const StudioDetail: NextPage = () => {
 			if (!likeUser?._id) throw new Error(Message.NOT_AUTHENTICATED);
 			await likeTargetPackage({ variables: { input: id } });
 			await getPackagesRefetch();
-			await sweetTopSmallSuccessAlert('success', 800);
 		} catch (err: any) {
 			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();

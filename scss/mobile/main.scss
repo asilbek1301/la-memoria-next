@@ -36,6 +36,13 @@
           display: flex;
           align-items: center;
           gap: 0;
+          // the 36px icon buttons leave 6px around each glyph: the photo and Login get the same
+          .avatar-btn {
+            margin-left: 6px;
+          }
+          .login-btn {
+            margin-left: 2px; // plus its own 4px padding
+          }
           .lang-btn {
             display: none;
           }
@@ -104,6 +111,11 @@
         .search-field + .search-field {
           border-top: 1px solid $line;
         }
+      }
+      // a list opens over its own field, a little in from its left edge, and grows downward
+      .field-menu {
+        top: 0;
+        left: 12px;
       }
       .search-actions {
         justify-content: space-between;
@@ -724,6 +736,61 @@
   }
 
   /** PACKAGE DETAIL LAYOUT (phone); looks are in pc/general.scss under .detail-page **/
+  // member profile: photo, name and actions centred, then the posts in one column
+  #member-page {
+    width: 100%;
+    padding: calc(#{$nav-height-mobile} + 32px) 0 $section-space-mobile;
+    .container {
+      @include page-container-mobile;
+    }
+    .detail-missing {
+      margin-top: 24px;
+    }
+    .profile-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+    }
+    .profile-photo,
+    .profile-photo-skeleton {
+      width: $profile-photo-size-mobile;
+      height: $profile-photo-size-mobile;
+    }
+    .profile-photo span {
+      font-size: 40px;
+    }
+    .profile-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-name {
+      @include text-headline-lg-mobile;
+    }
+    .profile-actions {
+      margin-top: 8px;
+      justify-content: center;
+    }
+    .profile-posts {
+      margin-top: 48px;
+      padding-top: 32px;
+    }
+    .post-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 40px;
+    }
+    .post-skeleton {
+      height: 300px;
+    }
+    .results-pagination {
+      margin-top: 40px;
+    }
+  }
+
   // community chat: the launcher sits above the booking bar; the open panel takes the whole screen
   .chat-widget {
     .chat-launcher {

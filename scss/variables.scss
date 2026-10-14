@@ -84,6 +84,10 @@ $booking-panel-width: clamp(320px, 28vw, 380px); // narrower on tablets so the c
 $detail-column-gap: clamp(40px, 5vw, 80px);
 $fact-min-width: 190px; // a fact column never gets narrower: 4 across on desktop, 2x2 when space is short
 
+/** MEMBER PROFILE (pages/member) **/
+$profile-photo-size: 160px;
+$profile-photo-size-mobile: 112px;
+
 /** COMMUNITY CHAT (Chat.tsx) **/
 $chat-launcher-size: 56px;
 $chat-offset: 32px; // launcher distance from the screen edges on desktop
@@ -170,6 +174,11 @@ $invite-line-soft: rgba(201, 168, 124, 0.35);
 
 /** FORMS (My Page) **/
 $error-ink: #a1453a; // destructive text actions (Delete)
+$error-tint: rgba(161, 69, 58, 0.1); // soft circle behind the error icon
+
+/** POP-UPS (libs/sweetAlert.ts) **/
+$alert-width: 380px;
+$alert-backdrop: rgba(20, 14, 10, 0.45);
 $select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%236b4e3d' stroke-width='1.5'/%3E%3C/svg%3E");
 
 /** STUDIO DETAIL **/
@@ -183,7 +192,13 @@ $gallery-print-inset: 64px; // space between the single photo and the band edges
 $radius-card: 24px; // boxes: hero photo, feature card, philosophy, tier rows, empty states
 $radius-tile: 16px; // photos inside cards, search panel, panels on photos
 $radius-menu: 12px; // dropdown menus and their items
+$radius-menu-item: 8px; // a row inside a dropdown menu
 $radius-pill: 999px; // buttons, tabs, tags
+$hero-search-pad: 8px; // inner padding of the hero search bar
+$hero-field-height: 64px; // one field of the hero search bar (location, tier, style)
+$hero-menu-width: 260px; // the list that opens over a hero search field
+$hero-menu-row: 48px; // one row of that list (12px + 24px line + 12px)
+$hero-menu-shadow: 0 18px 48px -12px rgba(62, 44, 35, 0.22), 0 2px 8px rgba(62, 44, 35, 0.06);
 $hero-card-inset: clamp(16px, 3.33vw, 48px); // gap between the rounded hero card and the screen edge
 $hero-card-shadow: 0 24px 60px -28px rgba(34, 24, 18, 0.45);
 $btn-arrow-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 10'%3E%3Cpath d='M0 5h14.5M10.5 1l4 4-4 4' fill='none' stroke='%23fdf9f3' stroke-width='1.4'/%3E%3C/svg%3E");
@@ -303,6 +318,44 @@ $btn-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' vi
 		border-color: $btn-primary-bg-pressed;
 		background: $btn-primary-bg-pressed;
 		color: $ivory;
+	}
+}
+
+/** PROFILE ACTIONS: the compact Follow / follower count / heart row under a studio or member name **/
+@mixin profile-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 12px;
+	.button-secondary.following {
+		background: transparent;
+	}
+	// opens a followers / following panel; looks like an outlined Follow button
+	.followers-btn {
+		@include button-secondary;
+		gap: 6px;
+		strong {
+			color: inherit;
+			font-weight: 600;
+		}
+	}
+	.button-primary,
+	.button-secondary,
+	.followers-btn {
+		min-height: $btn-height-sm;
+		padding: 0 $btn-pad-x-sm;
+	}
+	.icon-action {
+		min-width: $btn-height-sm;
+		height: $btn-height-sm;
+		padding: 0 12px;
+		svg {
+			font-size: 18px;
+		}
+	}
+	// Follow is a toggle, not a way forward: no arrow
+	.button-primary::after {
+		content: none;
 	}
 }
 

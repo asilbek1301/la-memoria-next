@@ -7,7 +7,7 @@ import { LIKE_TARGET_PACKAGE } from '../../../apollo/user/mutation';
 import { Package } from '../../types/package/package';
 import { T } from '../../types/common';
 import { Messages } from '../../config';
-import { sweetMixinErrorAlert, sweetTopSmallSuccessAlert } from '../../sweetAlert';
+import { sweetMixinErrorAlert } from '../../sweetAlert';
 import PopularPackageCard from '../homepage/PopularPackageCard';
 import { ResultsPagination } from '../common/ListControls';
 
@@ -39,7 +39,6 @@ const MyFavorites = () => {
 			if (!user._id) throw new Error(Messages.error2);
 			await likeTargetPackage({ variables: { input: id } });
 			await refetch({ input: { page, limit: PAGE_SIZE } });
-			await sweetTopSmallSuccessAlert('Removed from liked', 800);
 		} catch (err: any) {
 			console.log('Error, likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();

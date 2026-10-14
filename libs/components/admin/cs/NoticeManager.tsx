@@ -35,7 +35,7 @@ import { Notice } from '../../../types/notice/notice';
 import { AllNoticesInquiry } from '../../../types/notice/notice.input';
 import { NoticeCategory, NoticeStatus, NoticeTopic } from '../../../enums/notice.enum';
 import { Direction } from '../../../enums/common.enum';
-import { sweetConfirmAlert, sweetErrorHandling, sweetTopSmallSuccessAlert } from '../../../sweetAlert';
+import { sweetConfirmAlert, sweetErrorHandling } from '../../../sweetAlert';
 import { helpTopics, topicLabel } from '../../cs/helpContent';
 
 // the backend's limits (NoticeInput)
@@ -181,7 +181,6 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 			else await createNotice({ variables: { input: { noticeCategory: category, ...fields } } });
 			setDraft(null);
 			await reload();
-			await sweetTopSmallSuccessAlert(draft._id ? 'Saved' : 'Added', 800);
 		} catch (err: any) {
 			sweetErrorHandling(err).then();
 		} finally {

@@ -8,7 +8,7 @@ import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded
 import MenuRoundedIcon from '@mui/icons-material/MenuRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
-import { Logout } from '@mui/icons-material';
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import { motion, MotionConfig } from 'framer-motion';
 import { getJwtToken, logOut, updateUserInfo } from '../auth';
@@ -26,9 +26,10 @@ const navLinks = [
 	{ href: '/cs', base: '/cs', label: 'Help' },
 ];
 
+// id is the next-i18next locale; label is read out by screen readers in place of the short code
 const languages = [
 	{ id: 'en', code: 'EN', label: 'English' },
-	{ id: 'kr', code: 'KO', label: 'Korean' },
+	{ id: 'kr', code: 'KR', label: 'Korean' },
 	{ id: 'ru', code: 'RU', label: 'Russian' },
 ];
 
@@ -151,6 +152,7 @@ const Top = () => {
 							className={'lang-btn'}
 							aria-label={`Language: ${currentLang.label}`}
 							aria-haspopup="menu"
+							aria-expanded={Boolean(langAnchor)}
 							onClick={(e) => setLangAnchor(e.currentTarget)}
 						>
 							{currentLang.code}
@@ -159,13 +161,18 @@ const Top = () => {
 							anchorEl={langAnchor}
 							open={Boolean(langAnchor)}
 							onClose={() => setLangAnchor(null)}
-							classes={{ paper: 'nav-menu' }}
-							anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-							transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+							classes={{ paper: 'nav-menu lang-menu' }}
+							anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+							transformOrigin={{ vertical: 'top', horizontal: 'center' }}
 						>
 							{languages.map((item) => (
-								<MenuItem key={item.id} selected={item.id === lang} onClick={() => langChoice(item.id)}>
-									{t(item.label)}
+								<MenuItem
+									key={item.id}
+									selected={item.id === lang}
+									aria-label={item.label}
+									onClick={() => langChoice(item.id)}
+								>
+									{item.code}
 								</MenuItem>
 							))}
 						</Menu>
@@ -177,6 +184,7 @@ const Top = () => {
 									className={'avatar-btn'}
 									aria-label="Account menu"
 									aria-haspopup="menu"
+									aria-expanded={Boolean(userAnchor)}
 									onClick={(e) => setUserAnchor(e.currentTarget)}
 								>
 									<img
@@ -200,11 +208,12 @@ const Top = () => {
 											router.push('/mypage').then();
 										}}
 									>
+										<PersonOutlineRoundedIcon className={'menu-icon'} aria-hidden="true" />
 										{t('My Page')}
 									</MenuItem>
 									<MenuItem onClick={() => logOut()}>
-										<Logout fontSize="small" style={{ marginRight: 10 }} />
-										Logout
+										<LogoutRoundedIcon className={'menu-icon'} aria-hidden="true" />
+										Log out
 									</MenuItem>
 								</Menu>
 							</>

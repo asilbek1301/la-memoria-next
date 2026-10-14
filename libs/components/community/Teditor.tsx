@@ -8,7 +8,7 @@ import '@toast-ui/editor/dist/toastui-editor.css';
 import { useMutation } from '@apollo/client';
 import { BoardArticleCategory } from '../../enums/board-article.enum';
 import { CREATE_BOARD_ARTICLE } from '../../../apollo/user/mutation';
-import { sweetErrorHandling, sweetTopSuccessAlert } from '../../sweetAlert';
+import { sweetErrorHandling } from '../../sweetAlert';
 import { Message } from '../../enums/common.enum';
 import { categoryLabels } from './communitySearch';
 
@@ -102,7 +102,6 @@ const TuiEditor = () => {
 				},
 			});
 
-			await sweetTopSuccessAlert('Your post is published', 700);
 			await router.push({
 				pathname: '/mypage',
 				query: {
