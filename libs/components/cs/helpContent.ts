@@ -5,8 +5,8 @@ import { NoticeTopic } from '../../enums/notice.enum';
 export type HelpTab = 'faq' | 'notice' | 'contact';
 export type TopicKey = 'packages' | 'reservations' | 'payments' | 'studios' | 'community';
 
-export const SUPPORT_PHONE = '+82 10 4867 2909';
-export const SUPPORT_TEL = 'tel:+821048672909';
+export const SUPPORT_PHONE = '+82 10 8317 2332';
+export const SUPPORT_TEL = 'tel:+821083172332';
 
 export const helpTabs: { value: HelpTab; label: string }[] = [
 	{ value: 'faq', label: 'FAQ' },
