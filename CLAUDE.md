@@ -1,5 +1,3 @@
-Go outside of this project and read la-memoria/docs/ai first!
-
 # La Memoria Frontend Modification Instructions
 
 This client project is being migrated from nestar-next to la-memoria-next
@@ -13,12 +11,7 @@ This client project is being migrated from nestar-next to la-memoria-next
 
 ## Backend Context
 
-Before making any changes, read:
-
-- docs/ai/BACKEND_MIGRATION.md
-- docs/ai/DECIONS.md
-- docs/ai/FRONTEND_MIGRATION.md
-  and etc inside of la-memoria/docs/ai
+Before making any changes, read the backend project in `../la-memoria` (its CLAUDE.md and the enums/DTOs in `apps/la-memoria-api/src/libs`).
 
 ## Workflow
 
@@ -27,7 +20,6 @@ Before making any changes, read:
 3. Make small incremental changes.
 4. Run typecheck after each phase.
 5. Do not remove working logic unless replaced safely.
-6. Update la-memoria/docs/ai/COMPLETED_TASKS.md after major changes.
 
 ## Package Manager
 
