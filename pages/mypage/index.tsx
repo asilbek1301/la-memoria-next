@@ -7,6 +7,7 @@ import { Drawer } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import MyHeader from '../../libs/components/mypage/MyHeader';
 import NextShoot from '../../libs/components/mypage/NextShoot';
@@ -22,7 +23,13 @@ import WriteArticle from '../../libs/components/mypage/WriteArticle';
 import MyFollowList from '../../libs/components/mypage/MyFollowList';
 import { userVar } from '../../apollo/store';
 import { getJwtToken } from '../../libs/auth';
-import { GET_FAVORITES, GET_MEMBER, GET_MY_RESERVATIONS, GET_STUDIO_PACKAGES, GET_STUDIO_RESERVATIONS } from '../../apollo/user/query';
+import {
+	GET_FAVORITES,
+	GET_MEMBER,
+	GET_MY_RESERVATIONS,
+	GET_STUDIO_PACKAGES,
+	GET_STUDIO_RESERVATIONS,
+} from '../../apollo/user/query';
 import { SUBSCRIBE, UNSUBSCRIBE } from '../../apollo/user/mutation';
 import { MemberType } from '../../libs/enums/member.enum';
 import { Member } from '../../libs/types/member/member';
@@ -43,6 +50,7 @@ interface Tab {
 
 const MyPage: NextPage = () => {
 	const user = useReactiveVar(userVar);
+	const { t } = useTranslation('common');
 	const router = useRouter();
 	const device = useDeviceDetect();
 	const isStudio = user?.memberType === MemberType.STUDIO;
@@ -53,7 +61,9 @@ const MyPage: NextPage = () => {
 	const studioOnly = ['myPackages', 'addPackage'];
 	const coupleOnly = ['myReservations', 'myFavorites', 'recentlyVisited'];
 	const category =
-		(!isStudio && studioOnly.includes(requested)) || (isAdmin && coupleOnly.includes(requested)) ? 'overview' : requested;
+		(!isStudio && studioOnly.includes(requested)) || (isAdmin && coupleOnly.includes(requested))
+			? 'overview'
+			: requested;
 	// Following / Followers open as a side panel over the overview (old ?category= links still work)
 	const followMode = category === 'followings' || category === 'followers' ? category : null;
 	const view = followMode ? 'overview' : category;
@@ -79,7 +89,9 @@ const MyPage: NextPage = () => {
 	});
 	const { data: ownData } = useQuery(GET_STUDIO_PACKAGES, {
 		fetchPolicy: 'network-only',
-		variables: { input: { page: 1, limit: 3, sort: 'createdAt', direction: 'DESC', search: { packageStatus: 'ACTIVE' } } },
+		variables: {
+			input: { page: 1, limit: 3, sort: 'createdAt', direction: 'DESC', search: { packageStatus: 'ACTIVE' } },
+		},
 		skip: !user?._id || !isStudio,
 	});
 	const prints: string[] = ((isStudio ? ownData?.getStudioPackages?.list : savedData?.getFavorites?.list) ?? [])
@@ -154,7 +166,8 @@ const MyPage: NextPage = () => {
 	];
 	const activeTab = view === 'writeArticle' ? 'myArticles' : view;
 	const closePanel = () => router.push({ pathname: '/mypage' }, undefined, { scroll: false });
-	const openPanel = (mode: string) => router.replace({ pathname: '/mypage', query: { category: mode } }, undefined, { scroll: false });
+	const openPanel = (mode: string) =>
+		router.replace({ pathname: '/mypage', query: { category: mode } }, undefined, { scroll: false });
 
 	if (!user?._id) {
 		return <div id="my-page" className={'detail-page my-page'} aria-busy="true" />;
@@ -173,7 +186,7 @@ const MyPage: NextPage = () => {
 					onOpenFollows={openPanel}
 				/>
 
-				<nav className={'my-tabs'} aria-label="My Page">
+				<nav className={'my-tabs'} aria-label={t('My Page')}>
 					{tabs.map((tab) => (
 						<Link
 							key={tab.category}
@@ -182,7 +195,7 @@ const MyPage: NextPage = () => {
 							aria-current={activeTab === tab.category ? 'page' : undefined}
 							scroll={false}
 						>
-							{tab.label}
+							{t(tab.label)}
 							{(tab.count ?? 0) > 0 && <span className={'tab-count'}>{tab.count}</span>}
 						</Link>
 					))}
@@ -215,14 +228,14 @@ const MyPage: NextPage = () => {
 			>
 				<header className={'panel-head'}>
 					<h2 id="follow-panel-title" className={'panel-title'}>
-						{followMode === 'followers' ? 'Followers' : 'Following'}
+						{followMode === 'followers' ? t('Followers') : t('Following', { context: 'list' })}
 					</h2>
-					<button type="button" className={'icon-btn'} aria-label="Close" onClick={closePanel}>
+					<button type="button" className={'icon-btn'} aria-label={t('Close')} onClick={closePanel}>
 						<CloseRoundedIcon />
 					</button>
 				</header>
 				<div className={'panel-body'}>
-					<div className={'follow-switch'} role="group" aria-label="Show">
+					<div className={'follow-switch'} role="group" aria-label={t('Show')}>
 						{[
 							{ mode: 'followings', label: 'Following', count: member?.memberFollowings ?? 0 },
 							{ mode: 'followers', label: 'Followers', count: member?.memberFollowers ?? 0 },
@@ -234,7 +247,7 @@ const MyPage: NextPage = () => {
 								aria-pressed={followMode === item.mode}
 								onClick={() => openPanel(item.mode)}
 							>
-								{item.label}
+								{item.mode === 'followings' ? t('Following', { context: 'list' }) : t(item.label)}
 								{item.count > 0 && <span className={'tab-count'}>{item.count}</span>}
 							</button>
 						))}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
@@ -22,6 +23,7 @@ type TopicValue = TopicKey | 'ALL';
     live in the URL (?tab=faq&topic=community, ?q=guidelines), so links work **/
 const CS: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const [query, setQuery] = useState<string>('');
 	const tab: HelpTab = isHelpTab(router.query.tab) ? router.query.tab : 'faq';
 	const topic: TopicValue = isTopicKey(router.query.topic) ? router.query.topic : 'ALL';
@@ -74,28 +76,33 @@ const CS: NextPage = () => {
 				<div className={'container'}>
 					<div className={'header-row'}>
 						<div className={'header-text'}>
-							<span className={'header-label'}>Help</span>
-							<h1 className={'page-title'}>How can we help?</h1>
-							<p className={'page-intro'}>Answers about packages, reservations, payments and the community.</p>
+							<span className={'header-label'}>{t('Help')}</span>
+							<h1 className={'page-title'}>{t('How can we help?')}</h1>
+							<p className={'page-intro'}>{t('Answers about packages, reservations, payments and the community.')}</p>
 						</div>
 						<form className={'search-field'} role="search" onSubmit={(e) => e.preventDefault()}>
 							<SearchRoundedIcon aria-hidden="true" />
 							<input
 								type="search"
 								value={query}
-								placeholder="Search questions"
-								aria-label="Search questions"
+								placeholder={t('Search questions')}
+								aria-label={t('Search questions')}
 								onChange={(e) => searchHandler(e.target.value)}
 							/>
 							{query && (
-								<button type="button" className={'clear-btn'} aria-label="Clear search" onClick={() => setQuery('')}>
+								<button
+									type="button"
+									className={'clear-btn'}
+									aria-label={t('Clear search')}
+									onClick={() => setQuery('')}
+								>
 									<CloseRoundedIcon />
 								</button>
 							)}
 						</form>
 					</div>
 
-					<div className={'category-tabs help-tabs'} role="tablist" aria-label="Help sections">
+					<div className={'category-tabs help-tabs'} role="tablist" aria-label={t('Help sections')}>
 						{helpTabs.map((item) => (
 							<button
 								type="button"
@@ -109,7 +116,7 @@ const CS: NextPage = () => {
 								onClick={() => go(item.value)}
 								onKeyDown={tabKeyHandler}
 							>
-								{item.label}
+								{t(item.label)}
 							</button>
 						))}
 					</div>

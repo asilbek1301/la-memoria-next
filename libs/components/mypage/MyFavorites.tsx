@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { GET_FAVORITES } from '../../../apollo/user/query';
@@ -15,6 +16,7 @@ const PAGE_SIZE = 6;
 
 /** liked packages: every package here is liked, so the heart shows filled and removes it **/
 const MyFavorites = () => {
+	const { t } = useTranslation('common');
 	const [page, setPage] = useState<number>(1);
 
 	/** APOLLO REQUESTS **/
@@ -50,9 +52,9 @@ const MyFavorites = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="liked-title" className={'detail-title'}>
-						Liked packages
+						{t('Liked packages')}
 					</h2>
-					<p className={'section-note'}>Packages you liked with the heart.</p>
+					<p className={'section-note'}>{t('Packages you liked with the heart.')}</p>
 				</div>
 			</div>
 			{loading && favorites.length === 0 ? (
@@ -63,9 +65,9 @@ const MyFavorites = () => {
 				</div>
 			) : favorites.length === 0 ? (
 				<div className={'empty-box my-empty'}>
-					<p>No liked packages yet.</p>
+					<p>{t('No liked packages yet.')}</p>
 					<Link href={'/package'} className={'button-primary'}>
-						Browse packages
+						{t('Browse packages')}
 					</Link>
 				</div>
 			) : (

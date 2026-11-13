@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import moment from 'moment';
 import { useQuery } from '@apollo/client';
 import { GET_MY_RESERVATIONS, GET_STUDIO_RESERVATIONS } from '../../../apollo/user/query';
@@ -22,6 +23,7 @@ const isUpcoming = (r: Reservation) => moment(r.reservationDate).isSameOrAfter(m
 
 /** couples: the nearest pending or confirmed shoot, with its progress; studios: the next request waiting **/
 const NextShoot = ({ isStudio, onChanged }: { isStudio: boolean; onChanged: () => void }) => {
+	const { t } = useTranslation('common');
 	const update = useReservationUpdate();
 
 	/** APOLLO REQUESTS **/
@@ -55,10 +57,10 @@ const NextShoot = ({ isStudio, onChanged }: { isStudio: boolean; onChanged: () =
 	const waiting = isStudio ? pendingResult?.metaCounter?.[0]?.total ?? 0 : 0;
 	const confirmedStep = next.reservationStatus === ReservationStatus.CONFIRMED;
 	const steps = [
-		{ label: 'Requested', date: next.createdAt, done: true },
-		{ label: 'Confirmed', date: next.confirmedAt, done: confirmedStep },
-		{ label: 'Shoot day', date: next.reservationDate, done: false },
-		{ label: 'Completed', date: next.completedAt, done: false },
+		{ label: t('Requested'), date: next.createdAt, done: true },
+		{ label: t('Confirmed'), date: next.confirmedAt, done: confirmedStep },
+		{ label: t('Shoot day'), date: next.reservationDate, done: false },
+		{ label: t('Completed'), date: next.completedAt, done: false },
 	];
 	const current = confirmedStep ? 2 : 1;
 
@@ -69,26 +71,28 @@ const NextShoot = ({ isStudio, onChanged }: { isStudio: boolean; onChanged: () =
 			{/* an invitation card: the date set large, framed by a thin double line */}
 			<div className={'invite'}>
 				<p className={'shoot-label'}>
-					{isStudio ? `${waiting} ${waiting === 1 ? 'request' : 'requests'} waiting` : 'Your next shoot'}
+					{isStudio ? t('{{count}} requests waiting', { count: waiting }) : t('Your next shoot')}
 				</p>
 				<p className={'invite-date'}>
-					<span className={'date-month'}>{date.format('MMMM YYYY')}</span>
+					<span className={'date-month'}>{date.format(t('MMMM YYYY'))}</span>
 					<span className={'date-day'}>{date.format('D')}</span>
 					<span className={'date-weekday'}>{date.format('dddd')}</span>
 				</p>
 				<span className={'invite-rule'} aria-hidden="true" />
 				<h2 id="next-shoot-title" className={'shoot-title'}>
-					<Link href={href}>{pkg?.packageTitle ?? 'Package'}</Link>
+					<Link href={href}>{pkg?.packageTitle ? t(pkg.packageTitle) : t('Package')}</Link>
 				</h2>
 				<p className={'shoot-meta'}>
-					{pkg && `${prettyEnum(pkg.packageLocation)} — ${prettyEnum(pkg.packageStyle)} · `}
+					{pkg && `${t(prettyEnum(pkg.packageLocation))} — ${t(prettyEnum(pkg.packageStyle))} · `}
 					{formatKRW(next.reservationPrice)}
 				</p>
-				{isStudio && next.memberData && <p className={'shoot-meta'}>Requested by {next.memberData.memberNick}</p>}
-				<span className={'status-pill'}>{statusLabel(next.reservationStatus, isStudio)}</span>
+				{isStudio && next.memberData && (
+					<p className={'shoot-meta'}>{t('Requested by {{name}}', { name: next.memberData.memberNick })}</p>
+				)}
+				<span className={'status-pill'}>{t(statusLabel(next.reservationStatus, isStudio))}</span>
 
 				{!isStudio && (
-					<ol className={'shoot-track'} aria-label="Progress">
+					<ol className={'shoot-track'} aria-label={t('Progress')}>
 						{steps.map((step, index) => (
 							<li
 								key={step.label}
@@ -98,7 +102,7 @@ const NextShoot = ({ isStudio, onChanged }: { isStudio: boolean; onChanged: () =
 								<span className={'track-dot'} aria-hidden="true" />
 								<span className={'track-label'}>{step.label}</span>
 								{step.date && (step.done || index === 2) && (
-									<span className={'track-date'}>{moment(step.date).format('D MMM')}</span>
+									<span className={'track-date'}>{moment(step.date).format(t('D MMM'))}</span>
 								)}
 							</li>
 						))}
@@ -116,13 +120,13 @@ const NextShoot = ({ isStudio, onChanged }: { isStudio: boolean; onChanged: () =
 									if (await update(next._id, action.status, action.confirm)) await refresh();
 								}}
 							>
-								{action.label}
+								{t(action.label)}
 							</button>
 						))
 					) : (
 						<>
 							<Link href={href} className={'button-primary'}>
-								View package
+								{t('View package')}
 							</Link>
 							{reservationActions(next, false).map((action) => (
 								<button
@@ -133,7 +137,7 @@ const NextShoot = ({ isStudio, onChanged }: { isStudio: boolean; onChanged: () =
 										if (await update(next._id, action.status, action.confirm)) await refresh();
 									}}
 								>
-									{action.label}
+									{t(action.label)}
 								</button>
 							))}
 						</>

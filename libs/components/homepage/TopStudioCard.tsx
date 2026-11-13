@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { Member } from '../../types/member/member';
 import { REACT_APP_API_URL } from '../../config';
 
@@ -9,6 +10,7 @@ interface TopStudioProps {
 
 const TopStudioCard = (props: TopStudioProps) => {
 	const { studio } = props;
+	const { t } = useTranslation('common');
 	const name = studio?.memberFullName || studio?.memberNick;
 	const image = studio?.memberImage ? `${REACT_APP_API_URL}/${studio.memberImage}` : '';
 	const href = { pathname: '/studio/detail', query: { studioId: studio?._id } };
@@ -27,13 +29,11 @@ const TopStudioCard = (props: TopStudioProps) => {
 					<Link href={href}>{name}</Link>
 				</h3>
 				{(studio?.memberPackages ?? 0) > 0 && (
-					<span className={'card-count'}>
-						{studio.memberPackages} {studio.memberPackages === 1 ? 'package' : 'packages'}
-					</span>
+					<span className={'card-count'}>{t('{{count}} packages', { count: studio.memberPackages })}</span>
 				)}
 			</div>
-			{studio?.memberAddress && <p className={'card-location'}>{studio.memberAddress}</p>}
-			{studio?.memberDesc && <p className={'card-desc'}>{studio.memberDesc}</p>}
+			{studio?.memberAddress && <p className={'card-location'}>{t(studio.memberAddress)}</p>}
+			{studio?.memberDesc && <p className={'card-desc'}>{t(studio.memberDesc)}</p>}
 		</article>
 	);
 };

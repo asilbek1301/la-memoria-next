@@ -3,6 +3,7 @@ import { Member } from '../../types/member/member';
 import { Direction } from '../../enums/common.enum';
 import { SortOption } from '../common/ListControls';
 import { REACT_APP_API_URL } from '../../config';
+import { TFunction } from 'i18next';
 
 export const defaultStudiosInput: StudiosInquiry = {
 	page: 1,
@@ -43,18 +44,18 @@ export const studioName = (studio: Member) => {
 };
 
 /** "12, Dosan-daero 81-gil, Gangnam-gu, Seoul" -> "Gangnam-gu · Seoul"; other formats are shown as written **/
-export const studioLocation = (address?: string) => {
+export const studioLocation = (address: string | undefined, t: TFunction) => {
 	if (!address) return '';
 	const parts = address
 		.split(',')
 		.map((part) => part.trim())
 		.filter(Boolean);
-	if (parts.length < 3) return address;
-	return `${parts[parts.length - 2]} · ${parts[parts.length - 1]}`;
+	if (parts.length < 3) return t(address);
+	return `${t(parts[parts.length - 2])} · ${t(parts[parts.length - 1])}`;
 };
 
-export const plural = (count: number, word: string) =>
-	`${count.toLocaleString('en-US')} ${count === 1 ? word : `${word}s`}`;
+/** "1 package" / "3 packages" in the page language; the keys are "{{count}} packages" with _one/_other forms **/
+export const plural = (count: number, word: string, t: TFunction) => t(`{{count}} ${word}s`, { count });
 
 /** a member photo URL, or '' when there is none. Login stores a local placeholder path for members without a
     photo ('/img/profile/defaultUser.svg'); that is not an uploaded file, so it counts as no photo **/
@@ -64,10 +65,10 @@ export const memberPhoto = (image?: string | null) =>
 export const studioImage = (studio: Member) => memberPhoto(studio?.memberImage);
 
 /** "2 packages · 120 followers": only counts above 0 **/
-export const studioStats = (studio: Member) => {
+export const studioStats = (studio: Member, t: TFunction) => {
 	const packages = studio?.memberPackages ?? 0;
 	const followers = studio?.memberFollowers ?? 0;
-	return [packages > 0 && plural(packages, 'package'), followers > 0 && plural(followers, 'follower')]
+	return [packages > 0 && plural(packages, 'package', t), followers > 0 && plural(followers, 'follower', t)]
 		.filter(Boolean)
 		.join(' · ');
 };

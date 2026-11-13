@@ -347,7 +347,7 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 							>
 								<span className={'field-label'}>{t(field.label)}</span>
 								<span className={'field-value'}>
-									{field.selected ? prettyEnum(field.selected) : field.allLabel}
+									{field.selected ? t(prettyEnum(field.selected)) : t(field.allLabel)}
 								</span>
 								<motion.span
 									className={'field-chevron'}
@@ -363,7 +363,7 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 									<motion.ul
 										className={'field-menu'}
 										role="listbox"
-										aria-label={field.label}
+										aria-label={t(field.label)}
 										variants={dropdownVariants}
 										initial="hidden"
 										animate="visible"
@@ -377,7 +377,7 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 												className={!field.selected ? 'selected' : ''}
 												onClick={() => clearFieldHandler(field.key)}
 											>
-												{field.allLabel}
+												{t(field.allLabel)}
 											</button>
 										</li>
 										{field.options.map((option: string) => (
@@ -389,7 +389,7 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 													className={field.selected === option ? 'selected' : ''}
 													onClick={() => field.onSelect(option)}
 												>
-													{prettyEnum(option)}
+													{t(prettyEnum(option))}
 												</button>
 											</li>
 										))}
@@ -405,154 +405,154 @@ const HeaderFilter = (props: HeaderFilterProps) => {
 						<span>{t('Advanced')}</span>
 					</button> */}
 					<button type="button" className={'search-btn'} onClick={pushSearchHandler}>
-						Search
+						{t('Search')}
 					</button>
 				</motion.div>
 			</motion.div>
 
-				{/* ADVANCED FILTER MODAL */}
-				<Modal
-					open={openAdvancedFilter}
-					onClose={() => advancedFilterHandler(false)}
-					aria-labelledby="modal-modal-title"
-					aria-describedby="modal-modal-description"
-				>
-					{/* @ts-ignore */}
-					<Box sx={style}>
-						<motion.div
-							className={'advanced-filter-modal'}
-							initial={{ opacity: 0, scale: 0.96, y: 12 }}
-							animate={{ opacity: 1, scale: 1, y: 0 }}
-							transition={springSnappy}
-						>
-							<div className={'close'} onClick={() => advancedFilterHandler(false)}>
-								<CloseIcon />
+			{/* ADVANCED FILTER MODAL */}
+			<Modal
+				open={openAdvancedFilter}
+				onClose={() => advancedFilterHandler(false)}
+				aria-labelledby="modal-modal-title"
+				aria-describedby="modal-modal-description"
+			>
+				{/* @ts-ignore */}
+				<Box sx={style}>
+					<motion.div
+						className={'advanced-filter-modal'}
+						initial={{ opacity: 0, scale: 0.96, y: 12 }}
+						animate={{ opacity: 1, scale: 1, y: 0 }}
+						transition={springSnappy}
+					>
+						<div className={'close'} onClick={() => advancedFilterHandler(false)}>
+							<CloseIcon />
+						</div>
+						<div className={'top'}>
+							<span>{t('Find your package')}</span>
+							<div className={'search-input-box'}>
+								<img src="/img/icons/search.svg" alt="" />
+								<input
+									value={searchFilter?.search?.text ?? ''}
+									type="text"
+									placeholder={t('What are you looking for?')}
+									onChange={(e: any) => {
+										setSearchFilter({
+											...searchFilter,
+											search: { ...searchFilter.search, text: e.target.value },
+										});
+									}}
+								/>
 							</div>
-							<div className={'top'}>
-								<span>Find your package</span>
-								<div className={'search-input-box'}>
-									<img src="/img/icons/search.svg" alt="" />
-									<input
-										value={searchFilter?.search?.text ?? ''}
-										type="text"
-										placeholder={'What are you looking for?'}
-										onChange={(e: any) => {
-											setSearchFilter({
-												...searchFilter,
-												search: { ...searchFilter.search, text: e.target.value },
-											});
-										}}
-									/>
-								</div>
-							</div>
-							<Divider sx={{ mt: '30px', mb: '35px' }} />
-							<div className={'middle'}>
-								<div className={'row-box'}>
-									<div className={'box'}>
-										<span>edited photos</span>
-										<div className={'inside'}>
+						</div>
+						<Divider sx={{ mt: '30px', mb: '35px' }} />
+						<div className={'middle'}>
+							<div className={'row-box'}>
+								<div className={'box'}>
+									<span>{t('edited photos')}</span>
+									<div className={'inside'}>
+										<div
+											className={`room ${!searchFilter?.search?.photosList ? 'active' : ''}`}
+											onClick={() => packagePhotosSelectHandler(0)}
+										>
+											{t('Any')}
+										</div>
+										{packagePhotosList.map((bed: number) => (
 											<div
-												className={`room ${!searchFilter?.search?.photosList ? 'active' : ''}`}
-												onClick={() => packagePhotosSelectHandler(0)}
+												className={`room ${searchFilter?.search?.photosList?.includes(bed) ? 'active' : ''}`}
+												onClick={() => packagePhotosSelectHandler(bed)}
+												key={bed}
 											>
-												Any
+												{bed == 0 ? t('Any') : bed}
 											</div>
-											{packagePhotosList.map((bed: number) => (
-												<div
-													className={`room ${searchFilter?.search?.photosList?.includes(bed) ? 'active' : ''}`}
-													onClick={() => packagePhotosSelectHandler(bed)}
-													key={bed}
-												>
-													{bed == 0 ? 'Any' : bed}
-												</div>
-											))}
-										</div>
-									</div>
-									<div className={'box'}>
-										<span>options</span>
-										<div className={'inside'}>
-											<FormControl>
-												<Select
-													value={optionCheck}
-													onChange={packageOptionSelectHandler}
-													displayEmpty
-													inputProps={{ 'aria-label': 'Without label' }}
-												>
-													<MenuItem value={'all'}>All Options</MenuItem>
-													<MenuItem value={'packageAlbum'}>Album</MenuItem>
-													<MenuItem value={'packageDress'}>Dress</MenuItem>
-													<MenuItem value={'packageMakeup'}>Makeup</MenuItem>
-												</Select>
-											</FormControl>
-										</div>
+										))}
 									</div>
 								</div>
-								<div className={'row-box'} style={{ marginTop: '44px' }}>
-									<div className={'box'}>
-										<span>duration (hours)</span>
-										<div className={'inside space-between align-center'}>
-											<FormControl sx={{ width: '122px' }}>
-												<Select
-													value={searchFilter?.search?.durationsRange?.start}
-													onChange={(e: any) => packageDurationHandler(e, 'start')}
-													displayEmpty
-													inputProps={{ 'aria-label': 'Without label' }}
-													MenuProps={MenuProps}
-												>
-													{packageDurations.map((duration: number) => (
-														<MenuItem
-															value={duration}
-															disabled={(searchFilter?.search?.durationsRange?.end || 0) < duration}
-															key={duration}
-														>
-															{duration}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-											<div className={'minus-line'}></div>
-											<FormControl sx={{ width: '122px' }}>
-												<Select
-													value={searchFilter?.search?.durationsRange?.end}
-													onChange={(e: any) => packageDurationHandler(e, 'end')}
-													displayEmpty
-													inputProps={{ 'aria-label': 'Without label' }}
-													MenuProps={MenuProps}
-												>
-													{packageDurations.map((duration: number) => (
-														<MenuItem
-															value={duration}
-															disabled={(searchFilter?.search?.durationsRange?.start || 0) > duration}
-															key={duration}
-														>
-															{duration}
-														</MenuItem>
-													))}
-												</Select>
-											</FormControl>
-										</div>
+								<div className={'box'}>
+									<span>{t('options')}</span>
+									<div className={'inside'}>
+										<FormControl>
+											<Select
+												value={optionCheck}
+												onChange={packageOptionSelectHandler}
+												displayEmpty
+												inputProps={{ 'aria-label': t('Without label') }}
+											>
+												<MenuItem value={'all'}>{t('All Options')}</MenuItem>
+												<MenuItem value={'packageAlbum'}>{t('Album')}</MenuItem>
+												<MenuItem value={'packageDress'}>{t('Dress')}</MenuItem>
+												<MenuItem value={'packageMakeup'}>{t('Makeup')}</MenuItem>
+											</Select>
+										</FormControl>
 									</div>
 								</div>
 							</div>
-							<Divider sx={{ mt: '60px', mb: '18px' }} />
-							<div className={'bottom'}>
-								<div onClick={resetFilterHandler}>
-									<img src="/img/icons/reset.svg" alt="" />
-									<span>Reset all filters</span>
+							<div className={'row-box'} style={{ marginTop: '44px' }}>
+								<div className={'box'}>
+									<span>{t('duration (hours)')}</span>
+									<div className={'inside space-between align-center'}>
+										<FormControl sx={{ width: '122px' }}>
+											<Select
+												value={searchFilter?.search?.durationsRange?.start}
+												onChange={(e: any) => packageDurationHandler(e, 'start')}
+												displayEmpty
+												inputProps={{ 'aria-label': t('Without label') }}
+												MenuProps={MenuProps}
+											>
+												{packageDurations.map((duration: number) => (
+													<MenuItem
+														value={duration}
+														disabled={(searchFilter?.search?.durationsRange?.end || 0) < duration}
+														key={duration}
+													>
+														{duration}
+													</MenuItem>
+												))}
+											</Select>
+										</FormControl>
+										<div className={'minus-line'}></div>
+										<FormControl sx={{ width: '122px' }}>
+											<Select
+												value={searchFilter?.search?.durationsRange?.end}
+												onChange={(e: any) => packageDurationHandler(e, 'end')}
+												displayEmpty
+												inputProps={{ 'aria-label': t('Without label') }}
+												MenuProps={MenuProps}
+											>
+												{packageDurations.map((duration: number) => (
+													<MenuItem
+														value={duration}
+														disabled={(searchFilter?.search?.durationsRange?.start || 0) > duration}
+														key={duration}
+													>
+														{duration}
+													</MenuItem>
+												))}
+											</Select>
+										</FormControl>
+									</div>
 								</div>
-								<Button
-									startIcon={<img src={'/img/icons/search.svg'} />}
-									className={'search-btn'}
-									onClick={pushSearchHandler}
-								>
-									Search
-								</Button>
 							</div>
-						</motion.div>
-					</Box>
-				</Modal>
-			</MotionConfig>
-		);
+						</div>
+						<Divider sx={{ mt: '60px', mb: '18px' }} />
+						<div className={'bottom'}>
+							<div onClick={resetFilterHandler}>
+								<img src="/img/icons/reset.svg" alt="" />
+								<span>{t('Reset all filters')}</span>
+							</div>
+							<Button
+								startIcon={<img src={'/img/icons/search.svg'} />}
+								className={'search-btn'}
+								onClick={pushSearchHandler}
+							>
+								{t('Search')}
+							</Button>
+						</div>
+					</motion.div>
+				</Box>
+			</Modal>
+		</MotionConfig>
+	);
 };
 
 HeaderFilter.defaultProps = {

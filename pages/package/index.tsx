@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import { NetworkStatus, useMutation, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { useReducedMotion } from 'framer-motion';
@@ -38,6 +39,7 @@ export const getStaticProps = async ({ locale }: any) => ({
 
 const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const reduceMotion = useReducedMotion();
 	const [searchFilter, setSearchFilter] = useState<PackagesInquiry>(
 		router?.query?.input ? parsePackagesInput(router.query.input) : initialInput,
@@ -114,14 +116,13 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 				variables: { input: id },
 			});
 			await getPackagesRefetch({ input: searchFilter });
-
 		} catch (err: any) {
 			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
 		}
 	};
 
-	const chips = activeChips(searchFilter);
+	const chips = activeChips(searchFilter, t);
 	const extraCount = extraFilterCount(searchFilter);
 	const page = searchFilter.page ?? 1;
 	const limit = searchFilter.limit ?? defaultPackagesInput.limit;
@@ -130,7 +131,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 		<div id="package-list-page" className={'package-page'}>
 			<header className={'package-header'} ref={headerRef}>
 				<div className={'container'}>
-					<h1 className={'visually-hidden'}>Find your package</h1>
+					<h1 className={'visually-hidden'}>{t('Find your package')}</h1>
 					<SentenceFilter
 						input={searchFilter}
 						onSearch={searchHandler}
@@ -148,7 +149,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 				visible={barVisible}
 			/>
 
-			<section className={'package-results'} ref={resultsRef} aria-label="Packages">
+			<section className={'package-results'} ref={resultsRef} aria-label={t('Packages')}>
 				<div className={'container'}>
 					<ResultsToolbar
 						input={searchFilter}
@@ -161,7 +162,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 					/>
 
 					{loading ? (
-						<div className={'package-grid'} aria-busy="true" aria-label="Loading packages">
+						<div className={'package-grid'} aria-busy="true" aria-label={t('Loading packages')}>
 							{Array.from({ length: limit }).map((_, i) => (
 								<div className={'card-skeleton'} key={i}>
 									<Skeleton variant="rectangular" className={'skeleton portrait'} />
@@ -173,7 +174,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 						</div>
 					) : packages.length === 0 ? (
 						<div className={'empty-box package-empty'}>
-							<p>{emptySentence(searchFilter)}</p>
+							<p>{emptySentence(searchFilter, t)}</p>
 							{chips.length > 0 && (
 								<div className={'empty-actions'}>
 									{(searchFilter.search?.typeList?.length ?? 0) > 0 && (
@@ -182,7 +183,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 											className={'button-secondary'}
 											onClick={() => searchHandler({ typeList: [] })}
 										>
-											Show all tiers
+											{t('Show all tiers')}
 										</button>
 									)}
 									<button
@@ -190,7 +191,7 @@ const PackageList: NextPage = ({ initialInput, ...props }: any) => {
 										className={'button-primary'}
 										onClick={() => pushInput(clearedSearch(searchFilter))}
 									>
-										Clear filters
+										{t('Clear filters')}
 									</button>
 								</div>
 							)}

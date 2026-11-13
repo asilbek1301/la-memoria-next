@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Drawer, Skeleton } from '@mui/material';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
@@ -54,6 +55,7 @@ const similarInput = (search: object) => ({
 
 const PackageDetail: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
 	const packageId = typeof router.query.id === 'string' ? router.query.id : '';
@@ -139,7 +141,7 @@ const PackageDetail: NextPage = () => {
 	const shareHandler = async () => {
 		const url = window.location.href;
 		try {
-			if (navigator.share) await navigator.share({ title: pkg?.packageTitle, url });
+			if (navigator.share) await navigator.share({ title: pkg?.packageTitle ? t(pkg.packageTitle) : undefined, url });
 			else {
 				await navigator.clipboard.writeText(url);
 				setCopied(true);
@@ -158,9 +160,9 @@ const PackageDetail: NextPage = () => {
 			<div id="package-detail-page" className={'detail-page'}>
 				<div className={'container'}>
 					<div className={'empty-box detail-missing'}>
-						<p>Package not found.</p>
+						<p>{t('Package not found.')}</p>
 						<Link href={'/package'} className={'button-primary'}>
-							Back to packages
+							{t('Back to packages')}
 						</Link>
 					</div>
 				</div>
@@ -170,7 +172,7 @@ const PackageDetail: NextPage = () => {
 
 	if (!pkg) {
 		return (
-			<div id="package-detail-page" className={'detail-page'} aria-busy="true" aria-label="Loading package">
+			<div id="package-detail-page" className={'detail-page'} aria-busy="true" aria-label={t('Loading package')}>
 				<div className={'container'}>
 					<Skeleton width={260} className={'crumb-skeleton'} />
 					<Skeleton variant="rectangular" className={'skeleton gallery-skeleton'} />
@@ -195,20 +197,24 @@ const PackageDetail: NextPage = () => {
 	const isLiked = Boolean(pkg.meLiked?.[0]?.myFavorite);
 	const likes = pkg.packageLikes ?? 0;
 	const views = pkg.packageViews ?? 0;
-	const city = prettyEnum(pkg.packageLocation);
+	const city = t(prettyEnum(pkg.packageLocation));
 	const studio = pkg.memberData;
-	const desc = pkg.packageDesc?.trim() ?? '';
+	const desc = pkg.packageDesc?.trim() ? t(pkg.packageDesc.trim()) : '';
 	const longDesc = desc.length > DESC_PREVIEW;
 	const includes = [
-		{ label: 'Album', included: Boolean(pkg.packageAlbum) },
-		{ label: 'Dress', included: Boolean(pkg.packageDress) },
-		{ label: 'Hair & makeup', included: Boolean(pkg.packageMakeup) },
+		{ label: t('Album'), included: Boolean(pkg.packageAlbum) },
+		{ label: t('Dress'), included: Boolean(pkg.packageDress) },
+		{ label: t('Hair & makeup'), included: Boolean(pkg.packageMakeup) },
 	];
 	const facts = [
-		{ icon: <ScheduleOutlinedIcon />, label: 'Duration', value: formatHours(pkg.packageDuration) },
-		{ icon: <PhotoCameraOutlinedIcon />, label: 'Edited photos', value: `${pkg.packagePhotos} photos` },
-		{ icon: <PaletteOutlinedIcon />, label: 'Style', value: prettyEnum(pkg.packageStyle) },
-		{ icon: <PlaceOutlinedIcon />, label: 'Location', value: city, note: pkg.packageAddress },
+		{ icon: <ScheduleOutlinedIcon />, label: t('Duration'), value: formatHours(pkg.packageDuration, t) },
+		{
+			icon: <PhotoCameraOutlinedIcon />,
+			label: t('Edited photos'),
+			value: t('{{count}} photos', { count: pkg.packagePhotos }),
+		},
+		{ icon: <PaletteOutlinedIcon />, label: t('Style'), value: t(prettyEnum(pkg.packageStyle)) },
+		{ icon: <PlaceOutlinedIcon />, label: t('Location'), value: city, note: t(pkg.packageAddress) },
 	];
 
 	const booking = <BookingPanel pkg={pkg} user={user} onRequest={createReservationHandler} />;
@@ -216,33 +222,33 @@ const PackageDetail: NextPage = () => {
 	return (
 		<div id="package-detail-page" className={'detail-page'}>
 			<div className={'container'}>
-				<nav className={'breadcrumb'} aria-label="Breadcrumb">
+				<nav className={'breadcrumb'} aria-label={t('Breadcrumb')}>
 					<ol>
 						<li>
-							<Link href={'/package'}>Packages</Link>
+							<Link href={'/package'}>{t('Packages')}</Link>
 						</li>
 						<li>
 							<Link href={packageSearchHref({ locationList: [pkg.packageLocation] })}>{city}</Link>
 						</li>
-						<li aria-current="page">{pkg.packageTitle}</li>
+						<li aria-current="page">{t(pkg.packageTitle)}</li>
 					</ol>
 				</nav>
 
-				<PackageGallery images={pkg.packageImages} title={pkg.packageTitle} caption={pkg.packageAddress} />
+				<PackageGallery images={pkg.packageImages} title={t(pkg.packageTitle)} caption={t(pkg.packageAddress)} />
 
 				<div className={'detail-layout'}>
 					<div className={'detail-main'}>
 						<header className={'detail-head'}>
 							<div className={'head-text'}>
 								<p className={'head-meta'}>
-									{city} — {prettyEnum(pkg.packageStyle)}
+									{city} — {t(prettyEnum(pkg.packageStyle))}
 								</p>
-								<h1 className={'head-title'}>{pkg.packageTitle}</h1>
+								<h1 className={'head-title'}>{t(pkg.packageTitle)}</h1>
 								<div className={'head-sub'}>
-									<span className={'tag'}>{prettyEnum(pkg.packageType)} tier</span>
+									<span className={'tag'}>{t('{{tier}} tier', { tier: prettyEnum(pkg.packageType) })}</span>
 									{studio && (
 										<span className={'head-studio'}>
-											By{' '}
+											{t('By')}{' '}
 											<Link href={{ pathname: '/studio/detail', query: { studioId: studio._id } }}>
 												{studioName(studio)}
 											</Link>
@@ -255,7 +261,7 @@ const PackageDetail: NextPage = () => {
 								<button
 									type="button"
 									className={`icon-action ${isLiked ? 'liked' : ''}`}
-									aria-label={isLiked ? 'Unlike this package' : 'Like this package'}
+									aria-label={isLiked ? t('Unlike this package') : t('Like this package')}
 									aria-pressed={isLiked}
 									onClick={() => likePackageHandler(user, pkg._id)}
 								>
@@ -265,7 +271,7 @@ const PackageDetail: NextPage = () => {
 								<button
 									type="button"
 									className={'icon-action'}
-									aria-label={copied ? 'Link copied' : 'Share this package'}
+									aria-label={copied ? t('Link copied') : t('Share this package')}
 									onClick={shareHandler}
 								>
 									{copied ? <CheckRoundedIcon /> : <IosShareRoundedIcon />}
@@ -273,7 +279,7 @@ const PackageDetail: NextPage = () => {
 							</div>
 						</header>
 
-						<ul className={'fact-list'} aria-label="Key facts">
+						<ul className={'fact-list'} aria-label={t('Key facts')}>
 							{facts.map((fact) => (
 								<li className={'fact'} key={fact.label}>
 									<span className={'fact-icon'} aria-hidden="true">
@@ -288,14 +294,14 @@ const PackageDetail: NextPage = () => {
 
 						<section className={'detail-section'} aria-labelledby="included-title">
 							<h2 id="included-title" className={'detail-title'}>
-								What&apos;s included
+								{t("What's included")}
 							</h2>
 							<ul className={'include-list'}>
 								{includes.map((item) => (
 									<li className={`include-item ${item.included ? 'yes' : 'no'}`} key={item.label}>
 										{item.included ? <CheckRoundedIcon aria-hidden="true" /> : <RemoveRoundedIcon aria-hidden="true" />}
 										<span className={'include-name'}>{item.label}</span>
-										<span className={'include-state'}>{item.included ? 'Included' : 'Not included'}</span>
+										<span className={'include-state'}>{item.included ? t('Included') : t('Not included')}</span>
 									</li>
 								))}
 							</ul>
@@ -304,7 +310,7 @@ const PackageDetail: NextPage = () => {
 						{desc && (
 							<section className={'detail-section'} aria-labelledby="about-title">
 								<h2 id="about-title" className={'detail-title'}>
-									About this package
+									{t('About this package')}
 								</h2>
 								<p className={`about-text ${longDesc && !descOpen ? 'clamped' : ''}`}>{desc}</p>
 								{longDesc && (
@@ -314,7 +320,7 @@ const PackageDetail: NextPage = () => {
 										aria-expanded={descOpen}
 										onClick={() => setDescOpen(!descOpen)}
 									>
-										{descOpen ? 'Show less' : 'Read more'}
+										{descOpen ? t('Show less') : t('Read more')}
 									</button>
 								)}
 							</section>
@@ -323,7 +329,7 @@ const PackageDetail: NextPage = () => {
 						{studio && (
 							<section className={'detail-section'} aria-labelledby="studio-title">
 								<h2 id="studio-title" className={'detail-title'}>
-									The studio
+									{t('The studio')}
 								</h2>
 								<StudioBlock studio={studio} user={user} />
 							</section>
@@ -338,7 +344,7 @@ const PackageDetail: NextPage = () => {
 				{similar.length > 0 && (
 					<section className={'detail-section similar'} aria-labelledby="similar-title">
 						<h2 id="similar-title" className={'detail-title'}>
-							Similar packages
+							{t('Similar packages')}
 						</h2>
 						<ul className={'similar-grid'}>
 							{similar.map((item) => (
@@ -356,7 +362,7 @@ const PackageDetail: NextPage = () => {
 					<div className={'booking-bar'}>
 						<div className={'bar-price'}>
 							<span className={'price'}>{formatKRW(pkg.packagePrice)}</span>
-							<span className={'booking-tier'}>{prettyEnum(pkg.packageType)} tier</span>
+							<span className={'booking-tier'}>{t('{{tier}} tier', { tier: prettyEnum(pkg.packageType) })}</span>
 						</div>
 						<button
 							type="button"
@@ -364,7 +370,7 @@ const PackageDetail: NextPage = () => {
 							aria-haspopup="dialog"
 							onClick={() => setSheetOpen(true)}
 						>
-							Reserve
+							{t('Reserve')}
 						</button>
 					</div>
 					<Drawer
@@ -372,11 +378,11 @@ const PackageDetail: NextPage = () => {
 						open={sheetOpen}
 						onClose={() => setSheetOpen(false)}
 						classes={{ paper: 'booking-sheet' }}
-						PaperProps={{ role: 'dialog', 'aria-label': 'Request a reservation' } as any}
+						PaperProps={{ role: 'dialog', 'aria-label': t('Request a reservation') } as any}
 					>
 						<div className={'sheet-head'}>
-							<p className={'sheet-title'}>Request a reservation</p>
-							<button type="button" className={'icon-btn'} aria-label="Close" onClick={() => setSheetOpen(false)}>
+							<p className={'sheet-title'}>{t('Request a reservation')}</p>
+							<button type="button" className={'icon-btn'} aria-label={t('Close')} onClick={() => setSheetOpen(false)}>
 								<CloseRoundedIcon />
 							</button>
 						</div>

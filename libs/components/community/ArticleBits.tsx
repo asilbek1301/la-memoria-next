@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -10,8 +11,9 @@ import { authorHref } from './communitySearch';
 
 /** the author's photo (or first letter) and name, with the date when asked **/
 export const ArticleAuthor = ({ article, withDate }: { article: BoardArticle; withDate?: boolean }) => {
+	const { t } = useTranslation('common');
 	const member = article?.memberData;
-	const name = member ? studioName(member) : 'Member';
+	const name = member ? studioName(member) : t('Member');
 	const photo = memberPhoto(member?.memberImage);
 	return (
 		<div className={'article-author'}>
@@ -23,7 +25,7 @@ export const ArticleAuthor = ({ article, withDate }: { article: BoardArticle; wi
 					{name}
 				</Link>
 				{withDate && (
-					<Moment className={'author-date'} format="MMMM D, YYYY">
+					<Moment className={'author-date'} format="LL">
 						{article?.createdAt}
 					</Moment>
 				)}
@@ -34,6 +36,7 @@ export const ArticleAuthor = ({ article, withDate }: { article: BoardArticle; wi
 
 /** views, likes and comments as small icons; only counts above 0 **/
 export const ArticleCounts = ({ article }: { article: BoardArticle }) => {
+	const { t } = useTranslation('common');
 	const counts = [
 		{ key: 'views', value: article?.articleViews ?? 0, word: 'view', icon: <VisibilityOutlinedIcon /> },
 		{ key: 'likes', value: article?.articleLikes ?? 0, word: 'like', icon: <FavoriteBorderRoundedIcon /> },
@@ -43,9 +46,9 @@ export const ArticleCounts = ({ article }: { article: BoardArticle }) => {
 	return (
 		<p className={'article-counts'}>
 			{counts.map((count) => (
-				<span key={count.key} title={plural(count.value, count.word)}>
+				<span key={count.key} title={plural(count.value, count.word, t)}>
 					<span aria-hidden="true">{count.icon}</span>
-					<span className={'visually-hidden'}>{plural(count.value, count.word)}</span>
+					<span className={'visually-hidden'}>{plural(count.value, count.word, t)}</span>
 					<span aria-hidden="true">{count.value.toLocaleString('en-US')}</span>
 				</span>
 			))}

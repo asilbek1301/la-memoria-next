@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { prettyEnum } from '../../../libs/utils';
 import type { NextPage } from 'next';
 import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
+export const getStaticProps = async ({ locale }: any) => ({
+	props: {
+		...(await serverSideTranslations(locale, ['common'])),
+	},
+});
 import { Box, List, ListItem, Stack } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -21,6 +29,7 @@ import { GET_ALL_PACKAGES_BY_ADMIN } from '../../../apollo/admin/query';
 import { T } from '../../../libs/types/common';
 
 const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
+	const { t } = useTranslation('common');
 	const [anchorEl, setAnchorEl] = useState<[] | HTMLElement[]>([]);
 	const [packagesInquiry, setPackagesInquiry] = useState<AllPackagesInquiry>(initialInquiry);
 	const [packages, setPackages] = useState<Package[]>([]);
@@ -35,9 +44,7 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 	const [updatePackageByAdmin] = useMutation(UPDATE_PACKAGE_BY_ADMIN);
 	const [removePackageByAdmin] = useMutation(REMOVE_PACKAGE_BY_ADMIN);
 
-	const {
-		refetch: getAllPackagesByAdminRefetch,
-	} = useQuery(GET_ALL_PACKAGES_BY_ADMIN, {
+	const { refetch: getAllPackagesByAdminRefetch } = useQuery(GET_ALL_PACKAGES_BY_ADMIN, {
 		fetchPolicy: 'network-only',
 		variables: { input: packagesInquiry },
 		notifyOnNetworkStatusChange: true,
@@ -162,7 +169,7 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 	return (
 		<Box component={'div'} className={'content'}>
 			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Packages
+				{t('Packages')}
 			</Typography>
 			<Box component={'div'} className={'table-wrap'}>
 				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
@@ -174,46 +181,50 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 									value="ALL"
 									className={value === 'ALL' ? 'li on' : 'li'}
 								>
-									All
+									{t('All')}
 								</ListItem>
 								<ListItem
 									onClick={(e) => tabChangeHandler(e, 'ACTIVE')}
 									value="ACTIVE"
 									className={value === 'ACTIVE' ? 'li on' : 'li'}
 								>
-									Active
+									{t('Active')}
 								</ListItem>
 								<ListItem
 									onClick={(e) => tabChangeHandler(e, 'HOLD')}
 									value="HOLD"
 									className={value === 'HOLD' ? 'li on' : 'li'}
 								>
-									Hold
+									{t('Hold')}
 								</ListItem>
 								<ListItem
 									onClick={(e) => tabChangeHandler(e, 'PAUSE')}
 									value="PAUSE"
 									className={value === 'PAUSE' ? 'li on' : 'li'}
 								>
-									Paused
+									{t('Paused')}
 								</ListItem>
 								<ListItem
 									onClick={(e) => tabChangeHandler(e, 'DELETE')}
 									value="DELETE"
 									className={value === 'DELETE' ? 'li on' : 'li'}
 								>
-									Deleted
+									{t('Deleted')}
 								</ListItem>
 							</List>
 							<Divider />
 							<Stack className={'search-area'} sx={{ m: '24px' }}>
-								<Select sx={{ width: '160px', mr: '20px' }} value={searchType} inputProps={{ 'aria-label': 'Filter by location' }}>
+								<Select
+									sx={{ width: '160px', mr: '20px' }}
+									value={searchType}
+									inputProps={{ 'aria-label': t('Filter by location') }}
+								>
 									<MenuItem value={'ALL'} onClick={() => searchTypeHandler('ALL')}>
-										All
+										{t('All')}
 									</MenuItem>
 									{Object.values(PackageLocation).map((location: string) => (
 										<MenuItem value={location} onClick={() => searchTypeHandler(location)} key={location}>
-											{prettyEnum(location)}
+											{t(prettyEnum(location))}
 										</MenuItem>
 									))}
 								</Select>
@@ -230,6 +241,11 @@ const AdminPackages: NextPage = ({ initialInquiry, ...props }: any) => {
 						/>
 
 						<TablePagination
+							labelRowsPerPage={t('Rows per page:')}
+							labelDisplayedRows={({ from, to, count }) =>
+								t('{{from}}–{{to}} of {{total}}', { from, to, total: count })
+							}
+							getItemAriaLabel={(type) => t(`Go to ${type} page`)}
 							rowsPerPageOptions={[10, 20, 40, 60]}
 							component="div"
 							count={packagesTotal}

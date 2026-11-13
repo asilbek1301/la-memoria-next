@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { GET_VISITED } from '../../../apollo/user/query';
@@ -11,6 +12,7 @@ const PAGE_SIZE = 6;
 
 /** packages you opened recently (the backend records a view when a logged-in member opens a package) **/
 const RecentlyVisited = () => {
+	const { t } = useTranslation('common');
 	const [page, setPage] = useState<number>(1);
 
 	/** APOLLO REQUESTS **/
@@ -28,9 +30,9 @@ const RecentlyVisited = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="visited-title" className={'detail-title'}>
-						Recently viewed
+						{t('Recently viewed')}
 					</h2>
-					<p className={'section-note'}>Packages you opened lately.</p>
+					<p className={'section-note'}>{t('Packages you opened lately.')}</p>
 				</div>
 			</div>
 			{loading && visited.length === 0 ? (
@@ -41,9 +43,9 @@ const RecentlyVisited = () => {
 				</div>
 			) : visited.length === 0 ? (
 				<div className={'empty-box my-empty'}>
-					<p>Packages you open will show up here.</p>
+					<p>{t('Packages you open will show up here.')}</p>
 					<Link href={'/package'} className={'button-primary'}>
-						Browse packages
+						{t('Browse packages')}
 					</Link>
 				</div>
 			) : (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import { statusBadge, statusLabel } from '../adminLabels';
 import { formatKRW, prettyEnum } from '../../../utils';
 import Link from 'next/link';
@@ -96,6 +97,7 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
+	const { t } = useTranslation('common');
 
 	return (
 		<TableHead>
@@ -106,7 +108,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 						align={headCell.numeric ? 'left' : 'center'}
 						padding={headCell.disablePadding ? 'none' : 'normal'}
 					>
-						{headCell.label}
+						{t(headCell.label)}
 					</TableCell>
 				))}
 			</TableRow>
@@ -124,14 +126,9 @@ interface PackagePanelListType {
 }
 
 export const PackagePanelList = (props: PackagePanelListType) => {
-	const {
-		packages,
-		anchorEl,
-		menuIconClickHandler,
-		menuIconCloseHandler,
-		updatePackageHandler,
-		removePackageHandler,
-	} = props;
+	const { t } = useTranslation('common');
+	const { packages, anchorEl, menuIconClickHandler, menuIconCloseHandler, updatePackageHandler, removePackageHandler } =
+		props;
 
 	return (
 		<Stack>
@@ -143,7 +140,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 						{packages.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>No packages here.</span>
+									<span className={'no-data'}>{t('No packages here.')}</span>
 								</TableCell>
 							</TableRow>
 						)}
@@ -164,7 +161,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 														</div>
 													</Link>
 													<Link href={`/package/detail?id=${pkg?._id}`}>
-														<div>{pkg.packageTitle}</div>
+														<div>{t(pkg.packageTitle)}</div>
 													</Link>
 												</Stack>
 											) : (
@@ -172,15 +169,14 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 													<div>
 														<Avatar alt="" src={packageImage} sx={{ ml: '2px', mr: '10px' }} />
 													</div>
-													<div style={{ marginTop: "10px" }}>{pkg.packageTitle}</div>
+													<div style={{ marginTop: '10px' }}>{t(pkg.packageTitle)}</div>
 												</Stack>
 											)}
-
 										</TableCell>
 										<TableCell align="center">{formatKRW(pkg.packagePrice)}</TableCell>
 										<TableCell align="center">{pkg.memberData?.memberNick}</TableCell>
-										<TableCell align="center">{prettyEnum(pkg.packageLocation)}</TableCell>
-										<TableCell align="center">{prettyEnum(pkg.packageType)}</TableCell>
+										<TableCell align="center">{t(prettyEnum(pkg.packageLocation))}</TableCell>
+										<TableCell align="center">{t(prettyEnum(pkg.packageType))}</TableCell>
 										<TableCell align="center">
 											{pkg.packageStatus === PackageStatus.DELETE && (
 												<Button
@@ -198,7 +194,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 														onClick={(e: any) => menuIconClickHandler(e, index)}
 														className={statusBadge(pkg.packageStatus)}
 													>
-														{statusLabel(pkg.packageStatus)}
+														{t(statusLabel(pkg.packageStatus))}
 													</Button>
 
 													<Menu
@@ -220,7 +216,7 @@ export const PackagePanelList = (props: PackagePanelListType) => {
 																	key={status}
 																>
 																	<Typography variant={'subtitle1'} component={'span'}>
-																		{statusLabel(status)}
+																		{t(statusLabel(status))}
 																	</Typography>
 																</MenuItem>
 															))}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import { REACT_APP_API_URL } from '../../../config';
@@ -14,6 +15,7 @@ interface PackageGalleryProps {
 /** editorial mosaic: 1 photo full width, 2-4 as one large plus two, 5+ as one large plus four; all open the lightbox **/
 const PackageGallery = (props: PackageGalleryProps) => {
 	const { images, title, caption } = props;
+	const { t } = useTranslation('common');
 	const urls = (images ?? []).filter(Boolean).map((image) => `${REACT_APP_API_URL}/${image}`);
 	const lightbox = usePhotoLightbox(urls.length);
 
@@ -21,7 +23,10 @@ const PackageGallery = (props: PackageGalleryProps) => {
 
 	const layout = urls.length === 1 ? 'single' : urls.length < 5 ? 'trio' : 'five';
 	const tiles = urls.slice(0, layout === 'single' ? 1 : layout === 'trio' ? 3 : 5);
-	const alt = (index: number) => (urls.length === 1 ? title : `${title}, photo ${index + 1} of ${urls.length}`);
+	const alt = (index: number) =>
+		urls.length === 1
+			? title
+			: t('{{title}}, photo {{index}} of {{total}}', { title, index: index + 1, total: urls.length });
 
 	return (
 		<>
@@ -35,7 +40,7 @@ const PackageGallery = (props: PackageGalleryProps) => {
 						type="button"
 						key={url + index}
 						className={`gallery-tile ${index === 0 ? 'lead' : ''}`}
-						aria-label={`Open photo ${index + 1} of ${urls.length}`}
+						aria-label={t('Open photo {{index}} of {{total}}', { index: index + 1, total: urls.length })}
 						onClick={(e) => lightbox.open(index, e)}
 					>
 						<img
@@ -55,7 +60,7 @@ const PackageGallery = (props: PackageGalleryProps) => {
 				{urls.length > 1 && (
 					<button type="button" className={'gallery-all'} onClick={(e) => lightbox.open(0, e)}>
 						<GridViewRoundedIcon aria-hidden="true" />
-						View all {urls.length} photos
+						{t('View all {{count}} photos', { count: urls.length })}
 					</button>
 				)}
 			</div>
@@ -63,7 +68,7 @@ const PackageGallery = (props: PackageGalleryProps) => {
 			<PhotoLightbox
 				urls={urls}
 				alts={urls.map((_, index) => alt(index))}
-				label={`${title} photos`}
+				label={t('{{title}} photos', { title })}
 				lightbox={lightbox}
 			/>
 		</>

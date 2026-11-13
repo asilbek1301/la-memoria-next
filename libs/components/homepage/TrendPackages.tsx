@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
+import { useTranslation } from 'next-i18next';
 import { Skeleton } from '@mui/material';
 import { Package } from '../../types/package/package';
 import { PackagesInquiry } from '../../types/package/package.input';
@@ -29,6 +30,7 @@ const locationTabs: { value: LocationTab; label: string }[] = [
 
 const TrendPackages = (props: TrendPackagesProps) => {
 	const { initialInput } = props;
+	const { t } = useTranslation('common');
 	const [location, setLocation] = useState<LocationTab>('ALL');
 	const input: PackagesInquiry = {
 		...initialInput,
@@ -64,7 +66,6 @@ const TrendPackages = (props: TrendPackagesProps) => {
 
 			//execute getPackagesRefetch
 			await getPackagesRefetch({ input });
-
 		} catch (err: any) {
 			console.log('Error:likePackageHandler', err.message);
 			sweetMixinErrorAlert(err.message).then();
@@ -77,17 +78,22 @@ const TrendPackages = (props: TrendPackagesProps) => {
 	return (
 		<HomeSection
 			id="trending"
-			title="Trending Packages"
-			subtitle="Ranked by likes from couples"
+			title={t('Trending Packages')}
+			subtitle={t('Ranked by likes from couples')}
 			aside={
 				<>
-					<FilterTabs label="Filter by location" options={locationTabs} value={location} onChange={setLocation} />
-					<ViewAllLink href={'/package'} label="View all" />
+					<FilterTabs
+						label={t('Filter by location')}
+						options={locationTabs.map((tab) => ({ ...tab, label: t(tab.label) }))}
+						value={location}
+						onChange={setLocation}
+					/>
+					<ViewAllLink href={'/package'} label={t('View all')} />
 				</>
 			}
 		>
 			{showSkeleton ? (
-				<div className={'trend-grid'} aria-busy="true" aria-label="Loading trending packages">
+				<div className={'trend-grid'} aria-busy="true" aria-label={t('Loading trending packages')}>
 					<Skeleton variant="rectangular" className={'skeleton feature-box'} />
 					<div className={'trend-list'}>
 						{[0, 1, 2, 3].map((i) => (
@@ -103,11 +109,13 @@ const TrendPackages = (props: TrendPackagesProps) => {
 				<EmptyState
 					message={
 						location === 'ALL'
-							? 'No packages have been published yet. Trending packages will appear here once couples start saving them.'
-							: `No packages in ${prettyEnum(location)} yet.`
+							? t(
+									'No packages have been published yet. Trending packages will appear here once couples start saving them.',
+							  )
+							: t('No packages in {{place}} yet.', { place: t(prettyEnum(location)) })
 					}
 					href="/package"
-					linkLabel="Browse all packages"
+					linkLabel={t('Browse all packages')}
 				/>
 			) : (
 				<div className={'trend-grid'}>
@@ -117,12 +125,7 @@ const TrendPackages = (props: TrendPackagesProps) => {
 					{rest.length > 0 && (
 						<div className={'trend-list'}>
 							{rest.map((pkg: Package, index: number) => (
-								<TrendPackageCard
-									key={pkg._id}
-									pkg={pkg}
-									rank={index + 2}
-									likePackageHandler={likePackageHandler}
-								/>
+								<TrendPackageCard key={pkg._id} pkg={pkg} rank={index + 2} likePackageHandler={likePackageHandler} />
 							))}
 						</div>
 					)}

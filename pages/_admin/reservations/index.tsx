@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import type { NextPage } from 'next';
 import withAdminLayout from '../../../libs/components/layout/LayoutAdmin';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
+export const getStaticProps = async ({ locale }: any) => ({
+	props: {
+		...(await serverSideTranslations(locale, ['common'])),
+	},
+});
 import { Box, List, ListItem } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
@@ -15,6 +23,7 @@ import { GET_ALL_RESERVATIONS_BY_ADMIN } from '../../../apollo/admin/query';
 import { T } from '../../../libs/types/common';
 
 const AdminReservations: NextPage = ({ initialInquiry, ...props }: any) => {
+	const { t } = useTranslation('common');
 	const [reservationsInquiry, setReservationsInquiry] = useState<ReservationsInquiry>(initialInquiry);
 	const [reservations, setReservations] = useState<Reservation[]>([]);
 	const [reservationsTotal, setReservationsTotal] = useState<number>(0);
@@ -54,7 +63,7 @@ const AdminReservations: NextPage = ({ initialInquiry, ...props }: any) => {
 	return (
 		<Box component={'div'} className={'content'}>
 			<Typography variant={'h2'} className={'tit'} sx={{ mb: '24px' }}>
-				Reservations
+				{t('Reservations')}
 			</Typography>
 			<Box component={'div'} className={'table-wrap'}>
 				<Box component={'div'} sx={{ width: '100%', typography: 'body1' }}>
@@ -68,7 +77,7 @@ const AdminReservations: NextPage = ({ initialInquiry, ...props }: any) => {
 										value={status}
 										className={value === status ? 'li on' : 'li'}
 									>
-										{status.charAt(0) + status.slice(1).toLowerCase()}
+										{t(status.charAt(0) + status.slice(1).toLowerCase())}
 									</ListItem>
 								))}
 							</List>
@@ -77,6 +86,11 @@ const AdminReservations: NextPage = ({ initialInquiry, ...props }: any) => {
 						<ReservationPanelList reservations={reservations} />
 
 						<TablePagination
+							labelRowsPerPage={t('Rows per page:')}
+							labelDisplayedRows={({ from, to, count }) =>
+								t('{{from}}–{{to}} of {{total}}', { from, to, total: count })
+							}
+							getItemAriaLabel={(type) => t(`Go to ${type} page`)}
 							rowsPerPageOptions={[10, 20, 40, 60]}
 							component="div"
 							count={reservationsTotal}

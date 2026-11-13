@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { logIn } from '../../auth';
 import AccountField from './AccountField';
 import { firstError, nickRules, passwordRules } from './accountRules';
@@ -11,6 +12,7 @@ interface LoginFormProps {
 
 /** nickname + password; errors appear after the first submit and update as the user types **/
 const LoginForm = ({ onSuccess, onSwitch }: LoginFormProps) => {
+	const { t } = useTranslation('common');
 	const [nick, setNick] = useState<string>('');
 	const [password, setPassword] = useState<string>('');
 	const [attempted, setAttempted] = useState<boolean>(false);
@@ -66,17 +68,17 @@ const LoginForm = ({ onSuccess, onSwitch }: LoginFormProps) => {
 
 			{serverError && (
 				<p className={'form-error'} role="alert">
-					{serverError}
+					{t(serverError)}
 				</p>
 			)}
 			<button type="submit" className={'button-primary submit-btn'} disabled={sending}>
-				{sending ? 'Logging in…' : 'Log in'}
+				{sending ? t('Logging in…') : t('Log in')}
 			</button>
 
 			<p className={'switch-line'}>
-				New to La Memoria?{' '}
+				{t('New to La Memoria?')}{' '}
 				<button type="button" className={'switch-btn'} onClick={onSwitch}>
-					Sign up
+					{t('Sign up')}
 				</button>
 			</p>
 		</form>

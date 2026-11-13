@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Menu, MenuItem } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
@@ -24,13 +25,14 @@ interface SortMenuProps {
 
 export const SortMenu = (props: SortMenuProps) => {
 	const { options, sort, direction, onSort } = props;
+	const { t } = useTranslation('common');
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 	const current = options.find((o) => o.sort === sort && o.direction === direction) ?? options[0];
 
 	return (
 		<div className={'sort-box'}>
 			<span className={'sort-label'} id="sort-label">
-				Sort by
+				{t('Sort by')}
 			</span>
 			<button
 				type="button"
@@ -40,7 +42,7 @@ export const SortMenu = (props: SortMenuProps) => {
 				aria-labelledby="sort-label sort-value"
 				onClick={(e) => setAnchorEl(e.currentTarget)}
 			>
-				<span id="sort-value">{current.label}</span>
+				<span id="sort-value">{t(current.label)}</span>
 				<KeyboardArrowDownRoundedIcon aria-hidden="true" />
 			</button>
 			<Menu
@@ -50,7 +52,7 @@ export const SortMenu = (props: SortMenuProps) => {
 				classes={{ paper: 'filter-menu' }}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-				MenuListProps={{ 'aria-label': 'Sort' }}
+				MenuListProps={{ 'aria-label': t('Sort') }}
 			>
 				{options.map((option) => (
 					<MenuItem
@@ -61,7 +63,7 @@ export const SortMenu = (props: SortMenuProps) => {
 							onSort(option.sort, option.direction);
 						}}
 					>
-						{option.label}
+						{t(option.label)}
 						{option.id === current.id && <CheckRoundedIcon className={'menu-check'} aria-hidden="true" />}
 					</MenuItem>
 				))}
@@ -91,23 +93,24 @@ export const ResultsPagination = (props: {
 	noun?: string;
 }) => {
 	const { page, limit, total, onPage, noun } = props;
+	const { t } = useTranslation('common');
 	const count = Math.ceil(total / limit);
 	if (total === 0) return null;
 	const from = (page - 1) * limit + 1;
 	const to = Math.min(page * limit, total);
 
 	return (
-		<nav className={'results-pagination'} aria-label="Pages">
+		<nav className={'results-pagination'} aria-label={t('Pages')}>
 			<p className={'showing'}>
-				Showing {from}–{to} of {total}
-				{noun ? ` ${noun}` : ''}
+				{t('Showing {{from}}–{{to}} of {{total}}', { from, to, total })}
+				{noun ? ` ${t(noun)}` : ''}
 			</p>
 			{count > 1 && (
 				<div className={'page-list'}>
 					<button
 						type="button"
 						className={'arrow-btn'}
-						aria-label="Previous page"
+						aria-label={t('Previous page')}
 						disabled={page <= 1}
 						onClick={() => onPage(page - 1)}
 					>
@@ -124,7 +127,7 @@ export const ResultsPagination = (props: {
 								key={item}
 								className={`page-num ${item === page ? 'active' : ''}`}
 								aria-current={item === page ? 'page' : undefined}
-								aria-label={`Page ${item}`}
+								aria-label={t('Page {{page}}', { page: item })}
 								onClick={() => onPage(item)}
 							>
 								{item}
@@ -134,7 +137,7 @@ export const ResultsPagination = (props: {
 					<button
 						type="button"
 						className={'arrow-btn'}
-						aria-label="Next page"
+						aria-label={t('Next page')}
 						disabled={page >= count}
 						onClick={() => onPage(page + 1)}
 					>

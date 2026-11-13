@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import moment from 'moment';
+import { useTranslation } from 'next-i18next';
+import { TFunction } from 'i18next';
 import { Popover, Skeleton } from '@mui/material';
 import NotificationsNoneRoundedIcon from '@mui/icons-material/NotificationsNoneRounded';
 import { useLazyQuery, useMutation, useQuery, useReactiveVar } from '@apollo/client';
@@ -34,9 +36,35 @@ const notificationHref = (item: Notification, memberType: string) => {
 	}
 };
 
+/** the backend writes each notification as an English sentence (la-memoria: member, package, board-article and
+    reservation services); the known sentences are rebuilt in the page language, anything else is shown as sent **/
+const notificationText = (title: string, t: TFunction): string => {
+	// reservation days come as "3 Dec 2026"
+	const day = (value: string) => {
+		const date = moment(value, 'D MMM YYYY', 'en', true);
+		return date.isValid() ? date.format('LL') : value;
+	};
+	let match: RegExpMatchArray | null;
+	if (title === 'liked your studio' || title === 'liked your profile') return t(title);
+	if ((match = title.match(/^liked your package "(.*)"$/)))
+		return t('liked your package "{{title}}"', { title: t(match[1]) });
+	if ((match = title.match(/^liked your post "(.*)"$/)))
+		return t('liked your post "{{title}}"', { title: t(match[1]) });
+	if ((match = title.match(/^requested "(.*)" for (.+)$/)))
+		return t('requested "{{title}}" for {{date}}', { title: t(match[1]), date: day(match[2]) });
+	if ((match = title.match(/^confirmed your reservation for (.+)$/)))
+		return t('confirmed your reservation for {{date}}', { date: day(match[1]) });
+	if ((match = title.match(/^marked your reservation for (.+) as completed$/)))
+		return t('marked your reservation for {{date}} as completed', { date: day(match[1]) });
+	if ((match = title.match(/^cancelled the reservation for (.+)$/)))
+		return t('cancelled the reservation for {{date}}', { date: day(match[1]) });
+	return title;
+};
+
 /** header bell for logged-in members: an unread count, and a panel with the newest notifications **/
 const NotificationBell = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const [anchor, setAnchor] = useState<HTMLElement | null>(null);
 
@@ -97,7 +125,7 @@ const NotificationBell = () => {
 			<button
 				type="button"
 				className={'icon-btn bell-btn'}
-				aria-label={unread ? `Notifications (${unread} unread)` : 'Notifications'}
+				aria-label={unread ? t('Notifications ({{count}} unread)', { count: unread }) : t('Notifications')}
 				aria-haspopup="dialog"
 				aria-expanded={Boolean(anchor)}
 				onClick={openPanel}
@@ -113,13 +141,13 @@ const NotificationBell = () => {
 				classes={{ paper: 'notification-panel' }}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-				slotProps={{ paper: { role: 'dialog', 'aria-label': 'Notifications' } }}
+				slotProps={{ paper: { role: 'dialog', 'aria-label': t('Notifications') } }}
 			>
 				<div className={'panel-head'}>
-					<h2 className={'panel-title'}>Notifications</h2>
+					<h2 className={'panel-title'}>{t('Notifications')}</h2>
 					{unread > 0 && (
 						<button type="button" className={'button-link'} onClick={markAllRead}>
-							Mark all as read
+							{t('Mark all as read')}
 						</button>
 					)}
 				</div>
@@ -151,20 +179,21 @@ const NotificationBell = () => {
 										/>
 										<span className={'item-body'}>
 											<span className={'item-text'}>
-												<strong>{item.authorData?.memberNick ?? 'Someone'}</strong> {item.notificationTitle}
+												<strong>{item.authorData?.memberNick ?? t('Someone')}</strong>{' '}
+												{notificationText(item.notificationTitle, t)}
 											</span>
 											<time className={'item-time'} dateTime={new Date(item.createdAt).toISOString()}>
 												{moment(item.createdAt).fromNow()}
 											</time>
 										</span>
-										{isNew && <span className={'unread-dot'} aria-label="Unread" />}
+										{isNew && <span className={'unread-dot'} aria-label={t('Unread')} />}
 									</button>
 								</li>
 							);
 						})}
 					</ul>
 				) : (
-					<p className={'panel-empty'}>Nothing yet. Reservation updates and likes will show up here.</p>
+					<p className={'panel-empty'}>{t('Nothing yet. Reservation updates and likes will show up here.')}</p>
 				)}
 			</Popover>
 		</>

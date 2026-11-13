@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { userVar } from '../../../apollo/store';
@@ -23,11 +24,18 @@ const statusTabs: { value: StatusTab; label: string }[] = [
 	{ value: ReservationStatus.CANCELLED, label: 'Cancelled' },
 ];
 
-const initialInput: ReservationsInquiry = { page: 1, limit: 5, sort: 'createdAt', direction: Direction.DESC, search: {} };
+const initialInput: ReservationsInquiry = {
+	page: 1,
+	limit: 5,
+	sort: 'createdAt',
+	direction: Direction.DESC,
+	search: {},
+};
 
 /** couples: their reservation requests; studios: requests from couples (same queries and rules as before) **/
 const MyReservations = () => {
 	const user = useReactiveVar(userVar);
+	const { t } = useTranslation('common');
 	const isStudio = user?.memberType === MemberType.STUDIO;
 	const [searchFilter, setSearchFilter] = useState<ReservationsInquiry>(initialInput);
 
@@ -49,15 +57,17 @@ const MyReservations = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="reservations-title" className={'detail-title'}>
-						{isStudio ? 'Reservation requests' : 'Reservations'}
+						{isStudio ? t('Reservation requests') : t('Reservations')}
 					</h2>
 					<p className={'section-note'}>
-						{isStudio ? 'Confirm, complete or decline requests from couples.' : 'Your requests and confirmed shoots.'}
+						{isStudio
+							? t('Confirm, complete or decline requests from couples.')
+							: t('Your requests and confirmed shoots.')}
 					</p>
 				</div>
 				<FilterTabs
-					label="Filter by status"
-					options={statusTabs}
+					label={t('Filter by status')}
+					options={statusTabs.map((tab) => ({ ...tab, label: t(tab.label) }))}
 					value={active}
 					onChange={(value) =>
 						setSearchFilter({ ...searchFilter, page: 1, search: value === 'ALL' ? {} : { reservationStatus: value } })
@@ -75,14 +85,16 @@ const MyReservations = () => {
 				<div className={'empty-box my-empty'}>
 					<p>
 						{active !== 'ALL'
-							? `No ${statusTabs.find((t) => t.value === active)?.label.toLowerCase()} reservations.`
+							? t('No {{status}} reservations.', {
+									status: t(statusTabs.find((tab) => tab.value === active)?.label ?? '').toLowerCase(),
+							  })
 							: isStudio
-							? 'No reservation requests yet.'
-							: 'No reservations yet.'}
+							? t('No reservation requests yet.')
+							: t('No reservations yet.')}
 					</p>
 					{!isStudio && active === 'ALL' && (
 						<Link href={'/package'} className={'button-primary'}>
-							Browse packages
+							{t('Browse packages')}
 						</Link>
 					)}
 				</div>

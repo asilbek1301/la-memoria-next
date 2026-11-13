@@ -21,6 +21,9 @@ p {
 }
 body {
 	font-family: $font;
+	// Korean wraps between words, not between syllables ("업데이트됩니 / 다"); long words still wrap
+	word-break: keep-all;
+	overflow-wrap: break-word;
 	&::-webkit-scrollbar {
 		width: 9px;
 	}

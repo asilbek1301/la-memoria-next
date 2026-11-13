@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import axios from 'axios';
 import { useMutation, useQuery } from '@apollo/client';
@@ -39,6 +40,7 @@ const includes: { key: 'packageAlbum' | 'packageDress' | 'packageMakeup'; label:
 /** create or edit a package (?packageId= edits); same CREATE_PACKAGE / UPDATE_PACKAGE and image upload as before **/
 const AddPackage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const packageId = typeof router.query.packageId === 'string' ? router.query.packageId : '';
 	const fileRef = useRef<HTMLInputElement>(null);
 	const [data, setData] = useState<PackageInput>(emptyPackage);
@@ -89,7 +91,7 @@ const AddPackage = () => {
 		const files = fileRef.current?.files;
 		if (!files || files.length === 0) return;
 		try {
-			if (files.length > MAX_PHOTOS) throw new Error(`Choose up to ${MAX_PHOTOS} photos.`);
+			if (files.length > MAX_PHOTOS) throw new Error(t('Choose up to {{count}} photos.', { count: MAX_PHOTOS }));
 			setUploading(true);
 			const formData = new FormData();
 			formData.append(
@@ -163,53 +165,53 @@ const AddPackage = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="add-title" className={'detail-title'}>
-						{editing ? 'Edit package' : 'Add a package'}
+						{editing ? t('Edit package') : t('Add a package')}
 					</h2>
-					<p className={'section-note'}>Everything here is shown to couples on the package page.</p>
+					<p className={'section-note'}>{t('Everything here is shown to couples on the package page.')}</p>
 				</div>
 				<Link href={{ pathname: '/mypage', query: { category: 'myPackages' } }} className={'button-link'}>
-					Back to my packages
+					{t('Back to my packages')}
 				</Link>
 			</div>
 
 			<form className={'my-form'} onSubmit={submit}>
 				<fieldset className={'form-group'}>
-					<legend className={'group-title'}>Basics</legend>
+					<legend className={'group-title'}>{t('Basics')}</legend>
 					<div className={'form-grid'}>
 						<label className={'field wide'}>
-							<span className={'field-label'}>Title</span>
+							<span className={'field-label'}>{t('Title')}</span>
 							<input
 								value={data.packageTitle}
 								maxLength={100}
 								required
-								placeholder="For example: Jeju Coast Sunset Snap"
+								placeholder={t('For example: Jeju Coast Sunset Snap')}
 								onChange={(e) => set('packageTitle', e.target.value)}
 							/>
 						</label>
 						<label className={'field'}>
-							<span className={'field-label'}>Tier</span>
+							<span className={'field-label'}>{t('Tier')}</span>
 							<select value={data.packageType} required onChange={(e) => set('packageType', e.target.value)}>
-								<option value="">Choose a tier</option>
+								<option value="">{t('Choose a tier')}</option>
 								{Object.values(PackageType).map((value) => (
 									<option key={value} value={value}>
-										{prettyEnum(value)}
+										{t(prettyEnum(value))}
 									</option>
 								))}
 							</select>
 						</label>
 						<label className={'field'}>
-							<span className={'field-label'}>Style</span>
+							<span className={'field-label'}>{t('Style')}</span>
 							<select value={data.packageStyle} required onChange={(e) => set('packageStyle', e.target.value)}>
-								<option value="">Choose a style</option>
+								<option value="">{t('Choose a style')}</option>
 								{Object.values(PackageStyle).map((value) => (
 									<option key={value} value={value}>
-										{prettyEnum(value)}
+										{t(prettyEnum(value))}
 									</option>
 								))}
 							</select>
 						</label>
 						<label className={'field'}>
-							<span className={'field-label'}>Price (₩)</span>
+							<span className={'field-label'}>{t('Price (₩)')}</span>
 							<input
 								type="number"
 								min={0}
@@ -224,26 +226,26 @@ const AddPackage = () => {
 				</fieldset>
 
 				<fieldset className={'form-group'}>
-					<legend className={'group-title'}>Location</legend>
+					<legend className={'group-title'}>{t('Location')}</legend>
 					<div className={'form-grid'}>
 						<label className={'field'}>
-							<span className={'field-label'}>City</span>
+							<span className={'field-label'}>{t('City')}</span>
 							<select value={data.packageLocation} required onChange={(e) => set('packageLocation', e.target.value)}>
-								<option value="">Choose a city</option>
+								<option value="">{t('Choose a city')}</option>
 								{Object.values(PackageLocation).map((value) => (
 									<option key={value} value={value}>
-										{prettyEnum(value)}
+										{t(prettyEnum(value))}
 									</option>
 								))}
 							</select>
 						</label>
 						<label className={'field'}>
-							<span className={'field-label'}>Place</span>
+							<span className={'field-label'}>{t('Place')}</span>
 							<input
 								value={data.packageAddress}
 								maxLength={100}
 								required
-								placeholder="For example: Gwangalli Beach, Suyeong-gu, Busan"
+								placeholder={t('For example: Gwangalli Beach, Suyeong-gu, Busan')}
 								onChange={(e) => set('packageAddress', e.target.value)}
 							/>
 						</label>
@@ -251,43 +253,51 @@ const AddPackage = () => {
 				</fieldset>
 
 				<fieldset className={'form-group'}>
-					<legend className={'group-title'}>The shoot</legend>
+					<legend className={'group-title'}>{t('The shoot')}</legend>
 					<div className={'form-grid'}>
 						<label className={'field'}>
-							<span className={'field-label'}>Duration</span>
+							<span className={'field-label'}>{t('Duration')}</span>
 							<select
 								value={data.packageDuration || ''}
 								required
 								onChange={(e) => set('packageDuration', Number(e.target.value))}
 							>
-								<option value="">Choose hours</option>
+								<option value="">{t('Choose hours')}</option>
 								{packageDurations
 									.filter((hours) => hours > 0)
 									.map((hours) => (
 										<option key={hours} value={hours}>
-											{hours} {hours === 1 ? 'hour' : 'hours'}
+											{t('{{count}} hours', { count: hours })}
 										</option>
 									))}
 							</select>
 						</label>
 						<label className={'field'}>
-							<span className={'field-label'}>Edited photos</span>
-							<select value={data.packagePhotos || ''} required onChange={(e) => set('packagePhotos', Number(e.target.value))}>
-								<option value="">Choose a number</option>
+							<span className={'field-label'}>{t('Edited photos')}</span>
+							<select
+								value={data.packagePhotos || ''}
+								required
+								onChange={(e) => set('packagePhotos', Number(e.target.value))}
+							>
+								<option value="">{t('Choose a number')}</option>
 								{packagePhotosList.map((count) => (
 									<option key={count} value={count}>
-										{count} photos
+										{t('{{count}} photos', { count })}
 									</option>
 								))}
 							</select>
 						</label>
 						<div className={'field wide'}>
-							<span className={'field-label'}>Includes</span>
+							<span className={'field-label'}>{t('Includes')}</span>
 							<div className={'check-row'}>
 								{includes.map((item) => (
 									<label key={item.key} className={`check-chip ${data[item.key] ? 'active' : ''}`}>
-										<input type="checkbox" checked={Boolean(data[item.key])} onChange={(e) => set(item.key, e.target.checked)} />
-										{item.label}
+										<input
+											type="checkbox"
+											checked={Boolean(data[item.key])}
+											onChange={(e) => set(item.key, e.target.checked)}
+										/>
+										{t(item.label)}
 									</label>
 								))}
 							</div>
@@ -296,9 +306,9 @@ const AddPackage = () => {
 				</fieldset>
 
 				<fieldset className={'form-group'}>
-					<legend className={'group-title'}>Description</legend>
+					<legend className={'group-title'}>{t('Description')}</legend>
 					<label className={'field'}>
-						<span className={'field-label'}>About this package</span>
+						<span className={'field-label'}>{t('About this package')}</span>
 						<textarea
 							rows={6}
 							maxLength={500}
@@ -311,28 +321,44 @@ const AddPackage = () => {
 				</fieldset>
 
 				<fieldset className={'form-group'}>
-					<legend className={'group-title'}>Photos</legend>
-					<p className={'field-help'}>Up to {MAX_PHOTOS} photos. The first one is the cover. A new upload replaces the current photos.</p>
+					<legend className={'group-title'}>{t('Photos')}</legend>
+					<p className={'field-help'}>
+						{t('Up to {{count}} photos. The first one is the cover. A new upload replaces the current photos.', {
+							count: MAX_PHOTOS,
+						})}
+					</p>
 					{data.packageImages.length > 0 && (
 						<ul className={'photo-previews'}>
 							{data.packageImages.map((image, index) => (
 								<li key={image}>
-									<img src={`${REACT_APP_API_URL}/${image}`} alt={`Photo ${index + 1}`} />
-									{index === 0 && <span className={'cover-tag'}>Cover</span>}
+									<img src={`${REACT_APP_API_URL}/${image}`} alt={t('Photo {{index}}', { index: index + 1 })} />
+									{index === 0 && <span className={'cover-tag'}>{t('Cover')}</span>}
 								</li>
 							))}
 						</ul>
 					)}
-					<input ref={fileRef} type="file" accept="image/jpeg,image/jpg,image/png" multiple hidden onChange={uploadImages} />
-					<button type="button" className={'button-secondary'} disabled={uploading} onClick={() => fileRef.current?.click()}>
-						{uploading ? 'Uploading…' : data.packageImages.length ? 'Replace photos' : 'Choose photos'}
+					<input
+						ref={fileRef}
+						type="file"
+						accept="image/jpeg,image/jpg,image/png"
+						multiple
+						hidden
+						onChange={uploadImages}
+					/>
+					<button
+						type="button"
+						className={'button-secondary'}
+						disabled={uploading}
+						onClick={() => fileRef.current?.click()}
+					>
+						{uploading ? t('Uploading…') : data.packageImages.length ? t('Replace photos') : t('Choose photos')}
 					</button>
 				</fieldset>
 
 				<div className={'form-foot'}>
-					{missing && <p className={'field-help'}>Fill in every field and add at least one photo.</p>}
+					{missing && <p className={'field-help'}>{t('Fill in every field and add at least one photo.')}</p>}
 					<button type="submit" className={'button-primary'} disabled={missing || saving}>
-						{saving ? 'Saving…' : editing ? 'Save changes' : 'Publish package'}
+						{saving ? t('Saving…') : editing ? t('Save changes') : t('Publish package')}
 					</button>
 				</div>
 			</form>

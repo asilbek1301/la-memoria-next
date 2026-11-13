@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
@@ -31,6 +32,7 @@ const profileHref = (member: Member) =>
 /** people you follow, or who follow you: avatar, name, counts and Follow / Following **/
 const MyFollowList = (props: MyFollowListProps) => {
 	const { mode, subscribeHandler, unsubscribeHandler, inPanel } = props;
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const ownerId = props.memberId ?? user?._id;
 	const [page, setPage] = useState<number>(1);
@@ -54,14 +56,15 @@ const MyFollowList = (props: MyFollowListProps) => {
 	const total: number = result?.metaCounter?.[0]?.total ?? 0;
 
 	return (
-		<section className={'my-section follow-section'} aria-label={isFollowers ? 'Followers' : 'Following'}>
+		<section
+			className={'my-section follow-section'}
+			aria-label={isFollowers ? t('Followers') : t('Following', { context: 'list' })}
+		>
 			<div className={'section-row'} hidden={inPanel}>
 				<div>
-					<h2 className={'detail-title'}>
-						{isFollowers ? 'Followers' : 'Following'}
-					</h2>
+					<h2 className={'detail-title'}>{isFollowers ? t('Followers') : t('Following', { context: 'list' })}</h2>
 					<p className={'section-note'}>
-						{isFollowers ? 'People and studios who follow you.' : 'Studios and people you follow.'}
+						{isFollowers ? t('People and studios who follow you.') : t('Studios and people you follow.')}
 					</p>
 				</div>
 			</div>
@@ -74,10 +77,10 @@ const MyFollowList = (props: MyFollowListProps) => {
 				</div>
 			) : list.length === 0 ? (
 				<div className={'empty-box my-empty'}>
-					<p>{isFollowers ? 'No followers yet.' : 'You are not following anyone yet.'}</p>
+					<p>{isFollowers ? t('No followers yet.') : t('You are not following anyone yet.')}</p>
 					{!isFollowers && (
 						<Link href={'/studio'} className={'button-primary'}>
-							Meet the studios
+							{t('Meet the studios')}
 						</Link>
 					)}
 				</div>
@@ -89,10 +92,10 @@ const MyFollowList = (props: MyFollowListProps) => {
 						const following = Boolean(item?.meFollowed?.[0]?.myFollowing);
 						const name = studioName(person);
 						const image = memberPhoto(person.memberImage);
-						const location = person.memberType === MemberType.STUDIO ? studioLocation(person.memberAddress) : '';
+						const location = person.memberType === MemberType.STUDIO ? studioLocation(person.memberAddress, t) : '';
 						const counts = [
-							(person.memberPackages ?? 0) > 0 && plural(person.memberPackages, 'package'),
-							(person.memberFollowers ?? 0) > 0 && plural(person.memberFollowers ?? 0, 'follower'),
+							(person.memberPackages ?? 0) > 0 && plural(person.memberPackages, 'package', t),
+							(person.memberFollowers ?? 0) > 0 && plural(person.memberFollowers ?? 0, 'follower', t),
 						]
 							.filter(Boolean)
 							.join(' · ');
@@ -106,14 +109,16 @@ const MyFollowList = (props: MyFollowListProps) => {
 									<Link href={profileHref(person)} className={'follow-name'}>
 										{name}
 									</Link>
-									{(location || counts) && <p className={'follow-meta'}>{[location, counts].filter(Boolean).join(' · ')}</p>}
+									{(location || counts) && (
+										<p className={'follow-meta'}>{[location, counts].filter(Boolean).join(' · ')}</p>
+									)}
 								</div>
 								{!isSelf && (
 									<button
 										type="button"
 										className={`follow-toggle ${following ? 'following' : ''}`}
 										aria-pressed={following}
-										aria-label={following ? `Unfollow ${name}` : `Follow ${name}`}
+										aria-label={t(following ? 'Unfollow {{name}}' : 'Follow {{name}}', { name })}
 										onClick={() =>
 											following
 												? unsubscribeHandler(person._id, refetch, input)
@@ -121,7 +126,7 @@ const MyFollowList = (props: MyFollowListProps) => {
 										}
 									>
 										{following && <CheckRoundedIcon aria-hidden="true" />}
-										{following ? 'Following' : 'Follow'}
+										{following ? t('Following') : t('Follow')}
 									</button>
 								)}
 							</li>
@@ -131,7 +136,13 @@ const MyFollowList = (props: MyFollowListProps) => {
 			)}
 
 			{total > PAGE_SIZE && (
-				<ResultsPagination page={page} limit={PAGE_SIZE} total={total} onPage={setPage} noun={isFollowers ? 'followers' : 'people'} />
+				<ResultsPagination
+					page={page}
+					limit={PAGE_SIZE}
+					total={total}
+					onPage={setPage}
+					noun={isFollowers ? 'followers' : 'people'}
+				/>
 			)}
 		</section>
 	);

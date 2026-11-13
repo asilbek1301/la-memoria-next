@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -28,18 +29,19 @@ export const packageDetailHref = (pkg: Package) => `/package/detail?id=${pkg?._i
 
 const TrendPackageCard = (props: TrendPackageCardProps) => {
 	const { pkg, rank, variant = 'compact', likePackageHandler } = props;
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const isLiked = Boolean(pkg?.meLiked && pkg?.meLiked[0]?.myFavorite);
 	const image = packageImage(pkg);
 	const studioName = pkg?.memberData?.memberNick;
-	const location = `${prettyEnum(pkg?.packageLocation)} — ${prettyEnum(pkg?.packageStyle)}`;
+	const location = `${t(prettyEnum(pkg?.packageLocation))} — ${t(prettyEnum(pkg?.packageStyle))}`;
 	const rankLabel = String(rank).padStart(2, '0');
 
 	const likeButton = (
 		<button
 			type="button"
 			className={`like-btn ${isLiked ? 'liked' : ''}`}
-			aria-label={isLiked ? `Unlike ${pkg?.packageTitle}` : `Like ${pkg?.packageTitle}`}
+			aria-label={t(isLiked ? 'Unlike {{title}}' : 'Like {{title}}', { title: t(pkg?.packageTitle) })}
 			aria-pressed={isLiked}
 			onClick={() => likePackageHandler(user, pkg?._id)}
 		>
@@ -48,9 +50,11 @@ const TrendPackageCard = (props: TrendPackageCardProps) => {
 	);
 
 	if (variant === 'featured') {
-		const details = [`${pkg?.packageDuration} hours`, `${pkg?.packagePhotos} photos`, ...packageInclusions(pkg)].join(
-			' · ',
-		);
+		const details = [
+			t('{{count}} hours', { count: pkg?.packageDuration }),
+			t('{{count}} photos', { count: pkg?.packagePhotos }),
+			...packageInclusions(pkg).map((item) => t(item)),
+		].join(' · ');
 
 		return (
 			<article className={'trend-feature'}>
@@ -58,7 +62,7 @@ const TrendPackageCard = (props: TrendPackageCardProps) => {
 					<span className={'feature-media'} tabIndex={-1} aria-hidden="true">
 						{image ? <img src={image} alt="" /> : <span className={'img-placeholder'} />}
 					</span>
-					<span className={'tag rank-tag'}>No. {rank} by likes</span>
+					<span className={'tag rank-tag'}>{t('No. {{rank}} by likes', { rank })}</span>
 					<div className={'like-box'}>{likeButton}</div>
 				</div>
 
@@ -68,19 +72,18 @@ const TrendPackageCard = (props: TrendPackageCardProps) => {
 						<span>{prettyEnum(pkg?.packageType)}</span>
 					</div>
 					<h3 className={'panel-title'}>
-						<Link href={packageDetailHref(pkg)}>{pkg?.packageTitle}</Link>
+						<Link href={packageDetailHref(pkg)}>{t(pkg?.packageTitle)}</Link>
 					</h3>
 					{studioName && <p className={'panel-studio'}>{studioName}</p>}
 					<p className={'panel-details'}>{details}</p>
 					<div className={'panel-price'}>
 						<span className={'price'}>{formatKRW(pkg?.packagePrice)}</span>
 						<span className={'panel-likes'}>
-							<FavoriteBorderRoundedIcon /> {(pkg?.packageLikes ?? 0).toLocaleString()}{' '}
-							{pkg?.packageLikes === 1 ? 'like' : 'likes'}
+							<FavoriteBorderRoundedIcon /> {t('{{count}} likes', { count: pkg?.packageLikes ?? 0 })}
 						</span>
 					</div>
 					<Link href={packageDetailHref(pkg)} className={'button-primary'}>
-						View &amp; reserve
+						{t('View & reserve')}
 					</Link>
 				</div>
 			</article>
@@ -100,13 +103,17 @@ const TrendPackageCard = (props: TrendPackageCardProps) => {
 				{location} · {prettyEnum(pkg?.packageType)}
 			</p>
 			<h3 className={'card-title'}>
-				<Link href={packageDetailHref(pkg)}>{pkg?.packageTitle}</Link>
+				<Link href={packageDetailHref(pkg)}>{t(pkg?.packageTitle)}</Link>
 			</h3>
 			{studioName && <p className={'card-studio'}>{studioName}</p>}
 			<div className={'card-footer'}>
 				<span className={'price'}>{formatKRW(pkg?.packagePrice)}</span>
-				<Link href={packageDetailHref(pkg)} className={'button-link'} aria-label={`Reserve ${pkg?.packageTitle}`}>
-					Reserve
+				<Link
+					href={packageDetailHref(pkg)}
+					className={'button-link'}
+					aria-label={t('Reserve {{title}}', { title: t(pkg?.packageTitle) })}
+				>
+					{t('Reserve')}
 				</Link>
 			</div>
 		</article>

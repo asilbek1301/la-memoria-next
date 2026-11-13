@@ -55,15 +55,17 @@ const Top = () => {
 
 	/** LIFECYCLES **/
 
+	// the URL decides the language (/ is English, /kr/… Korean, /ru/… Russian) and the button shows it.
+	// An English (unprefixed) address, e.g. typing localhost:3000, opens in the language chosen last time
 	useEffect(() => {
+		const current = router.locale ?? 'en';
 		const stored = localStorage.getItem('locale');
-		if (stored === null) {
-			localStorage.setItem('locale', 'en');
-			setLang('en');
-		} else {
-			setLang(stored);
+		if (stored && stored !== current && current === router.defaultLocale && router.locales?.includes(stored)) {
+			router.replace(router.asPath, router.asPath, { locale: stored });
+			return;
 		}
-	}, [router]);
+		setLang(current);
+	}, [router.locale, router.asPath]);
 
 	useEffect(() => {
 		const jwt = getJwtToken();
@@ -100,7 +102,7 @@ const Top = () => {
 					<button
 						type="button"
 						className={'menu-btn icon-btn'}
-						aria-label="Open menu"
+						aria-label={t('Open menu')}
 						onClick={() => setDrawerOpen(true)}
 					>
 						<MenuRoundedIcon />
@@ -109,7 +111,7 @@ const Top = () => {
 					<motion.nav
 						variants={itemFadeUp}
 						className={'router-box'}
-						aria-label="Main"
+						aria-label={t('Main')}
 						onMouseLeave={() => setHoveredLink(null)}
 					>
 						{navLinks.map((link) => (
@@ -131,7 +133,7 @@ const Top = () => {
 					</motion.nav>
 
 					<motion.div variants={itemFadeUp} className={'logo-box'}>
-						<Link href={'/'} aria-label="La Memoria home">
+						<Link href={'/'} aria-label={t('La Memoria home')}>
 							<AnimatedLogo tone="dark" {...logoSize} />
 						</Link>
 					</motion.div>
@@ -141,7 +143,7 @@ const Top = () => {
 						<Link
 							href={savedHref}
 							className={'icon-btn saved-btn'}
-							aria-label={savedTotal ? `Liked packages (${savedTotal})` : 'Liked packages'}
+							aria-label={savedTotal ? t('Liked packages ({{count}})', { count: savedTotal }) : t('Liked packages')}
 						>
 							<FavoriteBorderRoundedIcon />
 						</Link>
@@ -149,7 +151,7 @@ const Top = () => {
 						<button
 							type="button"
 							className={'lang-btn'}
-							aria-label={`Language: ${currentLang.label}`}
+							aria-label={t('Language: {{language}}', { language: t(currentLang.label) })}
 							aria-haspopup="menu"
 							aria-expanded={Boolean(langAnchor)}
 							onClick={(e) => setLangAnchor(e.currentTarget)}
@@ -168,7 +170,7 @@ const Top = () => {
 								<MenuItem
 									key={item.id}
 									selected={item.id === lang}
-									aria-label={item.label}
+									aria-label={t(item.label)}
 									onClick={() => langChoice(item.id)}
 								>
 									{item.code}
@@ -181,17 +183,12 @@ const Top = () => {
 								<button
 									type="button"
 									className={'avatar-btn'}
-									aria-label="Account menu"
+									aria-label={t('Account menu')}
 									aria-haspopup="menu"
 									aria-expanded={Boolean(userAnchor)}
 									onClick={(e) => setUserAnchor(e.currentTarget)}
 								>
-									<img
-										src={
-											memberPhoto(user?.memberImage) || '/img/profile/defaultUser.svg'
-										}
-										alt=""
-									/>
+									<img src={memberPhoto(user?.memberImage) || '/img/profile/defaultUser.svg'} alt="" />
 								</button>
 								<Menu
 									anchorEl={userAnchor}
@@ -212,7 +209,7 @@ const Top = () => {
 									</MenuItem>
 									<MenuItem onClick={() => logOut()}>
 										<LogoutRoundedIcon className={'menu-icon'} aria-hidden="true" />
-										Log out
+										{t('Log out')}
 									</MenuItem>
 								</Menu>
 							</>
@@ -226,24 +223,19 @@ const Top = () => {
 				</div>
 			</motion.header>
 
-			<Drawer
-				anchor="left"
-				open={drawerOpen}
-				onClose={() => setDrawerOpen(false)}
-				classes={{ paper: 'nav-drawer' }}
-			>
+			<Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)} classes={{ paper: 'nav-drawer' }}>
 				<div className={'drawer-top'}>
 					<AnimatedLogo tone="dark" width={130} height={46} />
 					<button
 						type="button"
 						className={'icon-btn'}
-						aria-label="Close menu"
+						aria-label={t('Close menu')}
 						onClick={() => setDrawerOpen(false)}
 					>
 						<CloseRoundedIcon />
 					</button>
 				</div>
-				<nav className={'drawer-nav'} aria-label="Main">
+				<nav className={'drawer-nav'} aria-label={t('Main')}>
 					<Link href={'/'}>{t('Home')}</Link>
 					{navLinks.map((link) => (
 						<Link href={link.href} key={link.href} aria-current={activeLink === link.href ? 'page' : undefined}>

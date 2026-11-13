@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import moment from 'moment';
 import { Member } from '../../types/member/member';
 import { REACT_APP_API_URL } from '../../config';
@@ -20,6 +21,7 @@ interface MyHeaderProps {
 /** "your album cover": greeting, member since and counts on the left, a fan of printed photos on the right **/
 const MyHeader = (props: MyHeaderProps) => {
 	const { member, user, isStudio, savedTotal, reservationTotal, prints, onOpenFollows } = props;
+	const { t } = useTranslation('common');
 	const source = member ?? user;
 	const name = studioName(source);
 	const avatar = memberPhoto(source?.memberImage);
@@ -28,8 +30,14 @@ const MyHeader = (props: MyHeaderProps) => {
 	const packages = member?.memberPackages ?? 0;
 	const stats = (
 		isStudio
-			? [packages > 0 && plural(packages, 'package'), reservationTotal > 0 && plural(reservationTotal, 'reservation')]
-			: [savedTotal > 0 && `${savedTotal} liked`, reservationTotal > 0 && plural(reservationTotal, 'reservation')]
+			? [
+					packages > 0 && plural(packages, 'package', t),
+					reservationTotal > 0 && plural(reservationTotal, 'reservation', t),
+			  ]
+			: [
+					savedTotal > 0 && t('{{count}} liked', { count: savedTotal }),
+					reservationTotal > 0 && plural(reservationTotal, 'reservation', t),
+			  ]
 	).filter(Boolean) as string[];
 	const photos = prints.slice(0, 3);
 
@@ -40,10 +48,14 @@ const MyHeader = (props: MyHeaderProps) => {
 					<span className={'my-avatar'} aria-hidden="true">
 						{avatar ? <img src={avatar} alt="" /> : <span className={'arch-initial'}>{name.charAt(0)}</span>}
 					</span>
-					{member?.createdAt && <span className={'my-since'}>Member since {moment(member.createdAt).format('MMMM YYYY')}</span>}
+					{member?.createdAt && (
+						<span className={'my-since'}>
+							{t('Member since {{date}}', { date: moment(member.createdAt).format(t('MMMM YYYY')) })}
+						</span>
+					)}
 				</div>
 				<h1 className={'my-greeting'}>
-					Welcome back, <span className={'greeting-name'}>{name}</span>
+					{t('Welcome back,')} <span className={'greeting-name'}>{name}</span>
 				</h1>
 				{/* counts, follow pills and Edit profile share one line */}
 				<div className={'hero-meta'}>
@@ -65,18 +77,18 @@ const MyHeader = (props: MyHeaderProps) => {
 						<div className={'hero-follows'}>
 							{following > 0 && (
 								<button type="button" className={'follow-pill'} onClick={() => onOpenFollows('followings')}>
-									<strong>{following}</strong> Following
+									<strong>{following}</strong> {t('Following', { context: 'list' })}
 								</button>
 							)}
 							{followers > 0 && (
 								<button type="button" className={'follow-pill'} onClick={() => onOpenFollows('followers')}>
-									<strong>{followers}</strong> {followers === 1 ? 'Follower' : 'Followers'}
+									<strong>{followers}</strong> {followers === 1 ? t('Follower') : t('Followers')}
 								</button>
 							)}
 						</div>
 					)}
 					<Link href={{ pathname: '/mypage', query: { category: 'myProfile' } }} className={'button-link'}>
-						Edit profile
+						{t('Edit profile')}
 					</Link>
 				</div>
 			</div>

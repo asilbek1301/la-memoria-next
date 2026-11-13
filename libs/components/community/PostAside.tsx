@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import moment from 'moment';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
@@ -17,38 +18,39 @@ interface PostAsideProps {
 
 /** the side column of a post: who wrote it, then where to go next in the same category **/
 const PostAside = ({ article, neighbors, latest }: PostAsideProps) => {
+	const { t } = useTranslation('common');
 	const author = article.memberData;
-	const name = author ? studioName(author) : 'Member';
+	const name = author ? studioName(author) : t('Member');
 	const photo = memberPhoto(author?.memberImage);
 	const isStudio = author?.memberType === MemberType.STUDIO;
 	const posts = author?.memberArticles ?? 0;
-	const label = categoryLabel(article.articleCategory);
+	const label = t(categoryLabel(article.articleCategory));
 	const { previous, next } = neighbors;
 
 	return (
-		<aside className={'post-aside'} aria-label="About this post">
+		<aside className={'post-aside'} aria-label={t('About this post')}>
 			<section className={'aside-box author-box'} aria-labelledby="author-title">
 				<h2 id="author-title" className={'aside-label'}>
-					Written by
+					{t('Written by')}
 				</h2>
 				<div className={'author-row'}>
 					<span className={'author-photo'}>{photo ? <img src={photo} alt="" /> : name.charAt(0)}</span>
 					<span className={'author-text'}>
 						<span className={'author-name'}>{name}</span>
 						<span className={'author-meta'}>
-							{isStudio ? 'Studio' : 'Member'}
-							{posts > 0 && ` · ${plural(posts, 'post')}`}
+							{isStudio ? t('Studio') : t('Member')}
+							{posts > 0 && ` · ${plural(posts, 'post', t)}`}
 						</span>
 					</span>
 				</div>
 				<Link href={authorHref(article)} className={'button-link'}>
-					{isStudio ? 'View studio' : 'View profile'}
+					{isStudio ? t('View studio') : t('View profile')}
 				</Link>
 			</section>
 
 			<nav className={'aside-box board-box'} aria-labelledby="board-title">
 				<h2 id="board-title" className={'aside-label'}>
-					In {label}
+					{t('In {{category}}', { category: label })}
 				</h2>
 				{(previous || next) && (
 					<ul className={'board-list steps'}>
@@ -56,7 +58,7 @@ const PostAside = ({ article, neighbors, latest }: PostAsideProps) => {
 							<li>
 								<Link href={articleHref(previous)} className={'board-row'}>
 									<span className={'row-label'}>
-										<ArrowBackRoundedIcon /> Previous post
+										<ArrowBackRoundedIcon /> {t('Previous post')}
 									</span>
 									<span className={'row-title'}>{previous.articleTitle}</span>
 								</Link>
@@ -66,7 +68,7 @@ const PostAside = ({ article, neighbors, latest }: PostAsideProps) => {
 							<li>
 								<Link href={articleHref(next)} className={'board-row'}>
 									<span className={'row-label'}>
-										Next post <ArrowForwardRoundedIcon />
+										{t('Next post')} <ArrowForwardRoundedIcon />
 									</span>
 									<span className={'row-title'}>{next.articleTitle}</span>
 								</Link>
@@ -81,7 +83,7 @@ const PostAside = ({ article, neighbors, latest }: PostAsideProps) => {
 								<Link href={articleHref(item)} className={'board-row'}>
 									<span className={'row-title'}>{item.articleTitle}</span>
 									<time className={'row-label'} dateTime={new Date(item.createdAt).toISOString()}>
-										{moment(item.createdAt).format('MMMM D, YYYY')}
+										{moment(item.createdAt).format('LL')}
 									</time>
 								</Link>
 							</li>
@@ -89,7 +91,7 @@ const PostAside = ({ article, neighbors, latest }: PostAsideProps) => {
 					</ul>
 				)}
 				<Link href={categoryHref(article.articleCategory)} className={'button-link'}>
-					All posts in {label}
+					{t('All posts in {{category}}', { category: label })}
 				</Link>
 			</nav>
 		</aside>

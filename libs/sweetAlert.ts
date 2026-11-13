@@ -1,4 +1,8 @@
 import Swal from 'sweetalert2';
+import { i18n } from 'next-i18next';
+
+// pop-ups open outside React, so they translate with the shared i18n instance (keys are the English text)
+const t = (text: string): string => (i18n ? (i18n.t(text) as string) : text);
 
 /**
  * Every pop-up uses the site's look instead of SweetAlert's own: an ivory card, the site fonts, a small icon and
@@ -27,8 +31,8 @@ const errorIcon = { icon: 'error' as const, iconHtml: '!' };
 export const sweetErrorHandling = async (err: any) => {
 	await siteAlert.fire({
 		...errorIcon,
-		text: err.message,
-		confirmButtonText: 'OK',
+		text: t(err.message),
+		confirmButtonText: t('OK'),
 	});
 };
 
@@ -38,10 +42,10 @@ export const sweetConfirmAlert = (msg: string) =>
 		.fire({
 			icon: 'question',
 			iconHtml: '?',
-			text: msg,
+			text: t(msg),
 			showCancelButton: true,
-			confirmButtonText: 'Yes',
-			cancelButtonText: 'Cancel',
+			confirmButtonText: t('Yes'),
+			cancelButtonText: t('Cancel'),
 			reverseButtons: true, // Cancel first, the action last
 			focusCancel: true,
 		})
@@ -51,7 +55,7 @@ export const sweetConfirmAlert = (msg: string) =>
 export const sweetErrorAlert = async (msg: string, duration: number = 3000) => {
 	await siteAlert.fire({
 		...errorIcon,
-		title: msg,
+		title: t(msg),
 		showConfirmButton: false,
 		timer: duration,
 	});

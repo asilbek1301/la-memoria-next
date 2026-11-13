@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded';
 import { Package } from '../../../types/package/package';
 import { REACT_APP_API_URL } from '../../../config';
@@ -17,10 +18,11 @@ interface PortfolioWallProps {
 /** masonry of the photos from the studio's packages; each links to its package; hidden under three photos **/
 const PortfolioWall = (props: PortfolioWallProps) => {
 	const { packages, studioName } = props;
+	const { t } = useTranslation('common');
 	const photos = packages.flatMap((pkg) =>
 		(pkg.packageImages ?? []).filter(Boolean).map((image, index) => ({
 			url: `${REACT_APP_API_URL}/${image}`,
-			alt: `${pkg.packageTitle}, photo ${index + 1}`,
+			alt: t('{{title}}, photo {{index}}', { title: t(pkg.packageTitle), index: index + 1 }),
 			pkg,
 		})),
 	);
@@ -32,20 +34,20 @@ const PortfolioWall = (props: PortfolioWallProps) => {
 		<section className={'detail-section portfolio'} aria-labelledby="portfolio-title">
 			<div className={'section-row'}>
 				<h2 id="portfolio-title" className={'detail-title'}>
-					Portfolio
+					{t('Portfolio')}
 				</h2>
 				<button type="button" className={'button-link'} onClick={(e) => lightbox.open(0, e)}>
 					<GridViewRoundedIcon aria-hidden="true" />
-					View all {photos.length} photos
+					{t('View all {{count}} photos', { count: photos.length })}
 				</button>
 			</div>
 			<ul className={'portfolio-wall'}>
 				{photos.slice(0, WALL_SIZE).map((photo, index) => (
 					<li key={photo.url + index}>
-						<Link href={packageDetailHref(photo.pkg)} className={'wall-tile'} aria-label={photo.pkg.packageTitle}>
+						<Link href={packageDetailHref(photo.pkg)} className={'wall-tile'} aria-label={t(photo.pkg.packageTitle)}>
 							<img src={photo.url} alt={photo.alt} loading="lazy" />
 							<span className={'wall-caption'} aria-hidden="true">
-								{photo.pkg.packageTitle}
+								{t(photo.pkg.packageTitle)}
 							</span>
 						</Link>
 					</li>
@@ -54,7 +56,7 @@ const PortfolioWall = (props: PortfolioWallProps) => {
 			<PhotoLightbox
 				urls={photos.map((photo) => photo.url)}
 				alts={photos.map((photo) => photo.alt)}
-				label={`${studioName} portfolio`}
+				label={t('{{name}} portfolio', { name: studioName })}
 				lightbox={lightbox}
 			/>
 		</section>

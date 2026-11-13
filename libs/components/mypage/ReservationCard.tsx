@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import moment from 'moment';
 import { useMutation } from '@apollo/client';
 import { Reservation } from '../../types/reservation/reservation';
@@ -26,7 +27,9 @@ export const reservationActions = (reservation: Reservation, isStudio: boolean) 
 		return [];
 	}
 	if (status === ReservationStatus.PENDING || status === ReservationStatus.CONFIRMED)
-		return [{ status: ReservationStatus.CANCELLED, label: 'Cancel request', confirm: 'Cancel this reservation request?' }];
+		return [
+			{ status: ReservationStatus.CANCELLED, label: 'Cancel request', confirm: 'Cancel this reservation request?' },
+		];
 	return [];
 };
 
@@ -56,6 +59,7 @@ interface ReservationCardProps {
 
 const ReservationCard = (props: ReservationCardProps) => {
 	const { reservation, isStudio, onUpdated } = props;
+	const { t } = useTranslation('common');
 	const update = useReservationUpdate();
 	const pkg = reservation?.packageData;
 	const image = pkg?.packageImages?.[0] ? `${REACT_APP_API_URL}/${pkg.packageImages[0]}` : '';
@@ -71,25 +75,26 @@ const ReservationCard = (props: ReservationCardProps) => {
 			</Link>
 			<div className={'res-body'}>
 				<div className={'res-top'}>
-					<span className={'status-pill'}>{statusLabel(status, isStudio)}</span>
+					<span className={'status-pill'}>{t(statusLabel(status, isStudio))}</span>
 					<span className={'price'}>{formatKRW(reservation?.reservationPrice)}</span>
 				</div>
 				<h3 className={'res-title'}>
-					<Link href={href}>{pkg?.packageTitle ?? 'Package'}</Link>
+					<Link href={href}>{pkg?.packageTitle ? t(pkg.packageTitle) : t('Package')}</Link>
 				</h3>
 				{pkg && (
 					<p className={'res-meta'}>
-						{prettyEnum(pkg.packageLocation)} — {prettyEnum(pkg.packageStyle)} · {prettyEnum(pkg.packageType)} tier
+						{t(prettyEnum(pkg.packageLocation))} — {t(prettyEnum(pkg.packageStyle))} ·{' '}
+						{t('{{tier}} tier', { tier: prettyEnum(pkg.packageType) })}
 					</p>
 				)}
 				<p className={'res-date'}>
 					<time dateTime={String(reservation?.reservationDate)}>
-						{moment(reservation?.reservationDate).format('dddd, D MMMM YYYY')}
+						{moment(reservation?.reservationDate).format(t('dddd, D MMMM YYYY'))}
 					</time>
 				</p>
 				{isStudio && couple && (
 					<p className={'res-couple'}>
-						Requested by {couple.memberNick}
+						{t('Requested by {{name}}', { name: couple.memberNick })}
 						{couple.memberPhone && (
 							<>
 								{' · '}
@@ -105,12 +110,14 @@ const ReservationCard = (props: ReservationCardProps) => {
 							<button
 								type="button"
 								key={action.status}
-								className={index === 0 && action.status !== ReservationStatus.CANCELLED ? 'button-secondary' : 'button-link'}
+								className={
+									index === 0 && action.status !== ReservationStatus.CANCELLED ? 'button-secondary' : 'button-link'
+								}
 								onClick={async () => {
 									if (await update(reservation._id, action.status, action.confirm)) onUpdated();
 								}}
 							>
-								{action.label}
+								{t(action.label)}
 							</button>
 						))}
 					</div>

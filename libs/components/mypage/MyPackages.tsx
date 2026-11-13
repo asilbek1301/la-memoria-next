@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { Package } from '../../types/package/package';
@@ -33,6 +34,7 @@ const initialInput: StudioPackagesInquiry = {
 
 /** a studio's own packages: publish, pause, edit or delete (same UPDATE_PACKAGE calls as before) **/
 const MyPackages = () => {
+	const { t } = useTranslation('common');
 	const [searchFilter, setSearchFilter] = useState<StudioPackagesInquiry>(initialInput);
 
 	/** APOLLO REQUESTS **/
@@ -64,19 +66,21 @@ const MyPackages = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="packages-title" className={'detail-title'}>
-						My packages
+						{t('My packages')}
 					</h2>
-					<p className={'section-note'}>Published packages are visible to couples. Paused ones are hidden.</p>
+					<p className={'section-note'}>{t('Published packages are visible to couples. Paused ones are hidden.')}</p>
 				</div>
 				<div className={'section-tools'}>
 					<FilterTabs
-						label="Filter by status"
-						options={statusTabs}
+						label={t('Filter by status')}
+						options={statusTabs.map((tab) => ({ ...tab, label: t(tab.label) }))}
 						value={active}
-						onChange={(value) => setSearchFilter({ ...searchFilter, page: 1, search: { packageStatus: value as PackageStatus } })}
+						onChange={(value) =>
+							setSearchFilter({ ...searchFilter, page: 1, search: { packageStatus: value as PackageStatus } })
+						}
 					/>
 					<Link href={{ pathname: '/mypage', query: { category: 'addPackage' } }} className={'button-primary'}>
-						Add package
+						{t('Add package')}
 					</Link>
 				</div>
 			</div>
@@ -89,10 +93,14 @@ const MyPackages = () => {
 				</div>
 			) : packages.length === 0 ? (
 				<div className={'empty-box my-empty'}>
-					<p>No {statusTabs.find((tab) => tab.value === active)?.label.toLowerCase()} packages.</p>
+					<p>
+						{t('No {{status}} packages.', {
+							status: t(statusTabs.find((tab) => tab.value === active)?.label ?? '').toLowerCase(),
+						})}
+					</p>
 					{active === PackageStatus.ACTIVE && (
 						<Link href={{ pathname: '/mypage', query: { category: 'addPackage' } }} className={'button-primary'}>
-							Add your first package
+							{t('Add your first package')}
 						</Link>
 					)}
 				</div>
@@ -102,23 +110,28 @@ const MyPackages = () => {
 						const image = pkg.packageImages?.[0] ? `${REACT_APP_API_URL}/${pkg.packageImages[0]}` : '';
 						const href = { pathname: '/package/detail', query: { id: pkg._id } };
 						const stats = [
-							(pkg.packageViews ?? 0) > 0 && plural(pkg.packageViews, 'view'),
-							(pkg.packageLikes ?? 0) > 0 && plural(pkg.packageLikes, 'like'),
+							(pkg.packageViews ?? 0) > 0 && plural(pkg.packageViews, 'view', t),
+							(pkg.packageLikes ?? 0) > 0 && plural(pkg.packageLikes, 'like', t),
 						]
 							.filter(Boolean)
 							.join(' · ');
 						return (
-							<article className={`reservation-card package-row status-${String(pkg.packageStatus).toLowerCase()}`} key={pkg._id}>
+							<article
+								className={`reservation-card package-row status-${String(pkg.packageStatus).toLowerCase()}`}
+								key={pkg._id}
+							>
 								<Link href={href} className={'res-thumb'} tabIndex={-1} aria-hidden="true">
 									{image ? <img src={image} alt="" loading="lazy" /> : <span className={'img-placeholder'} />}
 								</Link>
 								<div className={'res-body'}>
 									<div className={'res-top'}>
-										<span className={'status-pill'}>{statusTabs.find((tab) => tab.value === pkg.packageStatus)?.label ?? pkg.packageStatus}</span>
+										<span className={'status-pill'}>
+											{t(statusTabs.find((tab) => tab.value === pkg.packageStatus)?.label ?? pkg.packageStatus)}
+										</span>
 										<span className={'price'}>{formatKRW(pkg.packagePrice)}</span>
 									</div>
 									<h3 className={'res-title'}>
-										<Link href={href}>{pkg.packageTitle}</Link>
+										<Link href={href}>{t(pkg.packageTitle)}</Link>
 									</h3>
 									{stats && <p className={'res-meta'}>{stats}</p>}
 									<div className={'res-actions'}>
@@ -126,15 +139,17 @@ const MyPackages = () => {
 											href={{ pathname: '/mypage', query: { category: 'addPackage', packageId: pkg._id } }}
 											className={'button-secondary'}
 										>
-											Edit
+											{t('Edit')}
 										</Link>
 										{pkg.packageStatus === PackageStatus.ACTIVE ? (
 											<button
 												type="button"
 												className={'button-link'}
-												onClick={() => changeStatus(pkg._id, PackageStatus.PAUSE, 'Pause this package? Couples will not see it.')}
+												onClick={() =>
+													changeStatus(pkg._id, PackageStatus.PAUSE, 'Pause this package? Couples will not see it.')
+												}
 											>
-												Pause
+												{t('Pause')}
 											</button>
 										) : (
 											<button
@@ -142,15 +157,17 @@ const MyPackages = () => {
 												className={'button-link'}
 												onClick={() => changeStatus(pkg._id, PackageStatus.ACTIVE, 'Publish this package?')}
 											>
-												Publish
+												{t('Publish')}
 											</button>
 										)}
 										<button
 											type="button"
 											className={'button-link danger'}
-											onClick={() => changeStatus(pkg._id, PackageStatus.DELETE, 'Delete this package? This cannot be undone.')}
+											onClick={() =>
+												changeStatus(pkg._id, PackageStatus.DELETE, 'Delete this package? This cannot be undone.')
+											}
 										>
-											Delete
+											{t('Delete')}
 										</button>
 									</div>
 								</div>

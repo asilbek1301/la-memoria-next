@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useRouter } from 'next/router';
 import moment from 'moment';
 import { Drawer, Skeleton } from '@mui/material';
@@ -39,6 +40,7 @@ const memberKind = (member: Member) => (member.memberType === MemberType.ADMIN ?
     Older links with ?category=followers or followings open that list **/
 const MemberProfile: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const device = useDeviceDetect();
 	const user = useReactiveVar(userVar);
 	const memberId = typeof router.query.memberId === 'string' ? router.query.memberId : '';
@@ -77,7 +79,8 @@ const MemberProfile: NextPage = () => {
 	// a studio has its own page, and your own profile is My Page
 	useEffect(() => {
 		if (!member) return;
-		if (member.memberType === MemberType.STUDIO) router.replace({ pathname: '/studio/detail', query: { studioId: member._id } });
+		if (member.memberType === MemberType.STUDIO)
+			router.replace({ pathname: '/studio/detail', query: { studioId: member._id } });
 		else if (user?._id && member._id === user._id) router.replace('/mypage');
 	}, [member, user?._id, router]);
 
@@ -123,16 +126,17 @@ const MemberProfile: NextPage = () => {
 	/** STATES **/
 
 	const notFound =
-		router.isReady && (!memberId || Boolean(error) || (!loading && !member) || member?.memberStatus === MemberStatus.BLOCK);
+		router.isReady &&
+		(!memberId || Boolean(error) || (!loading && !member) || member?.memberStatus === MemberStatus.BLOCK);
 
 	if (notFound) {
 		return (
 			<div id="member-page" className={'detail-page member-profile'}>
 				<div className={'container'}>
 					<div className={'empty-box detail-missing'}>
-						<p>This member doesn&apos;t exist or was removed.</p>
+						<p>{t("This member doesn't exist or was removed.")}</p>
 						<Link href={'/community'} className={'button-primary'}>
-							Back to Community
+							{t('Back to Community')}
 						</Link>
 					</div>
 				</div>
@@ -144,7 +148,7 @@ const MemberProfile: NextPage = () => {
 	const leaving = member && (member.memberType === MemberType.STUDIO || member._id === user?._id);
 	if (!member || leaving) {
 		return (
-			<div id="member-page" className={'detail-page member-profile'} aria-busy="true" aria-label="Loading profile">
+			<div id="member-page" className={'detail-page member-profile'} aria-busy="true" aria-label={t('Loading profile')}>
 				<div className={'container'}>
 					<div className={'profile-head'}>
 						<Skeleton variant="circular" className={'skeleton profile-photo-skeleton'} />
@@ -169,7 +173,7 @@ const MemberProfile: NextPage = () => {
 	const isFollowing = Boolean(member.meFollowed?.[0]?.myFollowing);
 	const followers = member.memberFollowers ?? 0;
 	const followings = member.memberFollowings ?? 0;
-	const panelTitle = panel === 'followers' ? `Followers of ${name}` : `${name} follows`;
+	const panelTitle = panel === 'followers' ? t('Followers of {{name}}', { name }) : t('{{name}} follows', { name });
 
 	return (
 		<div id="member-page" className={'detail-page member-profile'}>
@@ -179,9 +183,11 @@ const MemberProfile: NextPage = () => {
 						{photo ? <img src={photo} alt={name} /> : <span aria-hidden="true">{name.charAt(0)}</span>}
 					</div>
 					<div className={'profile-info'}>
-						<p className={'profile-kind'}>{memberKind(member)}</p>
+						<p className={'profile-kind'}>{t(memberKind(member))}</p>
 						<h1 className={'profile-name'}>{name}</h1>
-						<p className={'profile-since'}>Member since {moment(member.createdAt).format('MMMM YYYY')}</p>
+						<p className={'profile-since'}>
+							{t('Member since {{date}}', { date: moment(member.createdAt).format(t('MMMM YYYY')) })}
+						</p>
 						{member.memberDesc && <p className={'profile-desc'}>{member.memberDesc}</p>}
 						<div className={'profile-actions'}>
 							<button
@@ -191,16 +197,26 @@ const MemberProfile: NextPage = () => {
 								disabled={following}
 								onClick={followHandler}
 							>
-								{isFollowing ? 'Following' : 'Follow'}
+								{isFollowing ? t('Following') : t('Follow')}
 							</button>
 							{followers > 0 && (
-								<button type="button" className={'followers-btn'} aria-haspopup="dialog" onClick={() => setPanel('followers')}>
-									<strong>{followers}</strong> {followers === 1 ? 'follower' : 'followers'}
+								<button
+									type="button"
+									className={'followers-btn'}
+									aria-haspopup="dialog"
+									onClick={() => setPanel('followers')}
+								>
+									<strong>{followers}</strong> {t(followers === 1 ? 'follower' : 'followers')}
 								</button>
 							)}
 							{followings > 0 && (
-								<button type="button" className={'followers-btn'} aria-haspopup="dialog" onClick={() => setPanel('followings')}>
-									<strong>{followings}</strong> following
+								<button
+									type="button"
+									className={'followers-btn'}
+									aria-haspopup="dialog"
+									onClick={() => setPanel('followings')}
+								>
+									<strong>{followings}</strong> {t('following')}
 								</button>
 							)}
 						</div>
@@ -209,7 +225,8 @@ const MemberProfile: NextPage = () => {
 
 				<section className={'detail-section profile-posts'} aria-labelledby="posts-title">
 					<h2 id="posts-title" className={'detail-title'}>
-						Posts{postTotal > 0 ? ` (${postTotal})` : ''}
+						{t('Posts')}
+						{postTotal > 0 ? ` (${postTotal})` : ''}
 					</h2>
 					{postsLoading && posts.length === 0 ? (
 						<div className={'post-grid'} aria-busy="true">
@@ -219,9 +236,9 @@ const MemberProfile: NextPage = () => {
 						</div>
 					) : posts.length === 0 ? (
 						<div className={'empty-box'}>
-							<p>{name} hasn&apos;t posted yet.</p>
+							<p>{t("{{name}} hasn't posted yet.", { name })}</p>
 							<Link href={'/community'} className={'button-secondary'}>
-								Go to Community
+								{t('Go to Community')}
 							</Link>
 						</div>
 					) : (
@@ -250,7 +267,7 @@ const MemberProfile: NextPage = () => {
 					<h2 id="member-follow-title" className={'panel-title'}>
 						{panelTitle}
 					</h2>
-					<button type="button" className={'icon-btn'} aria-label="Close" onClick={() => setPanel(null)}>
+					<button type="button" className={'icon-btn'} aria-label={t('Close')} onClick={() => setPanel(null)}>
 						<CloseRoundedIcon />
 					</button>
 				</header>

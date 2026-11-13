@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
 import { useMutation, useQuery } from '@apollo/client';
 import {
@@ -51,7 +52,14 @@ const replyHref = (inquiry: Inquiry) =>
 	`mailto:${inquiry.inquiryEmail}?subject=${encodeURIComponent('Re: your message to La Memoria')}`;
 
 /** one status tab, with its own count (limit 1, the total only) **/
-const StatusTab = (props: { value: TabValue; label: string; active: boolean; refreshKey: number; onClick: () => void }) => {
+const StatusTab = (props: {
+	value: TabValue;
+	label: string;
+	active: boolean;
+	refreshKey: number;
+	onClick: () => void;
+}) => {
+	const { t } = useTranslation('common');
 	const { value, label, active, refreshKey, onClick } = props;
 	const { data, refetch } = useQuery(GET_ALL_INQUIRIES_BY_ADMIN, {
 		fetchPolicy: 'network-only',
@@ -63,13 +71,14 @@ const StatusTab = (props: { value: TabValue; label: string; active: boolean; ref
 	const count: number = data?.getAllInquiriesByAdmin?.metaCounter?.[0]?.total ?? 0;
 	return (
 		<ListItem onClick={onClick} className={active ? 'li on' : 'li'}>
-			{label} ({count})
+			{t(label)} ({count})
 		</ListItem>
 	);
 };
 
 /** the contact form inbox: read a message, reply from your email app, mark it answered **/
 const InquiryManager = () => {
+	const { t } = useTranslation('common');
 	const [tab, setTab] = useState<TabValue>(InquiryStatus.NEW);
 	const [page, setPage] = useState<number>(1);
 	const [limit, setLimit] = useState<number>(20);
@@ -119,11 +128,12 @@ const InquiryManager = () => {
 	return (
 		<Box component={'div'} className={'content'}>
 			<Typography variant={'h2'} className={'tit'} sx={{ mb: '8px' }}>
-				1:1 Inquiry
+				{t('1:1 Inquiry')}
 			</Typography>
 			<Typography sx={{ mb: '24px', color: '#757575', fontSize: '14px' }}>
-				Messages from the contact form on the Help page and the homepage. Reply from your email, then mark the message
-				answered.
+				{t(
+					'Messages from the contact form on the Help page and the homepage. Reply from your email, then mark the message answered.',
+				)}
 			</Typography>
 
 			<Box component={'div'} className={'table-wrap'}>
@@ -145,21 +155,21 @@ const InquiryManager = () => {
 				<Divider />
 
 				<TableContainer>
-					<Table sx={{ minWidth: 750 }} aria-label="Messages">
+					<Table sx={{ minWidth: 750 }} aria-label={t('Messages')}>
 						<TableHead>
 							<TableRow>
-								<TableCell>From</TableCell>
-								<TableCell>Message</TableCell>
-								<TableCell>Received</TableCell>
-								<TableCell>Status</TableCell>
-								<TableCell align="right">Actions</TableCell>
+								<TableCell>{t('From', { context: 'sender' })}</TableCell>
+								<TableCell>{t('Message')}</TableCell>
+								<TableCell>{t('Received')}</TableCell>
+								<TableCell>{t('Status')}</TableCell>
+								<TableCell align="right">{t('Actions')}</TableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
 							{inquiries.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={5} align="center">
-										<span className={'no-data'}>No messages here.</span>
+										<span className={'no-data'}>{t('No messages here.')}</span>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -186,24 +196,32 @@ const InquiryManager = () => {
 												size="small"
 												value={inquiry.inquiryStatus}
 												onChange={(e) => statusHandler(inquiry, e.target.value as InquiryStatus)}
-												inputProps={{ 'aria-label': `Status of the message from ${inquiry.inquiryName}` }}
+												inputProps={{
+													'aria-label': t('Status of the message from {{name}}', { name: inquiry.inquiryName }),
+												}}
 											>
 												{Object.values(InquiryStatus).map((status) => (
 													<MenuItem key={status} value={status}>
-														{statusLabels[status]}
+														{t(statusLabels[status])}
 													</MenuItem>
 												))}
 											</Select>
 										</TableCell>
 										<TableCell align="right">
-											<Tooltip title="View">
-												<IconButton aria-label={`View the message from ${inquiry.inquiryName}`} onClick={() => setOpen(inquiry)}>
+											<Tooltip title={t('View')}>
+												<IconButton
+													aria-label={t('View the message from {{name}}', { name: inquiry.inquiryName })}
+													onClick={() => setOpen(inquiry)}
+												>
 													<VisibilityOutlinedIcon />
 												</IconButton>
 											</Tooltip>
 											{inquiry.inquiryStatus === InquiryStatus.DELETE && (
-												<Tooltip title="Remove for good">
-													<IconButton aria-label={`Remove the message from ${inquiry.inquiryName}`} onClick={() => removeHandler(inquiry)}>
+												<Tooltip title={t('Remove for good')}>
+													<IconButton
+														aria-label={t('Remove the message from {{name}}', { name: inquiry.inquiryName })}
+														onClick={() => removeHandler(inquiry)}
+													>
 														<DeleteForeverOutlinedIcon />
 													</IconButton>
 												</Tooltip>
@@ -217,6 +235,9 @@ const InquiryManager = () => {
 				</TableContainer>
 
 				<TablePagination
+					labelRowsPerPage={t('Rows per page:')}
+					labelDisplayedRows={({ from, to, count }) => t('{{from}}–{{to}} of {{total}}', { from, to, total: count })}
+					getItemAriaLabel={(type) => t(`Go to ${type} page`)}
 					rowsPerPageOptions={[20, 40, 60]}
 					component="div"
 					count={total}
@@ -231,23 +252,25 @@ const InquiryManager = () => {
 			</Box>
 
 			<Dialog open={Boolean(open)} onClose={() => setOpen(null)} fullWidth maxWidth="sm">
-				<DialogTitle>Message from {open?.inquiryName}</DialogTitle>
+				<DialogTitle>{t('Message from {{name}}', { name: open?.inquiryName })}</DialogTitle>
 				<DialogContent>
 					<Typography sx={{ color: '#757575', fontSize: '14px', mb: '16px' }}>
 						{open?.inquiryEmail} · <Moment format="YYYY-MM-DD HH:mm">{open?.createdAt}</Moment> ·{' '}
-						{open ? statusLabels[open.inquiryStatus] : ''}
-						{open?.memberId ? ' · sent while logged in' : ''}
+						{open ? t(statusLabels[open.inquiryStatus]) : ''}
+						{open?.memberId ? ` · ${t('sent while logged in')}` : ''}
 					</Typography>
-					<Typography sx={{ whiteSpace: 'pre-line', fontSize: '15px', lineHeight: 1.7 }}>{open?.inquiryMessage}</Typography>
+					<Typography sx={{ whiteSpace: 'pre-line', fontSize: '15px', lineHeight: 1.7 }}>
+						{open?.inquiryMessage}
+					</Typography>
 				</DialogContent>
 				<DialogActions sx={{ p: '16px 24px' }}>
-					<Button onClick={() => setOpen(null)}>Close</Button>
+					<Button onClick={() => setOpen(null)}>{t('Close')}</Button>
 					{open && open.inquiryStatus !== InquiryStatus.ANSWERED && (
-						<Button onClick={() => statusHandler(open, InquiryStatus.ANSWERED)}>Mark answered</Button>
+						<Button onClick={() => statusHandler(open, InquiryStatus.ANSWERED)}>{t('Mark answered')}</Button>
 					)}
 					{open && (
 						<Button variant="contained" href={replyHref(open)}>
-							Reply by email
+							{t('Reply by email')}
 						</Button>
 					)}
 				</DialogActions>

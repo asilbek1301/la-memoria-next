@@ -3,6 +3,7 @@ import { PackageLocation, PackageStyle, PackageType } from '../../enums/package.
 import { Direction } from '../../enums/common.enum';
 import { formatKRW, prettyEnum } from '../../utils';
 import { SortOption } from '../common/ListControls';
+import { TFunction } from 'i18next';
 
 /** full ranges: a range equal to these means "any" **/
 export const DURATION_MAX = 12;
@@ -73,13 +74,13 @@ export const priceRange = (input: PackagesInquiry): [number, number] => [
 	input.search?.pricesRange?.end ?? PRICE_MAX,
 ];
 
-export const formatHours = (value: number) => `${value} ${value === 1 ? 'hour' : 'hours'}`;
+export const formatHours = (value: number, t: TFunction) => t('{{count}} hours', { count: value });
 
 /** list label: one value by name, several as a count, e.g. "Seoul" or "2 locations" **/
-export const listLabel = (values: string[] | undefined, emptyLabel: string, plural: string) => {
-	if (!values?.length) return emptyLabel;
-	if (values.length === 1) return prettyEnum(values[0]);
-	return `${values.length} ${plural}`;
+export const listLabel = (values: string[] | undefined, emptyLabel: string, plural: string, t: TFunction) => {
+	if (!values?.length) return t(emptyLabel);
+	if (values.length === 1) return t(prettyEnum(values[0]));
+	return t(`{{count}} ${plural}`, { count: values.length });
 };
 
 export interface ActiveChip {
@@ -89,25 +90,41 @@ export interface ActiveChip {
 }
 
 /** every active filter as a removable chip **/
-export const activeChips = (input: PackagesInquiry): ActiveChip[] => {
+export const activeChips = (input: PackagesInquiry, t: TFunction): ActiveChip[] => {
 	const s = input.search ?? {};
 	const chips: ActiveChip[] = [];
 	(s.typeList ?? []).forEach((v) =>
-		chips.push({ key: `type-${v}`, label: `${prettyEnum(v)} tier`, patch: { typeList: s.typeList?.filter((x) => x !== v) } }),
+		chips.push({
+			key: `type-${v}`,
+			label: t('{{tier}} tier', { tier: prettyEnum(v) }),
+			patch: { typeList: s.typeList?.filter((x) => x !== v) },
+		}),
 	);
 	(s.locationList ?? []).forEach((v) =>
-		chips.push({ key: `loc-${v}`, label: prettyEnum(v), patch: { locationList: s.locationList?.filter((x) => x !== v) } }),
+		chips.push({
+			key: `loc-${v}`,
+			label: t(prettyEnum(v)),
+			patch: { locationList: s.locationList?.filter((x) => x !== v) },
+		}),
 	);
 	(s.styleList ?? []).forEach((v) =>
-		chips.push({ key: `style-${v}`, label: prettyEnum(v), patch: { styleList: s.styleList?.filter((x) => x !== v) } }),
+		chips.push({
+			key: `style-${v}`,
+			label: t(prettyEnum(v)),
+			patch: { styleList: s.styleList?.filter((x) => x !== v) },
+		}),
 	);
 	(s.photosList ?? []).forEach((v) =>
-		chips.push({ key: `photos-${v}`, label: `${v} photos`, patch: { photosList: s.photosList?.filter((x) => x !== v) } }),
+		chips.push({
+			key: `photos-${v}`,
+			label: t('{{count}} photos', { count: Number(v) }),
+			patch: { photosList: s.photosList?.filter((x) => x !== v) },
+		}),
 	);
 	(s.options ?? []).forEach((v) =>
 		chips.push({
 			key: `opt-${v}`,
-			label: includeOptions.find((o) => o.value === v)?.label ?? v,
+			label: t(includeOptions.find((o) => o.value === v)?.label ?? v),
 			patch: { options: s.options?.filter((x) => x !== v) },
 		}),
 	);
@@ -115,7 +132,7 @@ export const activeChips = (input: PackagesInquiry): ActiveChip[] => {
 	if (dMin > 0 || dMax < DURATION_MAX)
 		chips.push({
 			key: 'duration',
-			label: `${dMin}–${formatHours(dMax)}`,
+			label: `${dMin}–${formatHours(dMax, t)}`,
 			patch: { durationsRange: { start: 0, end: DURATION_MAX } },
 		});
 	const [pMin, pMax] = priceRange(input);
@@ -149,13 +166,16 @@ export const clearedSearch = (input: PackagesInquiry): PackagesInquiry => ({
 });
 
 /** "No Gold packages in Daegu with a classic style yet." **/
-export const emptySentence = (input: PackagesInquiry) => {
+export const emptySentence = (input: PackagesInquiry, t: TFunction) => {
 	const s = input.search ?? {};
-	const tier = s.typeList?.length === 1 ? `${prettyEnum(s.typeList[0])} ` : '';
-	const place = s.locationList?.length ? ` in ${s.locationList.map(prettyEnum).join(' or ')}` : '';
-	const style = s.styleList?.length
-		? ` with a ${s.styleList.map((v) => prettyEnum(v).toLowerCase()).join(' or ')} style`
+	const or = t(' or ');
+	const tier = s.typeList?.length === 1 ? t('{{tier}} ', { tier: prettyEnum(s.typeList[0]) }) : '';
+	const place = s.locationList?.length
+		? t(' in {{places}}', { places: s.locationList.map((v) => t(prettyEnum(v))).join(or) })
 		: '';
-	const text = s.text ? ` matching “${s.text}”` : '';
-	return `No ${tier}packages${place}${style}${text} yet.`;
+	const style = s.styleList?.length
+		? t(' with a {{styles}} style', { styles: s.styleList.map((v) => t(prettyEnum(v)).toLowerCase()).join(or) })
+		: '';
+	const text = s.text ? t(' matching “{{text}}”', { text: s.text }) : '';
+	return t('No {{tier}}packages{{place}}{{style}}{{text}} yet.', { tier, place, style, text });
 };

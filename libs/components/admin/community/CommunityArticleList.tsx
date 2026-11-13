@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import { memberHref, statusBadge, statusLabel } from '../adminLabels';
 import { memberPhoto } from '../../studio/studioSearch';
 import { categoryLabel } from '../../community/communitySearch';
@@ -105,6 +106,7 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
+	const { t } = useTranslation('common');
 	return (
 		<TableHead>
 			<TableRow>
@@ -114,7 +116,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 						align={headCell.numeric ? 'left' : 'center'}
 						padding={headCell.disablePadding ? 'none' : 'normal'}
 					>
-						{headCell.label}
+						{t(headCell.label)}
 					</TableCell>
 				))}
 			</TableRow>
@@ -132,6 +134,7 @@ interface CommunityArticleListProps {
 }
 
 const CommunityArticleList = (props: CommunityArticleListProps) => {
+	const { t } = useTranslation('common');
 	const { articles, anchorEl, menuIconClickHandler, menuIconCloseHandler, updateArticleHandler, removeArticleHandler } =
 		props;
 
@@ -145,7 +148,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 						{articles.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>No posts here.</span>
+									<span className={'no-data'}>{t('No posts here.')}</span>
 								</TableCell>
 							</TableRow>
 						)}
@@ -163,7 +166,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 													className={'img_box'}
 												>
 													<IconButton className="btn_window">
-														<Tooltip title={'Open window'}>
+														<Tooltip title={t('Open window')}>
 															<OpenInBrowserRoundedIcon />
 														</Tooltip>
 													</IconButton>
@@ -171,7 +174,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 											)}
 										</Box>
 									</TableCell>
-									<TableCell align="left">{categoryLabel(article.articleCategory)}</TableCell>
+									<TableCell align="left">{t(categoryLabel(article.articleCategory))}</TableCell>
 									<TableCell align="left" className={'name'}>
 										<Link href={memberHref(article?.memberData)}>
 											<Avatar
@@ -198,8 +201,11 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 											</Button>
 										) : (
 											<>
-												<Button onClick={(e: any) => menuIconClickHandler(e, index)} className={statusBadge(article.articleStatus)}>
-													{statusLabel(article.articleStatus)}
+												<Button
+													onClick={(e: any) => menuIconClickHandler(e, index)}
+													className={statusBadge(article.articleStatus)}
+												>
+													{t(statusLabel(article.articleStatus))}
 												</Button>
 
 												<Menu
@@ -221,7 +227,7 @@ const CommunityArticleList = (props: CommunityArticleListProps) => {
 																key={status}
 															>
 																<Typography variant={'subtitle1'} component={'span'}>
-																	{statusLabel(status)}
+																	{t(statusLabel(status))}
 																</Typography>
 															</MenuItem>
 														))}

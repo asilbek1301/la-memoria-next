@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Drawer, Skeleton } from '@mui/material';
 import { useReducedMotion } from 'framer-motion';
@@ -19,12 +20,7 @@ import CommentsSection from '../../libs/components/common/CommentsSection';
 import MyFollowList from '../../libs/components/mypage/MyFollowList';
 import useDeviceDetect from '../../libs/hooks/useDeviceDetect';
 import { SortMenu, SortOption } from '../../libs/components/common/ListControls';
-import {
-	plural,
-	studioImage,
-	studioLocation,
-	studioName,
-} from '../../libs/components/studio/studioSearch';
+import { plural, studioImage, studioLocation, studioName } from '../../libs/components/studio/studioSearch';
 import { Member } from '../../libs/types/member/member';
 import { Package } from '../../libs/types/package/package';
 import { T } from '../../libs/types/common';
@@ -63,6 +59,7 @@ const cityOf = (studio?: Member) => studio?.memberAddress?.split(',').pop()?.tri
 
 const StudioDetail: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const reduceMotion = useReducedMotion();
 	const device = useDeviceDetect();
@@ -102,7 +99,13 @@ const StudioDetail: NextPage = () => {
 	} = useQuery(GET_PACKAGES, {
 		fetchPolicy: 'cache-and-network',
 		variables: {
-			input: { page: 1, limit: ALL_PACKAGES, sort: 'createdAt', direction: Direction.DESC, search: { memberId: studioId } },
+			input: {
+				page: 1,
+				limit: ALL_PACKAGES,
+				sort: 'createdAt',
+				direction: Direction.DESC,
+				search: { memberId: studioId },
+			},
 		},
 		skip: !studioId,
 	});
@@ -186,9 +189,9 @@ const StudioDetail: NextPage = () => {
 			<div id="studio-detail-page" className={'detail-page studio-detail'}>
 				<div className={'container'}>
 					<div className={'empty-box detail-missing'}>
-						<p>Studio not found.</p>
+						<p>{t('Studio not found.')}</p>
 						<Link href={'/studio'} className={'button-primary'}>
-							Back to studios
+							{t('Back to studios')}
 						</Link>
 					</div>
 				</div>
@@ -198,7 +201,12 @@ const StudioDetail: NextPage = () => {
 
 	if (!studio) {
 		return (
-			<div id="studio-detail-page" className={'detail-page studio-detail'} aria-busy="true" aria-label="Loading studio">
+			<div
+				id="studio-detail-page"
+				className={'detail-page studio-detail'}
+				aria-busy="true"
+				aria-label={t('Loading studio')}
+			>
 				<div className={'container'}>
 					<Skeleton width={220} className={'crumb-skeleton'} />
 					<div className={'studio-hero'}>
@@ -217,17 +225,14 @@ const StudioDetail: NextPage = () => {
 
 	const name = studioName(studio);
 	const image = studioImage(studio);
-	const location = studioLocation(studio.memberAddress);
+	const location = studioLocation(studio.memberAddress, t);
 	const city = studio.memberAddress?.split(',').pop()?.trim() ?? '';
 	const likes = studio.memberLikes ?? 0;
 	// the follower count opens the followers panel, so it sits next to the Follow button, not in the stats
 	const packageCount = studio.memberPackages ?? 0;
 	const followerCount = studio.memberFollowers ?? 0;
 	const isSelf = Boolean(user?._id) && user._id === studio._id;
-	const stats = [
-		packageCount > 0 && plural(packageCount, 'package'),
-		likes > 0 && plural(likes, 'like'),
-	]
+	const stats = [packageCount > 0 && plural(packageCount, 'package', t), likes > 0 && plural(likes, 'like', t)]
 		.filter(Boolean)
 		.join(' · ');
 	const following = Boolean(studio.meFollowed?.[0]?.myFollowing);
@@ -247,12 +252,12 @@ const StudioDetail: NextPage = () => {
 	return (
 		<div id="studio-detail-page" className={'detail-page studio-detail'}>
 			<div className={'container'}>
-				<nav className={'breadcrumb'} aria-label="Breadcrumb">
+				<nav className={'breadcrumb'} aria-label={t('Breadcrumb')}>
 					<ol>
 						<li>
-							<Link href={'/studio'}>Studios</Link>
+							<Link href={'/studio'}>{t('Studios')}</Link>
 						</li>
-						{city && <li>{city}</li>}
+						{city && <li>{t(city)}</li>}
 						<li aria-current="page">{name}</li>
 					</ol>
 				</nav>
@@ -260,7 +265,7 @@ const StudioDetail: NextPage = () => {
 				<header className={'studio-hero'}>
 					<div className={'hero-portrait'}>
 						{image ? (
-							<img src={image} alt={`${name} studio`} />
+							<img src={image} alt={t('{{name}} studio', { name })} />
 						) : (
 							<span className={'arch-initial'} aria-hidden="true">
 								{name.charAt(0)}
@@ -270,7 +275,7 @@ const StudioDetail: NextPage = () => {
 					<div className={'hero-info'}>
 						{location && <p className={'hero-location'}>{location}</p>}
 						<h1 className={'hero-name'}>{name}</h1>
-						{studio.memberDesc && <p className={'hero-desc'}>{studio.memberDesc}</p>}
+						{studio.memberDesc && <p className={'hero-desc'}>{t(studio.memberDesc)}</p>}
 						{stats && <p className={'hero-stats'}>{stats}</p>}
 						{(!isSelf || followerCount > 0) && (
 							<div className={'hero-actions'}>
@@ -282,12 +287,12 @@ const StudioDetail: NextPage = () => {
 											aria-pressed={following}
 											onClick={followHandler}
 										>
-											{following ? 'Following' : 'Follow'}
+											{following ? t('Following') : t('Follow')}
 										</button>
 										<button
 											type="button"
 											className={`icon-action ${liked ? 'liked' : ''}`}
-											aria-label={liked ? `Unlike ${name}` : `Like ${name}`}
+											aria-label={t(liked ? 'Unlike {{title}}' : 'Like {{title}}', { title: name })}
 											aria-pressed={liked}
 											onClick={() => likeStudioHandler(user, studio._id)}
 										>
@@ -297,8 +302,13 @@ const StudioDetail: NextPage = () => {
 									</>
 								)}
 								{followerCount > 0 && (
-									<button type="button" className={'followers-btn'} aria-haspopup="dialog" onClick={() => setFollowersOpen(true)}>
-										<strong>{followerCount}</strong> {followerCount === 1 ? 'follower' : 'followers'}
+									<button
+										type="button"
+										className={'followers-btn'}
+										aria-haspopup="dialog"
+										onClick={() => setFollowersOpen(true)}
+									>
+										<strong>{followerCount}</strong> {t(followerCount === 1 ? 'follower' : 'followers')}
 									</button>
 								)}
 							</div>
@@ -310,16 +320,16 @@ const StudioDetail: NextPage = () => {
 					<Skeleton variant="rectangular" className={'skeleton tiers-skeleton'} />
 				) : !hasPackages ? (
 					<div className={'empty-box studio-no-packages'}>
-						<p>{name} hasn&apos;t published any packages yet.</p>
+						<p>{t("{{name}} hasn't published any packages yet.", { name })}</p>
 						<Link href={'/studio'} className={'button-secondary'}>
-							Back to studios
+							{t('Back to studios')}
 						</Link>
 					</div>
 				) : (
 					<>
 						<section className={'detail-section tiers-section'} aria-labelledby="tiers-title">
 							<h2 id="tiers-title" className={'detail-title'}>
-								Packages by tier
+								{t('Packages by tier')}
 							</h2>
 							<StudioTiers packages={packages} active={tier} onSelect={(next) => selectTier(next, true)} />
 						</section>
@@ -327,23 +337,33 @@ const StudioDetail: NextPage = () => {
 						<section className={'detail-section'} ref={packagesRef} aria-labelledby="packages-title">
 							<div className={'section-row'}>
 								<h2 id="packages-title" className={'detail-title'}>
-									Packages ({shown.length})
+									{t('Packages')} ({shown.length})
 								</h2>
 								<div className={'section-tools'}>
-									<FilterTabs label="Filter by tier" options={tierTabs} value={tier} onChange={(next) => selectTier(next)} />
+									<FilterTabs
+										label={t('Filter by tier')}
+										options={tierTabs.map((tab) => ({ ...tab, label: t(tab.label) }))}
+										value={tier}
+										onChange={(next) => selectTier(next)}
+									/>
 									<SortMenu
 										options={packageSorts}
 										sort={sort.sort}
 										direction={sort.direction}
 										onSort={(nextSort, nextDirection) => {
-											setSort(packageSorts.find((o) => o.sort === nextSort && o.direction === nextDirection) ?? packageSorts[0]);
+											setSort(
+												packageSorts.find((o) => o.sort === nextSort && o.direction === nextDirection) ??
+													packageSorts[0],
+											);
 											setVisible(PAGE_STEP);
 										}}
 									/>
 								</div>
 							</div>
 							{shown.length === 0 ? (
-								<p className={'comment-empty'}>No {prettyEnum(tier as string)} packages from this studio.</p>
+								<p className={'comment-empty'}>
+									{t('No {{tier}} packages from this studio.', { tier: prettyEnum(tier as string) })}
+								</p>
 							) : (
 								<ul className={'studio-package-grid'}>
 									{shown.slice(0, visible).map((pkg) => (
@@ -356,7 +376,7 @@ const StudioDetail: NextPage = () => {
 							{shown.length > visible && (
 								<div className={'show-more'}>
 									<button type="button" className={'button-secondary'} onClick={() => setVisible(visible + PAGE_STEP)}>
-										Show more ({shown.length - visible})
+										{t('Show more')} ({shown.length - visible})
 									</button>
 								</div>
 							)}
@@ -370,13 +390,13 @@ const StudioDetail: NextPage = () => {
 					refId={studio._id}
 					group={CommentGroup.MEMBER}
 					user={user}
-					formNote={isSelf ? 'This is your studio, so you can read comments here but not post them.' : undefined}
+					formNote={isSelf ? t('This is your studio, so you can read comments here but not post them.') : undefined}
 				/>
 
 				{sameCity.length > 0 && (
 					<section className={'detail-section similar'} aria-labelledby="more-studios-title">
 						<h2 id="more-studios-title" className={'detail-title'}>
-							More studios in {city}
+							{t('More studios in {{city}}', { city: t(city) })}
 						</h2>
 						<ul className={'more-studios'}>
 							{sameCity.map((item) => (
@@ -398,9 +418,9 @@ const StudioDetail: NextPage = () => {
 			>
 				<header className={'panel-head'}>
 					<h2 id="studio-followers-title" className={'panel-title'}>
-						Followers of {name}
+						{t('Followers of {{name}}', { name })}
 					</h2>
-					<button type="button" className={'icon-btn'} aria-label="Close" onClick={() => setFollowersOpen(false)}>
+					<button type="button" className={'icon-btn'} aria-label={t('Close')} onClick={() => setFollowersOpen(false)}>
 						<CloseRoundedIcon />
 					</button>
 				</header>

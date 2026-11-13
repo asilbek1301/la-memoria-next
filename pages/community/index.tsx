@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import { NetworkStatus, useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { useReducedMotion } from 'framer-motion';
@@ -49,6 +50,7 @@ const CategoryTab = (props: {
 	onKeyDown: (e: React.KeyboardEvent<HTMLButtonElement>) => void;
 }) => {
 	const { value, label, active, onSelect, onKeyDown } = props;
+	const { t } = useTranslation('common');
 	const { data } = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'cache-and-network',
 		variables: { input: { page: 1, limit: 1, search: value === 'ALL' ? {} : { articleCategory: value } } },
@@ -66,7 +68,7 @@ const CategoryTab = (props: {
 			onClick={() => onSelect(value)}
 			onKeyDown={onKeyDown}
 		>
-			{label}
+			{t(label)}
 			{count > 0 && <span className={'tab-count'}>{count}</span>}
 		</button>
 	);
@@ -74,6 +76,7 @@ const CategoryTab = (props: {
 
 const Community: NextPage = ({ initialInput, ...props }: any) => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const reduceMotion = useReducedMotion();
 	const user = useReactiveVar(userVar);
 	const [searchFilter, setSearchFilter] = useState<BoardArticlesInquiry>(
@@ -201,17 +204,17 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 				<div className={'container'}>
 					<div className={'header-row'}>
 						<div className={'header-text'}>
-							<span className={'header-label'}>Community</span>
-							<h1 className={'page-title'}>Stories from couples</h1>
-							<p className={'page-intro'}>Share your preparations, ask questions and find recommendations.</p>
+							<span className={'header-label'}>{t('Community')}</span>
+							<h1 className={'page-title'}>{t('Stories from couples')}</h1>
+							<p className={'page-intro'}>{t('Share your preparations, ask questions and find recommendations.')}</p>
 						</div>
 						<Link href={writeHref} className={'button-primary'}>
-							Write a post
+							{t('Write a post')}
 						</Link>
 					</div>
 
 					<div className={'community-toolbar'}>
-						<div className={'category-tabs'} role="tablist" aria-label="Categories">
+						<div className={'category-tabs'} role="tablist" aria-label={t('Categories')}>
 							{categoryTabs.map((tab) => (
 								<CategoryTab
 									key={tab.value}
@@ -236,12 +239,17 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 								<input
 									type="search"
 									value={searchText}
-									placeholder="Search posts"
-									aria-label="Search posts"
+									placeholder={t('Search posts')}
+									aria-label={t('Search posts')}
 									onChange={(e) => setSearchText(e.target.value)}
 								/>
 								{searchText && (
-									<button type="button" className={'clear-btn'} aria-label="Clear search" onClick={() => setSearchText('')}>
+									<button
+										type="button"
+										className={'clear-btn'}
+										aria-label={t('Clear search')}
+										onClick={() => setSearchText('')}
+									>
 										<CloseRoundedIcon />
 									</button>
 								)}
@@ -262,11 +270,11 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 
 				<section className={'community-latest'} ref={listRef} aria-labelledby="latest-title">
 					<h2 id="latest-title" className={'latest-title'}>
-						{text ? `Posts matching “${text}”` : 'Latest posts'}
+						{text ? t('Posts matching “{{text}}”', { text }) : t('Latest posts')}
 					</h2>
 
 					{loading ? (
-						<ul className={'article-grid'} aria-busy="true" aria-label="Loading posts">
+						<ul className={'article-grid'} aria-busy="true" aria-label={t('Loading posts')}>
 							{Array.from({ length: 6 }).map((_, i) => (
 								<li className={'card-skeleton'} key={i}>
 									<Skeleton variant="rectangular" className={'skeleton wide'} />
@@ -280,18 +288,18 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 						<div className={'empty-box community-empty'}>
 							<p>
 								{text
-									? `No posts match “${text}”.`
+									? t('No posts match “{{text}}”.', { text })
 									: category
-									? `No posts in ${categoryLabel(category)} yet.`
-									: 'No posts yet.'}
+									? t('No posts in {{category}} yet.', { category: t(categoryLabel(category)) })
+									: t('No posts yet.')}
 							</p>
 							{text ? (
 								<button type="button" className={'button-primary'} onClick={() => searchHandler('')}>
-									Clear search
+									{t('Clear search')}
 								</button>
 							) : (
 								<Link href={writeHref} className={'button-primary'}>
-									Write the first post
+									{t('Write the first post')}
 								</Link>
 							)}
 						</div>
@@ -317,7 +325,7 @@ const Community: NextPage = ({ initialInput, ...props }: any) => {
 
 					<p className={'community-guidelines'}>
 						<Link href={'/cs?tab=faq&q=guidelines'} className={'button-link'}>
-							Community guidelines
+							{t('Community guidelines')}
 						</Link>
 					</p>
 				</section>

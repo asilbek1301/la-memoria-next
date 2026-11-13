@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
 import { useMutation, useQuery } from '@apollo/client';
 import {
@@ -69,11 +70,16 @@ const StatusTab = (props: {
 	refreshKey: number;
 	onClick: () => void;
 }) => {
+	const { t } = useTranslation('common');
 	const { category, value, label, active, refreshKey, onClick } = props;
 	const { data, refetch } = useQuery(GET_ALL_NOTICES_BY_ADMIN, {
 		fetchPolicy: 'network-only',
 		variables: {
-			input: { page: 1, limit: 1, search: value === 'ALL' ? { noticeCategory: category } : { noticeCategory: category, noticeStatus: value } },
+			input: {
+				page: 1,
+				limit: 1,
+				search: value === 'ALL' ? { noticeCategory: category } : { noticeCategory: category, noticeStatus: value },
+			},
 		},
 	});
 	// recount after an add, edit, status change or removal
@@ -83,13 +89,14 @@ const StatusTab = (props: {
 	const count: number = data?.getAllNoticesByAdmin?.metaCounter?.[0]?.total ?? 0;
 	return (
 		<ListItem onClick={onClick} className={active ? 'li on' : 'li'}>
-			{label} ({count})
+			{t(label)} ({count})
 		</ListItem>
 	);
 };
 
 /** admin list for Help content: notices or FAQ. Add, edit, hold, delete and remove; the Help page shows Active items **/
 const NoticeManager = ({ category, title }: { category: NoticeCategory; title: string }) => {
+	const { t } = useTranslation('common');
 	const isFaq = category === NoticeCategory.FAQ;
 	const [inquiry, setInquiry] = useState<AllNoticesInquiry>({
 		page: 1,
@@ -193,15 +200,20 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 	return (
 		<Box component={'div'} className={'content'}>
 			<Box component={'div'} className={'title flex_space'}>
-				<Typography variant={'h2'}>{title}</Typography>
+				<Typography variant={'h2'}>{t(title)}</Typography>
 				<Button className="btn_add" variant={'contained'} size={'medium'} onClick={() => setDraft({ ...emptyDraft })}>
 					<AddRoundedIcon sx={{ mr: '8px' }} />
-					ADD
+					{t('ADD')}
 				</Button>
 			</Box>
 			<Typography sx={{ mb: '24px', color: '#757575', fontSize: '14px' }}>
-				Active items are shown on the Help page{isFaq ? ' under their topic' : ', newest first'}. Hold hides an item; Deleted items
-				can be removed for good.
+				{isFaq
+					? t(
+							'Active items are shown on the Help page under their topic. Hold hides an item; Deleted items can be removed for good.',
+					  )
+					: t(
+							'Active items are shown on the Help page, newest first. Hold hides an item; Deleted items can be removed for good.',
+					  )}
 			</Typography>
 
 			<Box component={'div'} className={'table-wrap'}>
@@ -226,12 +238,12 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 								sx={{ width: '220px' }}
 								value={inquiry.search.noticeTopic ?? 'ALL'}
 								onChange={(e) => topicFilterHandler(e.target.value as NoticeTopic | 'ALL')}
-								inputProps={{ 'aria-label': 'Filter by topic' }}
+								inputProps={{ 'aria-label': t('Filter by topic') }}
 							>
-								<MenuItem value={'ALL'}>All topics</MenuItem>
+								<MenuItem value={'ALL'}>{t('All topics')}</MenuItem>
 								{helpTopics.map((item) => (
 									<MenuItem key={item.topic} value={item.topic}>
-										{item.label}
+										{t(item.label)}
 									</MenuItem>
 								))}
 							</Select>
@@ -244,10 +256,10 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 					<Table sx={{ minWidth: 750 }} aria-label={title}>
 						<TableHead>
 							<TableRow>
-								<TableCell>Title</TableCell>
-								{isFaq && <TableCell>Topic</TableCell>}
-								<TableCell>Created</TableCell>
-								<TableCell>Status</TableCell>
+								<TableCell>{t('Title')}</TableCell>
+								{isFaq && <TableCell>{t('Topic')}</TableCell>}
+								<TableCell>{t('Created')}</TableCell>
+								<TableCell>{t('Status')}</TableCell>
 								<TableCell align="right">Actions</TableCell>
 							</TableRow>
 						</TableHead>
@@ -255,7 +267,7 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 							{notices.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={isFaq ? 5 : 4} align="center">
-										<span className={'no-data'}>Nothing here yet. Use ADD to write the first one.</span>
+										<span className={'no-data'}>{t('Nothing here yet. Use ADD to write the first one.')}</span>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -284,7 +296,7 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 												size="small"
 												value={notice.noticeStatus}
 												onChange={(e) => statusHandler(notice, e.target.value as NoticeStatus)}
-												inputProps={{ 'aria-label': `Status of ${notice.noticeTitle}` }}
+												inputProps={{ 'aria-label': t('Status of {{title}}', { title: notice.noticeTitle }) }}
 											>
 												<MenuItem value={NoticeStatus.ACTIVE}>Active</MenuItem>
 												<MenuItem value={NoticeStatus.HOLD}>Hold</MenuItem>
@@ -292,9 +304,9 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 											</Select>
 										</TableCell>
 										<TableCell align="right">
-											<Tooltip title="Edit">
+											<Tooltip title={t('Edit')}>
 												<IconButton
-													aria-label={`Edit ${notice.noticeTitle}`}
+													aria-label={t('Edit {{title}}', { title: notice.noticeTitle })}
 													onClick={() =>
 														setDraft({
 															_id: notice._id,
@@ -308,8 +320,11 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 												</IconButton>
 											</Tooltip>
 											{notice.noticeStatus === NoticeStatus.DELETE && (
-												<Tooltip title="Remove for good">
-													<IconButton aria-label={`Remove ${notice.noticeTitle}`} onClick={() => removeHandler(notice)}>
+												<Tooltip title={t('Remove for good')}>
+													<IconButton
+														aria-label={t('Remove {{title}}', { title: notice.noticeTitle })}
+														onClick={() => removeHandler(notice)}
+													>
 														<DeleteForeverOutlinedIcon />
 													</IconButton>
 												</Tooltip>
@@ -323,6 +338,9 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 				</TableContainer>
 
 				<TablePagination
+					labelRowsPerPage={t('Rows per page:')}
+					labelDisplayedRows={({ from, to, count }) => t('{{from}}–{{to}} of {{total}}', { from, to, total: count })}
+					getItemAriaLabel={(type) => t(`Go to ${type} page`)}
 					rowsPerPageOptions={[20, 40, 60]}
 					component="div"
 					count={total}
@@ -334,7 +352,9 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 			</Box>
 
 			<Dialog open={Boolean(draft)} onClose={() => !saving && setDraft(null)} fullWidth maxWidth="md">
-				<DialogTitle>{draft?._id ? 'Edit' : 'Add'} {isFaq ? 'question' : 'notice'}</DialogTitle>
+				<DialogTitle>
+					{draft?._id ? t(isFaq ? 'Edit question' : 'Edit notice') : t(isFaq ? 'Add question' : 'Add notice')}
+				</DialogTitle>
 				<DialogContent>
 					<Stack spacing={3} sx={{ pt: 1 }}>
 						{isFaq && (
@@ -342,44 +362,44 @@ const NoticeManager = ({ category, title }: { category: NoticeCategory; title: s
 								value={draft?.noticeTopic ?? ''}
 								displayEmpty
 								onChange={(e) => draft && setDraft({ ...draft, noticeTopic: e.target.value as NoticeTopic })}
-								inputProps={{ 'aria-label': 'Topic' }}
+								inputProps={{ 'aria-label': t('Topic') }}
 							>
 								<MenuItem value={''} disabled>
-									Choose a topic
+									{t('Choose a topic')}
 								</MenuItem>
 								{helpTopics.map((item) => (
 									<MenuItem key={item.topic} value={item.topic}>
-										{item.label}
+										{t(item.label)}
 									</MenuItem>
 								))}
 							</Select>
 						)}
 						<TextField
-							label={isFaq ? 'Question' : 'Title'}
+							label={isFaq ? t('Question') : t('Title')}
 							value={draft?.noticeTitle ?? ''}
 							inputProps={{ maxLength: TITLE_MAX }}
 							helperText={`${titleLength} / ${TITLE_MAX}`}
 							onChange={(e) => draft && setDraft({ ...draft, noticeTitle: e.target.value })}
 						/>
 						<TextField
-							label={isFaq ? 'Answer' : 'Text'}
+							label={isFaq ? t('Answer') : t('Text')}
 							value={draft?.noticeContent ?? ''}
 							multiline
 							minRows={6}
 							// the theme fixes outlined inputs at 48px; a multi-line answer needs to grow
 							sx={{ '& .MuiOutlinedInput-root': { height: 'auto', alignItems: 'flex-start' } }}
 							inputProps={{ maxLength: CONTENT_MAX }}
-							helperText={`${contentLength} / ${CONTENT_MAX}. Line breaks are kept.`}
+							helperText={`${contentLength} / ${CONTENT_MAX}. ${t('Line breaks are kept.')}`}
 							onChange={(e) => draft && setDraft({ ...draft, noticeContent: e.target.value })}
 						/>
 					</Stack>
 				</DialogContent>
 				<DialogActions sx={{ p: '16px 24px' }}>
 					<Button onClick={() => setDraft(null)} disabled={saving}>
-						Cancel
+						{t('Cancel')}
 					</Button>
 					<Button variant="contained" onClick={saveHandler} disabled={draftInvalid || saving}>
-						{saving ? 'Saving…' : 'Save'}
+						{saving ? t('Saving…') : t('Save')}
 					</Button>
 				</DialogActions>
 			</Dialog>

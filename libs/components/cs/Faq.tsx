@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { TFunction } from 'i18next';
+import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { GET_NOTICES } from '../../../apollo/user/query';
@@ -21,12 +23,16 @@ interface FaqProps {
 	onContact: () => void;
 }
 
-const matches = (item: Notice, query: string) =>
-	`${item.noticeTitle} ${item.noticeContent}`.toLowerCase().includes(query.trim().toLowerCase());
+// searches the text as written and as shown in the page language
+const matches = (item: Notice, query: string, t: TFunction) =>
+	`${item.noticeTitle} ${item.noticeContent} ${t(item.noticeTitle)} ${t(item.noticeContent)}`
+		.toLowerCase()
+		.includes(query.trim().toLowerCase());
 
 /** questions written by admins (FAQ category), by topic; each one opens in place **/
 const Faq = (props: FaqProps) => {
 	const { topic, onTopic, query, onClearSearch, onContact } = props;
+	const { t } = useTranslation('common');
 	const [open, setOpen] = useState<string[]>([]);
 
 	/** APOLLO REQUESTS **/
@@ -39,7 +45,7 @@ const Faq = (props: FaqProps) => {
 	const searching = query.trim().length > 0;
 	const topicEnum = helpTopics.find((item) => item.value === topic)?.topic;
 	const list = searching
-		? all.filter((item) => matches(item, query))
+		? all.filter((item) => matches(item, query, t))
 		: all.filter((item) => !topicEnum || item.noticeTopic === topicEnum);
 	const singleMatch = searching && list.length === 1 ? list[0]._id : '';
 
@@ -48,18 +54,22 @@ const Faq = (props: FaqProps) => {
 		if (singleMatch) setOpen((current) => (current.includes(singleMatch) ? current : [...current, singleMatch]));
 	}, [singleMatch]);
 
-	const toggle = (id: string) => setOpen((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+	const toggle = (id: string) =>
+		setOpen((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
 	return (
 		<section className={'help-faq'} aria-labelledby="faq-title">
 			<div className={'section-head'}>
 				<h2 id="faq-title" className={'section-title'}>
-					{searching ? `Answers for “${query.trim()}”` : 'Frequently asked questions'}
+					{searching ? t('Answers for “{{text}}”', { text: query.trim() }) : t('Frequently asked questions')}
 				</h2>
 				{!searching && all.length > 0 && (
 					<FilterTabs
-						label="Topics"
-						options={[{ value: 'ALL', label: 'All' }, ...helpTopics.map(({ value, label }) => ({ value, label }))]}
+						label={t('Topics')}
+						options={[
+							{ value: 'ALL', label: t('All') },
+							...helpTopics.map(({ value, label }) => ({ value, label: t(label) })),
+						]}
 						value={topic}
 						onChange={(value) => onTopic(value as TopicValue)}
 					/>
@@ -67,7 +77,7 @@ const Faq = (props: FaqProps) => {
 			</div>
 
 			{loading && all.length === 0 ? (
-				<ul className={'faq-list'} aria-busy="true" aria-label="Loading questions">
+				<ul className={'faq-list'} aria-busy="true" aria-label={t('Loading questions')}>
 					{Array.from({ length: 5 }).map((_, i) => (
 						<li key={i} className={'faq-item'}>
 							<Skeleton width="60%" height={32} className={'faq-skeleton'} />
@@ -76,15 +86,15 @@ const Faq = (props: FaqProps) => {
 				</ul>
 			) : list.length === 0 ? (
 				<div className={'empty-box help-empty'}>
-					<p>{searching ? `No questions match “${query.trim()}”.` : 'No questions here yet.'}</p>
+					<p>{searching ? t('No questions match “{{text}}”.', { text: query.trim() }) : t('No questions here yet.')}</p>
 					<div className={'empty-actions'}>
 						{searching && (
 							<button type="button" className={'button-secondary'} onClick={onClearSearch}>
-								Clear search
+								{t('Clear search')}
 							</button>
 						)}
 						<button type="button" className={'button-primary'} onClick={onContact}>
-							Contact us
+							{t('Contact us')}
 						</button>
 					</div>
 				</div>
@@ -102,12 +112,18 @@ const Faq = (props: FaqProps) => {
 										aria-controls={`a-${item._id}`}
 										onClick={() => toggle(item._id)}
 									>
-										<span>{item.noticeTitle}</span>
+										<span>{t(item.noticeTitle)}</span>
 										<i className={'faq-sign'} aria-hidden="true" />
 									</button>
 								</h3>
-								<div id={`a-${item._id}`} role="region" aria-labelledby={`q-${item._id}`} className={'faq-answer'} hidden={!expanded}>
-									<p>{item.noticeContent}</p>
+								<div
+									id={`a-${item._id}`}
+									role="region"
+									aria-labelledby={`q-${item._id}`}
+									className={'faq-answer'}
+									hidden={!expanded}
+								>
+									<p>{t(item.noticeContent)}</p>
 								</div>
 							</li>
 						);
@@ -117,11 +133,11 @@ const Faq = (props: FaqProps) => {
 
 			<aside className={'help-cta'}>
 				<div>
-					<h3 className={'cta-title'}>Still have a question?</h3>
-					<p className={'cta-text'}>Call us and we will help with packages, studios and reservations.</p>
+					<h3 className={'cta-title'}>{t('Still have a question?')}</h3>
+					<p className={'cta-text'}>{t('Call us and we will help with packages, studios and reservations.')}</p>
 				</div>
 				<button type="button" className={'button-primary'} onClick={onContact}>
-					Contact us
+					{t('Contact us')}
 				</button>
 			</aside>
 		</section>

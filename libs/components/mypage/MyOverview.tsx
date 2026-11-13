@@ -1,8 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
-import { GET_BOARD_ARTICLES, GET_MY_RESERVATIONS, GET_STUDIO_RESERVATIONS, GET_VISITED } from '../../../apollo/user/query';
+import {
+	GET_BOARD_ARTICLES,
+	GET_MY_RESERVATIONS,
+	GET_STUDIO_RESERVATIONS,
+	GET_VISITED,
+} from '../../../apollo/user/query';
 import { Reservation } from '../../types/reservation/reservation';
 import { Package } from '../../types/package/package';
 import { BoardArticle } from '../../types/board-article/board-article';
@@ -11,16 +17,21 @@ import PopularPackageCard from '../homepage/PopularPackageCard';
 import CommunityCard from '../homepage/CommunityCard';
 import ReservationCard from './ReservationCard';
 
-const SeeAll = ({ category, label }: { category: string; label: string }) => (
-	<Link href={{ pathname: '/mypage', query: { category } }} className={'button-link'} aria-label={label}>
-		See all
-		<ArrowForwardRoundedIcon />
-	</Link>
-);
+const SeeAll = ({ category, label }: { category: string; label: string }) => {
+	const { t } = useTranslation('common');
+
+	return (
+		<Link href={{ pathname: '/mypage', query: { category } }} className={'button-link'} aria-label={t(label)}>
+			{t('See all')}
+			<ArrowForwardRoundedIcon />
+		</Link>
+	);
+};
 
 /** short previews of each part of My Page; empty parts are left out **/
 const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; onChanged: () => void }) => {
 	const { user, isStudio, isAdmin = false, onChanged } = props;
+	const { t } = useTranslation('common');
 	/** APOLLO REQUESTS **/
 
 	const reservations = useQuery(isStudio ? GET_STUDIO_RESERVATIONS : GET_MY_RESERVATIONS, {
@@ -36,7 +47,9 @@ const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; on
 	});
 	const articles = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'network-only',
-		variables: { input: { page: 1, limit: 3, sort: 'createdAt', direction: Direction.DESC, search: { memberId: user?._id } } },
+		variables: {
+			input: { page: 1, limit: 3, sort: 'createdAt', direction: Direction.DESC, search: { memberId: user?._id } },
+		},
 		skip: !user?._id,
 	});
 
@@ -51,11 +64,13 @@ const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; on
 	const adminNote = isAdmin && (
 		<aside className={'admin-note'}>
 			<div>
-				<p className={'note-title'}>You are signed in as the admin.</p>
-				<p className={'note-text'}>Members, packages, reservations, posts and messages are managed in the admin area.</p>
+				<p className={'note-title'}>{t('You are signed in as the admin.')}</p>
+				<p className={'note-text'}>
+					{t('Members, packages, reservations, posts and messages are managed in the admin area.')}
+				</p>
 			</div>
 			<Link href={'/_admin'} className={'button-primary'}>
-				Open the admin area
+				{t('Open the admin area')}
 			</Link>
 		</aside>
 	);
@@ -67,11 +82,14 @@ const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; on
 			<div className={'empty-box my-empty'}>
 				<p>
 					{isStudio
-						? 'Reservation requests and your posts will show up here.'
-						: 'Start by saving a few packages you like. They will show up here.'}
+						? t('Reservation requests and your posts will show up here.')
+						: t('Start by saving a few packages you like. They will show up here.')}
 				</p>
-				<Link href={isStudio ? { pathname: '/mypage', query: { category: 'addPackage' } } : '/package'} className={'button-primary'}>
-					{isStudio ? 'Add a package' : 'Browse packages'}
+				<Link
+					href={isStudio ? { pathname: '/mypage', query: { category: 'addPackage' } } : '/package'}
+					className={'button-primary'}
+				>
+					{isStudio ? t('Add a package') : t('Browse packages')}
 				</Link>
 			</div>
 		);
@@ -84,7 +102,7 @@ const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; on
 				<section className={'my-section'} aria-labelledby="ov-res-title">
 					<div className={'section-row'}>
 						<h2 id="ov-res-title" className={'detail-title'}>
-							{isStudio ? 'Latest requests' : 'Reservations'}
+							{isStudio ? t('Latest requests') : t('Reservations')}
 						</h2>
 						<SeeAll category={'myReservations'} label={'See all reservations'} />
 					</div>
@@ -108,7 +126,7 @@ const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; on
 				<section className={'my-section'} aria-labelledby="ov-visited-title">
 					<div className={'section-row'}>
 						<h2 id="ov-visited-title" className={'detail-title'}>
-							Recently viewed
+							{t('Recently viewed')}
 						</h2>
 						<SeeAll category={'recentlyVisited'} label={'See all recently viewed packages'} />
 					</div>
@@ -126,7 +144,7 @@ const MyOverview = (props: { user: any; isStudio: boolean; isAdmin?: boolean; on
 				<section className={'my-section'} aria-labelledby="ov-posts-title">
 					<div className={'section-row'}>
 						<h2 id="ov-posts-title" className={'detail-title'}>
-							My posts
+							{t('My posts')}
 						</h2>
 						<SeeAll category={'myArticles'} label={'See all my posts'} />
 					</div>

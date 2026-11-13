@@ -1,5 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { Editor } from '@toast-ui/react-editor';
+import { useTranslation } from 'next-i18next';
+import '@toast-ui/editor/dist/i18n/ko-kr';
+import '@toast-ui/editor/dist/i18n/ru-ru';
 import { getJwtToken } from '../../auth';
 import { REACT_APP_API_URL } from '../../config';
 import { useRouter } from 'next/router';
@@ -19,13 +22,18 @@ const CONTENT_MIN = 3;
 const CONTENT_MAX = 5000;
 
 /** an empty editor still returns '<p><br></p>'; treat that as no text **/
-const isBlank = (html: string) => html.replace(/<p><br><\/p>/g, '').replace(/<[^>]+>/g, '').trim() === '' && !/<img/i.test(html);
+const isBlank = (html: string) =>
+	html
+		.replace(/<p><br><\/p>/g, '')
+		.replace(/<[^>]+>/g, '')
+		.trim() === '' && !/<img/i.test(html);
 
 /** the community post form: category, title and the editor; publishes with CREATE_BOARD_ARTICLE **/
 const TuiEditor = () => {
 	const editorRef = useRef<Editor>(null),
 		token = getJwtToken(),
 		router = useRouter();
+	const { t } = useTranslation('common');
 	const [articleCategory, setArticleCategory] = useState<BoardArticleCategory>(BoardArticleCategory.FREE);
 	const [articleTitle, setArticleTitle] = useState<string>('');
 	const [articleContent, setArticleContent] = useState<string>('');
@@ -119,8 +127,8 @@ const TuiEditor = () => {
 	return (
 		<form className={'my-form write-form'} onSubmit={submitHandler}>
 			<fieldset className={'form-group'}>
-				<legend className={'field-label'}>Category</legend>
-				<div className={'check-row'} role="radiogroup" aria-label="Category">
+				<legend className={'field-label'}>{t('Category')}</legend>
+				<div className={'check-row'} role="radiogroup" aria-label={t('Category')}>
 					{Object.values(BoardArticleCategory).map((value) => (
 						<label key={value} className={`check-chip ${articleCategory === value ? 'active' : ''}`}>
 							<input
@@ -130,19 +138,19 @@ const TuiEditor = () => {
 								checked={articleCategory === value}
 								onChange={() => setArticleCategory(value)}
 							/>
-							{categoryLabels[value]}
+							{t(categoryLabels[value])}
 						</label>
 					))}
 				</div>
 			</fieldset>
 
 			<label className={'field'}>
-				<span className={'field-label'}>Title</span>
+				<span className={'field-label'}>{t('Title')}</span>
 				<input
 					type="text"
 					value={articleTitle}
 					maxLength={TITLE_MAX}
-					placeholder="Give your post a short title"
+					placeholder={t('Give your post a short title')}
 					onChange={(e) => setArticleTitle(e.target.value)}
 				/>
 				<span className={'field-help'}>
@@ -152,13 +160,15 @@ const TuiEditor = () => {
 
 			<div className={'field'}>
 				<span className={'field-label'} id="post-label">
-					Your post
+					{t('Your post')}
 				</span>
 				<div className={'editor-frame'} aria-labelledby="post-label">
 					<Editor
 						// not '': an empty value makes Toast UI load the container's old HTML (its own labels) as the post
 						initialValue={' '}
-						placeholder={'Share your preparations, a question or a recommendation.'}
+						placeholder={t('Share your preparations, a question or a recommendation.')}
+						// the toolbar and its tooltips follow the page language
+						language={router.locale === 'kr' ? 'ko-KR' : router.locale === 'ru' ? 'ru-RU' : 'en-US'}
 						previewStyle={'vertical'}
 						height={'480px'}
 						// @ts-ignore
@@ -182,19 +192,19 @@ const TuiEditor = () => {
 					/>
 				</div>
 				<span className={`field-help ${contentLong ? 'over' : ''}`} aria-live="polite">
-					{articleContent.length} / {CONTENT_MAX} characters, photos and formatting included. The first photo
-					becomes the cover.
+					{articleContent.length} / {CONTENT_MAX}{' '}
+					{t('characters, photos and formatting included. The first photo becomes the cover.')}
 				</span>
 			</div>
 
 			<div className={'form-foot'}>
 				{titleShort || contentShort ? (
-					<p className={'field-help'}>Add a title and write your post to publish it.</p>
+					<p className={'field-help'}>{t('Add a title and write your post to publish it.')}</p>
 				) : contentLong ? (
-					<p className={'field-help over'}>Your post is too long. Shorten it or remove a photo.</p>
+					<p className={'field-help over'}>{t('Your post is too long. Shorten it or remove a photo.')}</p>
 				) : null}
 				<button type="submit" className={'button-primary'} disabled={blocked || saving}>
-					{saving ? 'Publishing…' : 'Publish post'}
+					{saving ? t('Publishing…') : t('Publish post')}
 				</button>
 			</div>
 		</form>

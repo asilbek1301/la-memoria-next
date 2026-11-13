@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import decodeJWT from 'jwt-decode';
 import { googleLogIn } from '../../auth';
 import AccountField from './AccountField';
@@ -16,7 +17,10 @@ interface GoogleFinishFormProps {
 const suggestNick = (idToken: string) => {
 	try {
 		const { name = '' } = decodeJWT<{ name?: string }>(idToken);
-		const nick = name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, NICK_MAX);
+		const nick = name
+			.toLowerCase()
+			.replace(/[^a-z0-9]/g, '')
+			.slice(0, NICK_MAX);
 		return nick.length >= NICK_MIN ? nick : '';
 	} catch {
 		return '';
@@ -25,6 +29,7 @@ const suggestNick = (idToken: string) => {
 
 /** first Google sign-in only: account type, nickname and phone finish the new account (no password needed) **/
 const GoogleFinishForm = ({ idToken, onSuccess, onCancel }: GoogleFinishFormProps) => {
+	const { t } = useTranslation('common');
 	const [type, setType] = useState<AccountType>('USER');
 	const [nick, setNick] = useState<string>(() => suggestNick(idToken));
 	const [phone, setPhone] = useState<string>('');
@@ -60,7 +65,7 @@ const GoogleFinishForm = ({ idToken, onSuccess, onCancel }: GoogleFinishFormProp
 
 	return (
 		<form className={'account-form'} onSubmit={submit} noValidate aria-labelledby="account-title">
-			<p className={'form-note'}>Your Google account is confirmed. Choose how you will use La Memoria.</p>
+			<p className={'form-note'}>{t('Your Google account is confirmed. Choose how you will use La Memoria.')}</p>
 			<AccountTypeCards value={type} onChange={setType} />
 			<AccountField
 				ref={nickRef}
@@ -86,16 +91,16 @@ const GoogleFinishForm = ({ idToken, onSuccess, onCancel }: GoogleFinishFormProp
 
 			{serverError && (
 				<p className={'form-error'} role="alert">
-					{serverError}
+					{t(serverError)}
 				</p>
 			)}
 			<button type="submit" className={'button-primary submit-btn'} disabled={sending}>
-				{sending ? 'Creating account…' : type === 'STUDIO' ? 'Create studio account' : 'Create couple account'}
+				{sending ? t('Creating account…') : type === 'STUDIO' ? t('Create studio account') : t('Create couple account')}
 			</button>
 
 			<p className={'switch-line'}>
 				<button type="button" className={'switch-btn'} onClick={onCancel}>
-					Use another way to sign in
+					{t('Use another way to sign in')}
 				</button>
 			</p>
 		</form>

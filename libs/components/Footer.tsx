@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import moment from 'moment';
+import { useTranslation } from 'next-i18next';
 import AnimatedLogo from './common/AnimatedLogo';
 import { packageSearchHref, prettyEnum } from '../utils';
 import { PackageLocation, PackageType } from '../enums/package.enum';
@@ -42,31 +43,34 @@ const footerColumns = [
 ];
 
 const Footer = () => {
+	const { t } = useTranslation('common');
+
 	return (
 		<footer className={'footer-container'}>
 			<div className={'footer-main'}>
 				<div className={'brand-box'}>
-					<Link href={'/'} aria-label="La Memoria home" className={'logo-box'}>
+					<Link href={'/'} aria-label={t('La Memoria home')} className={'logo-box'}>
 						<AnimatedLogo tone="dark" width={170} height={59} />
 					</Link>
 					<p className={'about'}>
-						Pre-wedding photography packages from studios across Korea. Compare tiers, save the ones you love and
-						reserve your shoot in one place.
+						{t(
+							'Pre-wedding photography packages from studios across Korea. Compare tiers, save the ones you love and reserve your shoot in one place.',
+						)}
 					</p>
-					<span className={'label'}>Customer care</span>
+					<span className={'label'}>{t('Customer care')}</span>
 					<a className={'phone'} href={SUPPORT_TEL}>
 						{SUPPORT_PHONE}
 					</a>
 				</div>
 
-				<nav className={'footer-columns'} aria-label="Footer">
+				<nav className={'footer-columns'} aria-label={t('Footer')}>
 					{footerColumns.map((column) => (
 						<div className={'column'} key={column.title}>
-							<h2>{column.title}</h2>
+							<h2>{t(column.title)}</h2>
 							<ul>
 								{column.links.map((link) => (
 									<li key={link.label}>
-										<Link href={link.href}>{link.label}</Link>
+										<Link href={link.href}>{t(link.label)}</Link>
 									</li>
 								))}
 							</ul>
@@ -76,7 +80,7 @@ const Footer = () => {
 			</div>
 
 			<div className={'footer-bottom'}>
-				<p>© {moment().year()} La Memoria. All rights reserved.</p>
+				<p>{t('© {{year}} La Memoria. All rights reserved.', { year: moment().year() })}</p>
 			</div>
 		</footer>
 	);

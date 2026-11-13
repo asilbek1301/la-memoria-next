@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -19,13 +20,14 @@ interface StudioCardProps {
 /** studios grid card: framed arch portrait, then the location, name, description and counts, centred **/
 const StudioCard = (props: StudioCardProps) => {
 	const { studio, likeMemberHandler, showViews } = props;
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const name = studioName(studio);
 	const href = studioHref(studio);
 	const image = studioImage(studio);
-	const location = studioLocation(studio?.memberAddress);
+	const location = studioLocation(studio?.memberAddress, t);
 	const views = showViews ? studio?.memberViews ?? 0 : 0;
-	const stats = studioStats(studio);
+	const stats = studioStats(studio, t);
 	const isLiked = Boolean(studio?.meLiked && studio.meLiked[0]?.myFavorite);
 
 	return (
@@ -39,7 +41,7 @@ const StudioCard = (props: StudioCardProps) => {
 					<button
 						type="button"
 						className={`like-btn ${isLiked ? 'liked' : ''}`}
-						aria-label={isLiked ? `Unlike ${name}` : `Like ${name}`}
+						aria-label={t(isLiked ? 'Unlike {{title}}' : 'Like {{title}}', { title: name })}
 						aria-pressed={isLiked}
 						onClick={() => likeMemberHandler(user, studio?._id)}
 					>
@@ -51,10 +53,10 @@ const StudioCard = (props: StudioCardProps) => {
 			<h3 className={'tile-name'}>
 				<Link href={href}>{name}</Link>
 			</h3>
-			{studio?.memberDesc && <p className={'tile-desc'}>{studio.memberDesc}</p>}
+			{studio?.memberDesc && <p className={'tile-desc'}>{t(studio.memberDesc)}</p>}
 			{stats && <p className={'tile-stats'}>{stats}</p>}
 			<Link href={href} className={'button-link'} tabIndex={-1} aria-hidden="true">
-				View studio
+				{t('View studio')}
 				<ArrowForwardRoundedIcon />
 			</Link>
 		</article>

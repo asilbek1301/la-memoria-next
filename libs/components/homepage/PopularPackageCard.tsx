@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -19,16 +20,17 @@ interface PopularPackageCardProps {
 
 const PopularPackageCard = (props: PopularPackageCardProps) => {
 	const { pkg, likePackageHandler, showViews } = props;
+	const { t } = useTranslation('common');
 	const views = showViews ? pkg?.packageViews ?? 0 : 0;
 	const user = useReactiveVar(userVar);
 	const isLiked = Boolean(pkg?.meLiked && pkg?.meLiked[0]?.myFavorite);
 	const image = packageImage(pkg);
 	const studioName = pkg?.memberData?.memberNick;
 	const details = [
-		studioName && `By ${studioName}`,
-		`${pkg?.packageDuration} hours`,
-		`${pkg?.packagePhotos} photos`,
-		...packageInclusions(pkg),
+		studioName && t('By {{name}}', { name: studioName }),
+		t('{{count}} hours', { count: pkg?.packageDuration }),
+		t('{{count}} photos', { count: pkg?.packagePhotos }),
+		...packageInclusions(pkg).map((item) => t(item)),
 	]
 		.filter(Boolean)
 		.join(' · ');
@@ -37,7 +39,7 @@ const PopularPackageCard = (props: PopularPackageCardProps) => {
 		<article className={'popular-card'}>
 			<Link href={packageDetailHref(pkg)} className={'card-media'} tabIndex={-1} aria-hidden="true">
 				{image ? <img src={image} alt="" loading="lazy" /> : <span className={'img-placeholder'} />}
-				<span className={'tag'}>{prettyEnum(pkg?.packageType)} tier</span>
+				<span className={'tag'}>{t('{{tier}} tier', { tier: prettyEnum(pkg?.packageType) })}</span>
 			</Link>
 			{(views > 0 || likePackageHandler) && (
 				<div className={'photo-actions'}>
@@ -46,7 +48,7 @@ const PopularPackageCard = (props: PopularPackageCardProps) => {
 						<button
 							type="button"
 							className={`like-btn ${isLiked ? 'liked' : ''}`}
-							aria-label={isLiked ? `Unlike ${pkg?.packageTitle}` : `Like ${pkg?.packageTitle}`}
+							aria-label={t(isLiked ? 'Unlike {{title}}' : 'Like {{title}}', { title: t(pkg?.packageTitle) })}
 							aria-pressed={isLiked}
 							onClick={() => likePackageHandler(user, pkg?._id)}
 						>
@@ -57,12 +59,12 @@ const PopularPackageCard = (props: PopularPackageCardProps) => {
 			)}
 			<div className={'card-meta'}>
 				<span>
-					{prettyEnum(pkg?.packageLocation)} — {prettyEnum(pkg?.packageStyle)}
+					{t(prettyEnum(pkg?.packageLocation))} — {t(prettyEnum(pkg?.packageStyle))}
 				</span>
 				<span className={'price'}>{formatKRW(pkg?.packagePrice)}</span>
 			</div>
 			<h3 className={'card-title'}>
-				<Link href={packageDetailHref(pkg)}>{pkg?.packageTitle}</Link>
+				<Link href={packageDetailHref(pkg)}>{t(pkg?.packageTitle)}</Link>
 			</h3>
 			<p className={'card-details'}>
 				<span className={'details-text'}>{details}</span>

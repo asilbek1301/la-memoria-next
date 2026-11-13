@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import { Package } from '../../../types/package/package';
 import { PackageType } from '../../../enums/package.enum';
 import { formatKRW, prettyEnum } from '../../../utils';
@@ -15,9 +16,10 @@ interface StudioTiersProps {
 /** this studio's offer per tier: count and lowest price, or "Not offered"; a tier card filters the package grid **/
 const StudioTiers = (props: StudioTiersProps) => {
 	const { packages, active, onSelect } = props;
+	const { t } = useTranslation('common');
 
 	return (
-		<ul className={'studio-tiers'} aria-label="Packages by tier">
+		<ul className={'studio-tiers'} aria-label={t('Packages by tier')}>
 			{Object.values(PackageType).map((tier) => {
 				const inTier = packages.filter((pkg) => pkg.packageType === tier);
 				const offered = inTier.length > 0;
@@ -36,12 +38,12 @@ const StudioTiers = (props: StudioTiersProps) => {
 							{offered ? (
 								<>
 									<span className={'tier-from'}>
-										From <strong className={'price'}>{formatKRW(from)}</strong>
+										{t('From')} <strong className={'price'}>{formatKRW(from)}</strong>
 									</span>
-									<span className={'tier-count'}>{plural(inTier.length, 'package')}</span>
+									<span className={'tier-count'}>{plural(inTier.length, 'package', t)}</span>
 								</>
 							) : (
-								<span className={'tier-off'}>Not offered</span>
+								<span className={'tier-off'}>{t('Not offered')}</span>
 							)}
 						</button>
 					</li>

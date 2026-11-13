@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import moment from 'moment';
@@ -39,6 +40,7 @@ interface CommentItemProps {
 
 /** one comment; your own can be edited in place or deleted after a second click **/
 const CommentItem = ({ comment, isMine, authorHref, onSave, onDelete }: CommentItemProps) => {
+	const { t } = useTranslation('common');
 	const [mode, setMode] = useState<'read' | 'edit' | 'confirm'>('read');
 	const [draft, setDraft] = useState<string>(comment.commentContent);
 	const [busy, setBusy] = useState<boolean>(false);
@@ -70,13 +72,13 @@ const CommentItem = ({ comment, isMine, authorHref, onSave, onDelete }: CommentI
 					<Link href={authorHref} className={'comment-author'}>
 						{author?.memberFullName || author?.memberNick}
 					</Link>
-					<time dateTime={String(comment.createdAt)}>{moment(comment.createdAt).format('D MMMM YYYY')}</time>
+					<time dateTime={String(comment.createdAt)}>{moment(comment.createdAt).format('LL')}</time>
 				</p>
 
 				{mode === 'edit' ? (
 					<form className={'comment-form comment-edit'} onSubmit={save}>
 						<label className={'visually-hidden'} htmlFor={editId}>
-							Edit your comment
+							{t('Edit your comment')}
 						</label>
 						<textarea
 							id={editId}
@@ -93,10 +95,10 @@ const CommentItem = ({ comment, isMine, authorHref, onSave, onDelete }: CommentI
 							</span>
 							<span className={'comment-actions'}>
 								<button type="button" className={'button-link'} onClick={() => setMode('read')}>
-									Cancel
+									{t('Cancel')}
 								</button>
 								<button type="submit" className={'button-secondary'} disabled={!draft.trim() || busy}>
-									{busy ? 'Saving…' : 'Save'}
+									{busy ? t('Saving…') : t('Save')}
 								</button>
 							</span>
 						</div>
@@ -115,21 +117,21 @@ const CommentItem = ({ comment, isMine, authorHref, onSave, onDelete }: CommentI
 								setMode('edit');
 							}}
 						>
-							Edit
+							{t('Edit')}
 						</button>
 						<button type="button" className={'button-link'} onClick={() => setMode('confirm')}>
-							Delete
+							{t('Delete')}
 						</button>
 					</span>
 				)}
 				{isMine && mode === 'confirm' && (
-					<span className={'comment-actions'} role="group" aria-label="Delete this comment?">
-						<span className={'confirm-text'}>Delete this comment?</span>
+					<span className={'comment-actions'} role="group" aria-label={t('Delete this comment?')}>
+						<span className={'confirm-text'}>{t('Delete this comment?')}</span>
 						<button type="button" className={'button-link danger'} disabled={busy} onClick={remove}>
-							{busy ? 'Deleting…' : 'Delete'}
+							{busy ? t('Deleting…') : t('Delete')}
 						</button>
 						<button type="button" className={'button-link'} onClick={() => setMode('read')}>
-							Cancel
+							{t('Cancel')}
 						</button>
 					</span>
 				)}
@@ -143,6 +145,7 @@ const CommentItem = ({ comment, isMine, authorHref, onSave, onDelete }: CommentI
 const CommentsSection = (props: CommentsSectionProps) => {
 	const { refId, group, user, formNote, onCommented } = props;
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const [page, setPage] = useState<number>(1);
 	const [content, setContent] = useState<string>('');
 	const [sending, setSending] = useState<boolean>(false);
@@ -222,7 +225,8 @@ const CommentsSection = (props: CommentsSectionProps) => {
 	return (
 		<section id="comments" className={'detail-section comments-section'} aria-labelledby="comments-title">
 			<h2 id="comments-title" className={'detail-title'}>
-				Comments{total > 0 ? ` (${total})` : ''}
+				{t('Comments')}
+				{total > 0 ? ` (${total})` : ''}
 			</h2>
 
 			{formNote ? (
@@ -230,14 +234,14 @@ const CommentsSection = (props: CommentsSectionProps) => {
 			) : user?._id ? (
 				<form className={'comment-form'} onSubmit={submit}>
 					<label className={'visually-hidden'} htmlFor="comment-text">
-						Write a comment
+						{t('Write a comment')}
 					</label>
 					<textarea
 						id="comment-text"
 						rows={3}
 						maxLength={COMMENT_MAX}
 						value={content}
-						placeholder="Write a comment"
+						placeholder={t('Write a comment')}
 						onChange={(e) => setContent(e.target.value)}
 					/>
 					<div className={'comment-form-foot'}>
@@ -245,17 +249,14 @@ const CommentsSection = (props: CommentsSectionProps) => {
 							{content.length} / {COMMENT_MAX}
 						</span>
 						<button type="submit" className={'button-secondary'} disabled={!content.trim() || sending}>
-							{sending ? 'Posting…' : 'Post comment'}
+							{sending ? t('Posting…') : t('Post comment')}
 						</button>
 					</div>
 				</form>
 			) : (
 				<p className={'comment-login'}>
-					<Link
-						href={`/account/join?referrer=${encodeURIComponent(router.asPath)}`}
-						className={'button-link'}
-					>
-						Log in to comment
+					<Link href={`/account/join?referrer=${encodeURIComponent(router.asPath)}`} className={'button-link'}>
+						{t('Log in to comment')}
 					</Link>
 				</p>
 			)}
@@ -273,7 +274,7 @@ const CommentsSection = (props: CommentsSectionProps) => {
 					))}
 				</ul>
 			) : comments.length === 0 ? (
-				<p className={'comment-empty'}>No comments yet.</p>
+				<p className={'comment-empty'}>{t('No comments yet.')}</p>
 			) : (
 				<ul className={'comment-list'}>
 					{comments.map((comment) => (

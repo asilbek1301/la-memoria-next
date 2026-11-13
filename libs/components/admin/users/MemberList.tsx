@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import { memberHref, memberTypeLabel, statusBadge, statusLabel } from '../adminLabels';
 import { memberPhoto } from '../../studio/studioSearch';
 import Link from 'next/link';
@@ -31,7 +32,6 @@ interface Data {
 	warning: string;
 	block: string;
 }
-
 
 type Order = 'asc' | 'desc';
 
@@ -103,6 +103,7 @@ interface EnhancedTableProps {
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
+	const { t } = useTranslation('common');
 
 	return (
 		<TableHead>
@@ -113,7 +114,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 						align={headCell.numeric ? 'left' : 'center'}
 						padding={headCell.disablePadding ? 'none' : 'normal'}
 					>
-						{headCell.label}
+						{t(headCell.label)}
 					</TableCell>
 				))}
 			</TableRow>
@@ -130,6 +131,7 @@ interface MemberPanelListType {
 }
 
 export const MemberPanelList = (props: MemberPanelListType) => {
+	const { t } = useTranslation('common');
 	const { members, anchorEl, menuIconClickHandler, menuIconCloseHandler, updateMemberHandler } = props;
 
 	return (
@@ -142,7 +144,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 						{members.length === 0 && (
 							<TableRow>
 								<TableCell align="center" colSpan={8}>
-									<span className={'no-data'}>No members here.</span>
+									<span className={'no-data'}>{t('No members here.')}</span>
 								</TableCell>
 							</TableRow>
 						)}
@@ -173,7 +175,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 
 										<TableCell align="center">
 											<Button onClick={(e: any) => menuIconClickHandler(e, index)} className={'badge success'}>
-												{memberTypeLabel(member.memberType)}
+												{t(memberTypeLabel(member.memberType))}
 											</Button>
 
 											<Menu
@@ -195,7 +197,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 															key={type}
 														>
 															<Typography variant={'subtitle1'} component={'span'}>
-																{memberTypeLabel(type)}
+																{t(memberTypeLabel(type))}
 															</Typography>
 														</MenuItem>
 													))}
@@ -205,8 +207,11 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 										<TableCell align="center">{member.memberWarnings}</TableCell>
 										<TableCell align="center">{member.memberBlocks}</TableCell>
 										<TableCell align="center">
-											<Button onClick={(e: any) => menuIconClickHandler(e, member._id)} className={statusBadge(member.memberStatus)}>
-												{statusLabel(member.memberStatus)}
+											<Button
+												onClick={(e: any) => menuIconClickHandler(e, member._id)}
+												className={statusBadge(member.memberStatus)}
+											>
+												{t(statusLabel(member.memberStatus))}
 											</Button>
 
 											<Menu
@@ -228,7 +233,7 @@ export const MemberPanelList = (props: MemberPanelListType) => {
 															key={status}
 														>
 															<Typography variant={'subtitle1'} component={'span'}>
-																{statusLabel(status)}
+																{t(statusLabel(status))}
 															</Typography>
 														</MenuItem>
 													))}

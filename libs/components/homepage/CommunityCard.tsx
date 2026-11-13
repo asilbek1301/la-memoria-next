@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Moment from 'react-moment';
+import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
@@ -21,10 +22,11 @@ interface CommunityCardProps {
 const CommunityCard = (props: CommunityCardProps) => {
 	const { article, withFooter, likeArticleHandler } = props;
 	const user = useReactiveVar(userVar);
+	const { t } = useTranslation('common');
 	const image = article?.articleImage ? `${REACT_APP_API_URL}/${article.articleImage}` : '';
 	const href = articleHref(article);
 	const text = articleExcerpt(article?.articleContent);
-	const category = categoryLabel(article?.articleCategory);
+	const category = t(categoryLabel(article?.articleCategory));
 	const liked = Boolean(article?.meLiked?.[0]?.myFavorite);
 
 	return (
@@ -40,7 +42,7 @@ const CommunityCard = (props: CommunityCardProps) => {
 				<button
 					type="button"
 					className={`like-btn ${liked ? 'liked' : ''}`}
-					aria-label={liked ? `Unlike ${article?.articleTitle}` : `Like ${article?.articleTitle}`}
+					aria-label={t(liked ? 'Unlike {{title}}' : 'Like {{title}}', { title: article?.articleTitle })}
 					aria-pressed={liked}
 					onClick={() => likeArticleHandler(user, article?._id)}
 				>
@@ -49,7 +51,7 @@ const CommunityCard = (props: CommunityCardProps) => {
 			)}
 			<div className={'card-meta'}>
 				<span>{category}</span>
-				<Moment format="MMMM D, YYYY">{article?.createdAt}</Moment>
+				<Moment format="LL">{article?.createdAt}</Moment>
 			</div>
 			<h3 className={'card-title'}>
 				<Link href={href}>{article?.articleTitle}</Link>

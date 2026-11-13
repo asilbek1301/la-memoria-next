@@ -1,5 +1,6 @@
 import React from 'react';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import { useTranslation } from 'next-i18next';
 import { SortMenu } from '../common/ListControls';
 import { PackagesInquiry } from '../../types/package/package.input';
 import { ActiveChip, sortOptions } from './packageSearch';
@@ -17,21 +18,22 @@ interface ResultsToolbarProps {
 /** result count, active filters as removable chips, and the sort menu **/
 const ResultsToolbar = (props: ResultsToolbarProps) => {
 	const { input, total, loading, chips, onRemoveChip, onClearAll, onSort } = props;
+	const { t } = useTranslation('common');
 
 	return (
 		<div className={'results-toolbar'}>
 			<p className={'result-count'} aria-live="polite">
-				{loading ? 'Searching…' : `${total} ${total === 1 ? 'package' : 'packages'}`}
+				{loading ? t('Searching…') : t('{{count}} packages', { count: total })}
 			</p>
 
 			{chips.length > 0 && (
-				<ul className={'active-chips'} aria-label="Active filters">
+				<ul className={'active-chips'} aria-label={t('Active filters')}>
 					{chips.map((chip) => (
 						<li key={chip.key}>
 							<button
 								type="button"
 								className={'filter-chip'}
-								aria-label={`Remove filter ${chip.label}`}
+								aria-label={t('Remove filter {{filter}}', { filter: chip.label })}
 								onClick={() => onRemoveChip(chip)}
 							>
 								{chip.label}
@@ -41,7 +43,7 @@ const ResultsToolbar = (props: ResultsToolbarProps) => {
 					))}
 					<li>
 						<button type="button" className={'button-link clear-all'} onClick={onClearAll}>
-							Clear all
+							{t('Clear all')}
 						</button>
 					</li>
 				</ul>

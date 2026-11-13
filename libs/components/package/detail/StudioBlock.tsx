@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useMutation, useQuery } from '@apollo/client';
 import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import { Member } from '../../../types/member/member';
@@ -18,6 +19,7 @@ interface StudioBlockProps {
 /** "The studio": framed arch portrait, name, location, counts, Follow and View studio **/
 const StudioBlock = (props: StudioBlockProps) => {
 	const { studio: fallback, user } = props;
+	const { t } = useTranslation('common');
 
 	/** APOLLO REQUESTS: the studio with follower count and whether the viewer follows it **/
 	const { data, refetch } = useQuery(GET_MEMBER, {
@@ -32,8 +34,8 @@ const StudioBlock = (props: StudioBlockProps) => {
 	const name = studioName(studio);
 	const href = studioHref(studio);
 	const image = studioImage(studio);
-	const location = studioLocation(studio?.memberAddress);
-	const stats = studioStats(studio);
+	const location = studioLocation(studio?.memberAddress, t);
+	const stats = studioStats(studio, t);
 	const following = Boolean(studio?.meFollowed?.[0]?.myFollowing);
 	const isSelf = user?._id && user._id === studio?._id;
 
@@ -68,11 +70,11 @@ const StudioBlock = (props: StudioBlockProps) => {
 						aria-pressed={following}
 						onClick={followHandler}
 					>
-						{following ? 'Following' : 'Follow'}
+						{following ? t('Following') : t('Follow')}
 					</button>
 				)}
 				<Link href={href} className={'button-link'}>
-					View studio
+					{t('View studio')}
 					<ArrowForwardRoundedIcon />
 				</Link>
 			</div>

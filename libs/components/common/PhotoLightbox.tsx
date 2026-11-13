@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Dialog } from '@mui/material';
+import { useTranslation } from 'next-i18next';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
@@ -27,6 +28,7 @@ interface PhotoLightboxProps {
 /** full-screen photo viewer: arrow keys, swipe, Esc; focus is trapped while open and returns to the opener **/
 const PhotoLightbox = (props: PhotoLightboxProps) => {
 	const { urls, alts, label, lightbox } = props;
+	const { t } = useTranslation('common');
 	const { index, show, close, opener } = lightbox;
 	const touchX = useRef<number | null>(null);
 
@@ -60,7 +62,7 @@ const PhotoLightbox = (props: PhotoLightboxProps) => {
 						<p className={'lightbox-count'} aria-live="polite">
 							{index + 1} / {urls.length}
 						</p>
-						<button type="button" className={'lightbox-btn'} aria-label="Close photos" onClick={close}>
+						<button type="button" className={'lightbox-btn'} aria-label={t('Close photos')} onClick={close}>
 							<CloseRoundedIcon />
 						</button>
 					</div>
@@ -70,12 +72,17 @@ const PhotoLightbox = (props: PhotoLightboxProps) => {
 							<button
 								type="button"
 								className={'lightbox-btn prev'}
-								aria-label="Previous photo"
+								aria-label={t('Previous photo')}
 								onClick={() => show(index - 1)}
 							>
 								<ChevronLeftRoundedIcon />
 							</button>
-							<button type="button" className={'lightbox-btn next'} aria-label="Next photo" onClick={() => show(index + 1)}>
+							<button
+								type="button"
+								className={'lightbox-btn next'}
+								aria-label={t('Next photo')}
+								onClick={() => show(index + 1)}
+							>
 								<ChevronRightRoundedIcon />
 							</button>
 						</>

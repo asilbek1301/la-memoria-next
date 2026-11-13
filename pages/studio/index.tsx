@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import { NetworkStatus, useMutation, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { useReducedMotion } from 'framer-motion';
@@ -36,6 +37,7 @@ export const getStaticProps = async ({ locale }: any) => ({
 
 const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const reduceMotion = useReducedMotion();
 	const [searchFilter, setSearchFilter] = useState<StudiosInquiry>(
 		router?.query?.input ? parseStudiosInput(router.query.input) : initialInput,
@@ -136,15 +138,13 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 				<div className={'container'}>
 					<div className={'header-row'}>
 						<div className={'header-text'}>
-							<span className={'header-label'}>Studios</span>
-							<h1 className={'page-title'}>Meet the studios</h1>
-							<p className={'page-intro'}>
-								The photography studios behind every package, from Seoul to Jeju.
-							</p>
+							<span className={'header-label'}>{t('Studios')}</span>
+							<h1 className={'page-title'}>{t('Meet the studios')}</h1>
+							<p className={'page-intro'}>{t('The photography studios behind every package, from Seoul to Jeju.')}</p>
 						</div>
 						<p className={'studio-count'} aria-live="polite">
 							<i className={'count-dot'} aria-hidden="true" />
-							{loading ? 'Loading studios' : plural(total, 'studio')}
+							{loading ? t('Loading studios') : plural(total, 'studio', t)}
 						</p>
 					</div>
 					<div className={'monogram-rule'} aria-hidden="true">
@@ -159,7 +159,7 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 				</div>
 			)}
 
-			<section className={'studio-results'} ref={listRef} aria-label="All studios">
+			<section className={'studio-results'} ref={listRef} aria-label={t('All studios')}>
 				<div className={'container'}>
 					<div className={'studio-toolbar'}>
 						<form
@@ -174,15 +174,15 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 							<input
 								type="search"
 								value={searchText}
-								placeholder="Search studios"
-								aria-label="Search studios"
+								placeholder={t('Search studios')}
+								aria-label={t('Search studios')}
 								onChange={(e) => setSearchText(e.target.value)}
 							/>
 							{searchText && (
 								<button
 									type="button"
 									className={'clear-btn'}
-									aria-label="Clear search"
+									aria-label={t('Clear search')}
 									onClick={() => setSearchText('')}
 								>
 									<CloseRoundedIcon />
@@ -198,7 +198,7 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 					</div>
 
 					{loading ? (
-						<ul className={'studio-grid'} aria-busy="true" aria-label="Loading studios">
+						<ul className={'studio-grid'} aria-busy="true" aria-label={t('Loading studios')}>
 							{Array.from({ length: 4 }).map((_, i) => (
 								<li className={'tile-skeleton'} key={i}>
 									<Skeleton variant="rectangular" className={'skeleton arch-skeleton'} />
@@ -212,12 +212,12 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 						<div className={'empty-box studio-empty'}>
 							<p>
 								{searchFilter.search?.text
-									? `No studios match “${searchFilter.search.text}”.`
-									: 'No studios match your search.'}
+									? t('No studios match “{{text}}”.', { text: searchFilter.search.text })
+									: t('No studios match your search.')}
 							</p>
 							{searchFilter.search?.text && (
 								<button type="button" className={'button-primary'} onClick={() => searchHandler('')}>
-									Clear search
+									{t('Clear search')}
 								</button>
 							)}
 						</div>
@@ -243,12 +243,12 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 
 					<aside className={'studio-help'} aria-labelledby="studio-help-title">
 						<div className={'help-text'}>
-							<span className={'help-label'}>Need help?</span>
+							<span className={'help-label'}>{t('Need help?')}</span>
 							<h2 id="studio-help-title" className={'help-title'}>
-								Not sure which studio fits you?
+								{t('Not sure which studio fits you?')}
 							</h2>
 							<p className={'help-desc'}>
-								Call us and we will help you compare studios and packages for your date.
+								{t('Call us and we will help you compare studios and packages for your date.')}
 							</p>
 						</div>
 						<div className={'help-actions'}>
@@ -256,7 +256,7 @@ const StudioList: NextPage = ({ initialInput, ...props }: any) => {
 								{SUPPORT_PHONE}
 							</a>
 							<Link href={'/cs'} className={'button-primary'}>
-								Contact us
+								{t('Contact us')}
 							</Link>
 						</div>
 					</aside>

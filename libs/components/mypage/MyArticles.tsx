@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { userVar } from '../../../apollo/store';
@@ -13,6 +14,7 @@ const PAGE_SIZE = 6;
 
 /** your community posts, newest first, with "Write a post" **/
 const MyArticles = () => {
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const [page, setPage] = useState<number>(1);
 
@@ -35,13 +37,13 @@ const MyArticles = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="posts-title" className={'detail-title'}>
-						My posts
+						{t('My posts')}
 					</h2>
-					<p className={'section-note'}>Your posts in the community.</p>
+					<p className={'section-note'}>{t('Your posts in the community.')}</p>
 				</div>
 				{articles.length > 0 && (
 					<Link href={writeHref} className={'button-secondary'}>
-						Write a post
+						{t('Write a post')}
 					</Link>
 				)}
 			</div>
@@ -53,9 +55,9 @@ const MyArticles = () => {
 				</div>
 			) : articles.length === 0 ? (
 				<div className={'empty-box my-empty'}>
-					<p>You haven&apos;t written any posts yet.</p>
+					<p>{t("You haven't written any posts yet.")}</p>
 					<Link href={writeHref} className={'button-primary'}>
-						Write a post
+						{t('Write a post')}
 					</Link>
 				</div>
 			) : (
@@ -67,7 +69,9 @@ const MyArticles = () => {
 					))}
 				</ul>
 			)}
-			{total > PAGE_SIZE && <ResultsPagination page={page} limit={PAGE_SIZE} total={total} onPage={setPage} noun="posts" />}
+			{total > PAGE_SIZE && (
+				<ResultsPagination page={page} limit={PAGE_SIZE} total={total} onPage={setPage} noun="posts" />
+			)}
 		</section>
 	);
 };

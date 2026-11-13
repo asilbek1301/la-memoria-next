@@ -3,6 +3,7 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { useReactiveVar } from '@apollo/client';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import LoginForm from '../../libs/components/account/LoginForm';
 import SignupForm from '../../libs/components/account/SignupForm';
@@ -23,6 +24,7 @@ type Mode = 'login' | 'signup';
 /** Log in and sign up, one page. The URL picks the form (?mode=signup, ?type=studio) and where to return (?referrer=) **/
 const Join: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const mode: Mode = router.query.mode === 'signup' ? 'signup' : 'login';
 	const initialType: AccountType = router.query.type === 'studio' ? 'STUDIO' : 'USER';
@@ -71,7 +73,7 @@ const Join: NextPage = () => {
 			<div id="account-page" className={'account-page'}>
 				<div className={'account-box'}>
 					<h1 id="account-title" className={'account-title'}>
-						Finish your account
+						{t('Finish your account')}
 					</h1>
 					<GoogleFinishForm idToken={googleToken} onSuccess={goNext} onCancel={() => setGoogleToken('')} />
 				</div>
@@ -83,10 +85,10 @@ const Join: NextPage = () => {
 		<div id="account-page" className={'account-page'}>
 			<div className={'account-box'}>
 				<h1 id="account-title" className={'account-title'}>
-					{mode === 'login' ? 'Welcome back' : 'Create your account'}
+					{mode === 'login' ? t('Welcome back') : t('Create your account')}
 				</h1>
 
-				<div className={'mode-toggle'} role="group" aria-label="Log in or sign up">
+				<div className={'mode-toggle'} role="group" aria-label={t('Log in or sign up')}>
 					{(['login', 'signup'] as Mode[]).map((value) => (
 						<button
 							key={value}
@@ -95,7 +97,7 @@ const Join: NextPage = () => {
 							aria-pressed={mode === value}
 							onClick={() => switchMode(value)}
 						>
-							{value === 'login' ? 'Log in' : 'Sign up'}
+							{value === 'login' ? t('Log in') : t('Sign up')}
 						</button>
 					))}
 				</div>
@@ -103,7 +105,7 @@ const Join: NextPage = () => {
 				<GoogleButton onCredential={googleHandler} />
 				{googleError && (
 					<p className={'form-error'} role="alert">
-						{googleError}
+						{t(googleError)}
 					</p>
 				)}
 

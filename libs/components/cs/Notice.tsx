@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Moment from 'react-moment';
+import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { GET_NOTICES } from '../../../apollo/user/query';
@@ -10,6 +11,7 @@ const NOTICE_LIMIT = 50;
 
 /** notices written by admins, newest first; each one opens in place **/
 const Notice = ({ onFaq }: { onFaq: () => void }) => {
+	const { t } = useTranslation('common');
 	const [open, setOpen] = useState<string[]>([]);
 
 	/** APOLLO REQUESTS **/
@@ -19,17 +21,18 @@ const Notice = ({ onFaq }: { onFaq: () => void }) => {
 	});
 	const list: NoticeItem[] = data?.getNotices?.list ?? [];
 
-	const toggle = (id: string) => setOpen((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
+	const toggle = (id: string) =>
+		setOpen((current) => (current.includes(id) ? current.filter((x) => x !== id) : [...current, id]));
 
 	return (
 		<section className={'help-notices'} aria-labelledby="notices-title">
 			<div className={'section-head'}>
 				<h2 id="notices-title" className={'section-title'}>
-					Notices
+					{t('Notices')}
 				</h2>
 			</div>
 			{loading && list.length === 0 ? (
-				<ul className={'faq-list'} aria-busy="true" aria-label="Loading notices">
+				<ul className={'faq-list'} aria-busy="true" aria-label={t('Loading notices')}>
 					{Array.from({ length: 3 }).map((_, i) => (
 						<li key={i} className={'faq-item'}>
 							<Skeleton width="50%" height={32} className={'faq-skeleton'} />
@@ -38,9 +41,9 @@ const Notice = ({ onFaq }: { onFaq: () => void }) => {
 				</ul>
 			) : list.length === 0 ? (
 				<div className={'empty-box help-empty'}>
-					<p>No notices right now.</p>
+					<p>{t('No notices right now.')}</p>
 					<button type="button" className={'button-primary'} onClick={onFaq}>
-						Read the FAQ
+						{t('Read the FAQ')}
 					</button>
 				</div>
 			) : (
@@ -58,16 +61,22 @@ const Notice = ({ onFaq }: { onFaq: () => void }) => {
 										onClick={() => toggle(item._id)}
 									>
 										<span className={'notice-head'}>
-											<Moment className={'notice-date'} format="MMMM D, YYYY">
+											<Moment className={'notice-date'} format="LL">
 												{item.createdAt}
 											</Moment>
-											<span>{item.noticeTitle}</span>
+											<span>{t(item.noticeTitle)}</span>
 										</span>
 										<i className={'faq-sign'} aria-hidden="true" />
 									</button>
 								</h3>
-								<div id={`nc-${item._id}`} role="region" aria-labelledby={`n-${item._id}`} className={'faq-answer'} hidden={!expanded}>
-									<p>{item.noticeContent}</p>
+								<div
+									id={`nc-${item._id}`}
+									role="region"
+									aria-labelledby={`n-${item._id}`}
+									className={'faq-answer'}
+									hidden={!expanded}
+								>
+									<p>{t(item.noticeContent)}</p>
 								</div>
 							</li>
 						);

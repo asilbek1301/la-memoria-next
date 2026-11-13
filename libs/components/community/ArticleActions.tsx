@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
@@ -16,6 +17,7 @@ interface ArticleActionsProps {
 
 /** like, comments and copy link as labelled pill buttons, at the foot of the post **/
 const ArticleActions = ({ liked, likes, comments, onLike }: ArticleActionsProps) => {
+	const { t } = useTranslation('common');
 	const [copied, setCopied] = useState<boolean>(false);
 
 	useEffect(() => {
@@ -37,17 +39,17 @@ const ArticleActions = ({ liked, likes, comments, onLike }: ArticleActionsProps)
 		<div className={'article-actions'}>
 			<button type="button" className={`action-pill ${liked ? 'liked' : ''}`} aria-pressed={liked} onClick={onLike}>
 				{liked ? <FavoriteRoundedIcon /> : <FavoriteBorderRoundedIcon />}
-				{liked ? 'Liked' : 'Like'}
+				{liked ? t('Liked') : t('Like')}
 				{likes > 0 && <span className={'pill-count'}>{likes}</span>}
 			</button>
 			<a href="#comments" className={'action-pill'}>
 				<ChatBubbleOutlineRoundedIcon />
-				Comments
+				{t('Comments')}
 				{comments > 0 && <span className={'pill-count'}>{comments}</span>}
 			</a>
 			<button type="button" className={`action-pill ${copied ? 'copied' : ''}`} onClick={copyLink}>
 				{copied ? <CheckRoundedIcon /> : <LinkRoundedIcon />}
-				<span role="status">{copied ? 'Link copied' : 'Copy link'}</span>
+				<span role="status">{copied ? t('Link copied') : t('Copy link')}</span>
 			</button>
 		</div>
 	);

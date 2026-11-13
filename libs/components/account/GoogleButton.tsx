@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { GOOGLE_CLIENT_ID } from '../../config';
 
 const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client';
@@ -21,6 +23,8 @@ const loadGoogleScript = () =>
 
 /** Google's own "Continue with Google" button, then an "or" line. Hidden while no client ID is configured **/
 const GoogleButton = ({ onCredential }: { onCredential: (idToken: string) => void }) => {
+	const { t } = useTranslation('common');
+	const { locale } = useRouter();
 	const box = useRef<HTMLDivElement>(null);
 	// the latest handler, so Google's one-time callback never calls an old one
 	const handler = useRef(onCredential);
@@ -42,6 +46,8 @@ const GoogleButton = ({ onCredential }: { onCredential: (idToken: string) => voi
 					size: 'large',
 					shape: 'pill',
 					text: 'continue_with',
+					// Google writes its own button text; 'kr' is the site's code for Korean
+					locale: locale === 'kr' ? 'ko' : locale,
 					width: Math.min(box.current.offsetWidth, BUTTON_MAX_WIDTH),
 				});
 			})
@@ -56,7 +62,7 @@ const GoogleButton = ({ onCredential }: { onCredential: (idToken: string) => voi
 		<div className={'google-signin'}>
 			<div ref={box} className={'google-button'} />
 			<p className={'or-line'}>
-				<span>or</span>
+				<span>{t('or')}</span>
 			</p>
 		</div>
 	);

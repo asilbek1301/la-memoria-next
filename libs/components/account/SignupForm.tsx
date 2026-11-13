@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import { signUp } from '../../auth';
 import AccountField from './AccountField';
 import AccountTypeCards from './AccountTypeCards';
@@ -14,6 +15,7 @@ interface SignupFormProps {
 
 /** account type, then nickname, phone and password; the rules tick as the user types **/
 const SignupForm = ({ initialType, onSuccess, onSwitch }: SignupFormProps) => {
+	const { t } = useTranslation('common');
 	const [type, setType] = useState<AccountType>(initialType);
 	const [nick, setNick] = useState<string>('');
 	const [phone, setPhone] = useState<string>('');
@@ -103,17 +105,17 @@ const SignupForm = ({ initialType, onSuccess, onSwitch }: SignupFormProps) => {
 
 			{serverError && (
 				<p className={'form-error'} role="alert">
-					{serverError}
+					{t(serverError)}
 				</p>
 			)}
 			<button type="submit" className={'button-primary submit-btn'} disabled={sending}>
-				{sending ? 'Creating account…' : type === 'STUDIO' ? 'Create studio account' : 'Create couple account'}
+				{sending ? t('Creating account…') : type === 'STUDIO' ? t('Create studio account') : t('Create couple account')}
 			</button>
 
 			<p className={'switch-line'}>
-				Already have an account?{' '}
+				{t('Already have an account?')}{' '}
 				<button type="button" className={'switch-btn'} onClick={onSwitch}>
-					Log in
+					{t('Log in')}
 				</button>
 			</p>
 		</form>

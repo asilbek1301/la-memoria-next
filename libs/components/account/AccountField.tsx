@@ -1,4 +1,5 @@
 import React, { forwardRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import { Rule } from './accountRules';
 
@@ -17,7 +18,9 @@ interface AccountFieldProps {
 
 /** one labelled input with optional live rule hints, an inline error and a Show / Hide button for passwords **/
 const AccountField = forwardRef<HTMLInputElement, AccountFieldProps>((props, ref) => {
-	const { id, label, value, onChange, type = 'text', autoComplete, error, rules } = props;
+	const { t } = useTranslation('common');
+	const { id, value, onChange, type = 'text', autoComplete, error, rules } = props;
+	const label = t(props.label);
 	const [visible, setVisible] = useState<boolean>(false);
 	const isPassword = type === 'password';
 	const describedBy = [rules?.length ? `${id}-rules` : '', error ? `${id}-error` : ''].filter(Boolean).join(' ');
@@ -45,11 +48,11 @@ const AccountField = forwardRef<HTMLInputElement, AccountFieldProps>((props, ref
 					<button
 						type="button"
 						className={'show-btn'}
-						aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+						aria-label={t(visible ? 'Hide {{field}}' : 'Show {{field}}', { field: label.toLowerCase() })}
 						aria-pressed={visible}
 						onClick={() => setVisible(!visible)}
 					>
-						{visible ? 'Hide' : 'Show'}
+						{visible ? t('Hide') : t('Show')}
 					</button>
 				)}
 			</div>
@@ -60,8 +63,8 @@ const AccountField = forwardRef<HTMLInputElement, AccountFieldProps>((props, ref
 						return (
 							<li key={rule.label} className={met ? 'met' : ''}>
 								<CheckRoundedIcon aria-hidden="true" />
-								{rule.label}
-								<span className={'visually-hidden'}>{met ? ' (done)' : ''}</span>
+								{t(rule.label)}
+								<span className={'visually-hidden'}>{met ? ` ${t('(done)')}` : ''}</span>
 							</li>
 						);
 					})}
@@ -69,7 +72,7 @@ const AccountField = forwardRef<HTMLInputElement, AccountFieldProps>((props, ref
 			)}
 			{error && (
 				<p id={`${id}-error`} className={'field-error'}>
-					{error}
+					{t(error)}
 				</p>
 			)}
 		</div>

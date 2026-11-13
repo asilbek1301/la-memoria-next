@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
+import { useTranslation } from 'next-i18next';
 import { Skeleton } from '@mui/material';
 import { GET_PACKAGES } from '../../../apollo/user/query';
 import { PackageType } from '../../enums/package.enum';
@@ -30,6 +31,7 @@ const useTierSummary = (type: PackageType) => {
 };
 
 const PackageTiers = () => {
+	const { t } = useTranslation('common');
 	const tiers = [
 		useTierSummary(PackageType.PEARL),
 		useTierSummary(PackageType.GOLD),
@@ -40,8 +42,10 @@ const PackageTiers = () => {
 		<HomeSection
 			id="tier-list"
 			tone="tinted"
-			title="Choose Your Tier"
-			subtitle="Every studio offers its packages in three tiers. Compare prices and find the one that fits your day."
+			title={t('Choose Your Tier')}
+			subtitle={t(
+				'Every studio offers its packages in three tiers. Compare prices and find the one that fits your day.',
+			)}
 		>
 			<ol className={'tier-list'}>
 				{tiers.map((tier) => (
@@ -49,15 +53,13 @@ const PackageTiers = () => {
 						<div className={'tier-name'}>
 							<h3>{prettyEnum(tier.type)}</h3>
 						</div>
-						<p className={'tier-copy'}>{tierCopy[tier.type]}</p>
+						<p className={'tier-copy'}>{t(tierCopy[tier.type])}</p>
 						<div className={'tier-chips'}>
 							{tier.loading ? (
 								<Skeleton width={120} />
 							) : (
 								tier.total > 0 && (
-									<span className={'tier-count'}>
-										{tier.total} {tier.total === 1 ? 'package' : 'packages'} available
-									</span>
+									<span className={'tier-count'}>{t('{{count}} packages available', { count: tier.total })}</span>
 								)
 							)}
 						</div>
@@ -66,14 +68,14 @@ const PackageTiers = () => {
 								<Skeleton width={140} height={40} />
 							) : tier.total > 0 && tier.fromPrice !== undefined ? (
 								<>
-									<span className={'tier-from'}>From</span>
+									<span className={'tier-from'}>{t('From')}</span>
 									<span className={'price large'}>{formatKRW(tier.fromPrice)}</span>
 									<Link href={packageSearchHref({ typeList: [tier.type] })} className={'button-secondary'}>
-										View packages
+										{t('View packages')}
 									</Link>
 								</>
 							) : (
-								<span className={'tier-none'}>No packages yet</span>
+								<span className={'tier-none'}>{t('No packages yet')}</span>
 							)}
 						</div>
 					</li>

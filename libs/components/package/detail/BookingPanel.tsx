@@ -2,6 +2,7 @@ import React, { useId, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import moment from 'moment';
+import { useTranslation } from 'next-i18next';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import { Package } from '../../../types/package/package';
 import { MemberType } from '../../../enums/member.enum';
@@ -21,6 +22,7 @@ interface BookingPanelProps {
 const BookingPanel = (props: BookingPanelProps) => {
 	const { pkg, user, onRequest } = props;
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const fieldId = useId();
 	const [date, setDate] = useState<string>('');
 	const [note, setNote] = useState<string>('');
@@ -48,25 +50,25 @@ const BookingPanel = (props: BookingPanelProps) => {
 		<div className={'booking-panel'}>
 			<div className={'booking-price'}>
 				<span className={'price large'}>{formatKRW(pkg?.packagePrice)}</span>
-				<span className={'booking-tier'}>{prettyEnum(pkg?.packageType)} tier</span>
+				<span className={'booking-tier'}>{t('{{tier}} tier', { tier: prettyEnum(pkg?.packageType) })}</span>
 			</div>
 
 			{status === 'sent' ? (
 				<div className={'booking-sent'} role="status">
 					<CheckCircleOutlineRoundedIcon aria-hidden="true" />
-					<p className={'sent-title'}>Request sent</p>
-					<p className={'sent-desc'}>The studio will confirm your date. You can follow it in My Page.</p>
+					<p className={'sent-title'}>{t('Request sent')}</p>
+					<p className={'sent-desc'}>{t('The studio will confirm your date. You can follow it in My Page.')}</p>
 					<Link href={{ pathname: '/mypage', query: { category: 'myReservations' } }} className={'button-link'}>
-						View my reservations
+						{t('View my reservations')}
 					</Link>
 					<button type="button" className={'button-link'} onClick={() => setStatus('idle')}>
-						Request another date
+						{t('Request another date')}
 					</button>
 				</div>
 			) : (
 				<form className={'booking-form'} onSubmit={submit}>
 					<label className={'field'} htmlFor={`${fieldId}-date`}>
-						<span className={'field-label'}>Date</span>
+						<span className={'field-label'}>{t('Date')}</span>
 						<input
 							id={`${fieldId}-date`}
 							type="date"
@@ -79,7 +81,7 @@ const BookingPanel = (props: BookingPanelProps) => {
 					</label>
 					<label className={'field'} htmlFor={`${fieldId}-note`}>
 						<span className={'field-label'}>
-							Note <span className={'field-optional'}>(optional)</span>
+							{t('Note')} <span className={'field-optional'}>{t('(optional)')}</span>
 						</span>
 						<textarea
 							id={`${fieldId}-note`}
@@ -87,7 +89,7 @@ const BookingPanel = (props: BookingPanelProps) => {
 							maxLength={NOTE_MAX}
 							value={note}
 							disabled={!isActive}
-							placeholder="Anything the studio should know"
+							placeholder={t('Anything the studio should know')}
 							onChange={(e) => setNote(e.target.value)}
 						/>
 						<span className={'field-count'} aria-hidden="true">
@@ -97,7 +99,7 @@ const BookingPanel = (props: BookingPanelProps) => {
 
 					{!loggedIn ? (
 						<Link href={loginHref} className={'button-primary booking-btn'}>
-							Log in to reserve
+							{t('Log in to reserve')}
 						</Link>
 					) : (
 						<button
@@ -105,16 +107,16 @@ const BookingPanel = (props: BookingPanelProps) => {
 							className={'button-primary booking-btn'}
 							disabled={!isCouple || !isActive || !date || status === 'sending'}
 						>
-							{status === 'sending' ? 'Sending…' : 'Request reservation'}
+							{status === 'sending' ? t('Sending…') : t('Request reservation')}
 						</button>
 					)}
 
 					<p className={'booking-hint'}>
 						{!isActive
-							? 'This package is not taking reservations right now.'
+							? t('This package is not taking reservations right now.')
 							: loggedIn && !isCouple
-							? 'Only couple accounts can request a reservation.'
-							: 'The studio confirms your request. You will not be charged now.'}
+							? t('Only couple accounts can request a reservation.')
+							: t('The studio confirms your request. You will not be charged now.')}
 					</p>
 				</form>
 			)}

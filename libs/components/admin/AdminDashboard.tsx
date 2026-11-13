@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import Moment from 'react-moment';
 import { DocumentNode, useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
@@ -26,12 +27,24 @@ const useTotal = (query: DocumentNode, field: string, search: Record<string, unk
 	return { total: (data?.[field]?.metaCounter?.[0]?.total ?? 0) as number, loading: loading && !data };
 };
 
-const Tile = (props: { label: string; total: number; loading: boolean; href: string; note?: string; highlight?: boolean }) => {
+const Tile = (props: {
+	label: string;
+	total: number;
+	loading: boolean;
+	href: string;
+	note?: string;
+	highlight?: boolean;
+}) => {
 	const { label, total, loading, href, note, highlight } = props;
+	const { t } = useTranslation('common');
 	return (
 		<Link href={href} className={`stat-tile ${highlight && total > 0 ? 'highlight' : ''}`}>
-			<span className={'stat-label'}>{label}</span>
-			{loading ? <Skeleton width={60} height={44} /> : <span className={'stat-value'}>{total.toLocaleString('en-US')}</span>}
+			<span className={'stat-label'}>{t(label)}</span>
+			{loading ? (
+				<Skeleton width={60} height={44} />
+			) : (
+				<span className={'stat-value'}>{total.toLocaleString('en-US')}</span>
+			)}
 			{note && <span className={'stat-note'}>{note}</span>}
 		</Link>
 	);
@@ -39,12 +52,17 @@ const Tile = (props: { label: string; total: number; loading: boolean; href: str
 
 /** /_admin: counts and the latest activity, each linking to its page; built only from the existing admin queries **/
 const AdminDashboard = () => {
+	const { t } = useTranslation('common');
 	const members = useTotal(GET_ALL_MEMBERS_BY_ADMIN, 'getAllMembersByAdmin');
 	const studios = useTotal(GET_ALL_MEMBERS_BY_ADMIN, 'getAllMembersByAdmin', { memberType: 'STUDIO' });
 	const couples = useTotal(GET_ALL_MEMBERS_BY_ADMIN, 'getAllMembersByAdmin', { memberType: 'USER' });
 	const packages = useTotal(GET_ALL_PACKAGES_BY_ADMIN, 'getAllPackagesByAdmin', { packageStatus: 'ACTIVE' });
-	const pending = useTotal(GET_ALL_RESERVATIONS_BY_ADMIN, 'getAllReservationsByAdmin', { reservationStatus: 'PENDING' });
-	const confirmed = useTotal(GET_ALL_RESERVATIONS_BY_ADMIN, 'getAllReservationsByAdmin', { reservationStatus: 'CONFIRMED' });
+	const pending = useTotal(GET_ALL_RESERVATIONS_BY_ADMIN, 'getAllReservationsByAdmin', {
+		reservationStatus: 'PENDING',
+	});
+	const confirmed = useTotal(GET_ALL_RESERVATIONS_BY_ADMIN, 'getAllReservationsByAdmin', {
+		reservationStatus: 'CONFIRMED',
+	});
 	const newMessages = useTotal(GET_ALL_INQUIRIES_BY_ADMIN, 'getAllInquiriesByAdmin', { inquiryStatus: 'NEW' });
 	const posts = useTotal(GET_ALL_BOARD_ARTICLES_BY_ADMIN, 'getAllBoardArticlesByAdmin', { articleStatus: 'ACTIVE' });
 
@@ -62,13 +80,13 @@ const AdminDashboard = () => {
 	const memberNote =
 		studios.loading || couples.loading
 			? undefined
-			: `${studios.total.toLocaleString('en-US')} studios · ${couples.total.toLocaleString('en-US')} couples`;
+			: `${t('{{count}} studios', { count: studios.total })} · ${t('{{count}} couples', { count: couples.total })}`;
 
 	return (
 		<div className={'content dashboard'}>
 			<div className={'dashboard-head'}>
-				<h2 className={'tit'}>Dashboard</h2>
-				<p className={'dashboard-intro'}>La Memoria at a glance. Each number opens its list.</p>
+				<h2 className={'tit'}>{t('Dashboard')}</h2>
+				<p className={'dashboard-intro'}>{t('La Memoria at a glance. Each number opens its list.')}</p>
 			</div>
 
 			<div className={'stat-grid'}>
@@ -78,7 +96,7 @@ const AdminDashboard = () => {
 					label={'Pending reservations'}
 					{...pending}
 					href={'/_admin/reservations'}
-					note={confirmed.loading ? undefined : `${confirmed.total.toLocaleString('en-US')} confirmed`}
+					note={confirmed.loading ? undefined : t('{{count}} confirmed', { count: confirmed.total })}
 				/>
 				<Tile label={'New messages'} {...newMessages} href={'/_admin/cs/inquiry'} highlight />
 				<Tile label={'Community posts'} {...posts} href={'/_admin/community'} />
@@ -87,27 +105,34 @@ const AdminDashboard = () => {
 			<div className={'panel-grid'}>
 				<section className={'dash-panel'} aria-labelledby="latest-reservations">
 					<div className={'panel-head'}>
-						<h3 id="latest-reservations">Latest reservations</h3>
+						<h3 id="latest-reservations">{t('Latest reservations')}</h3>
 						<Link href={'/_admin/reservations'} className={'panel-link'}>
-							All reservations
+							{t('All reservations')}
 						</Link>
 					</div>
 					{latestReservations.loading && !latestReservations.data ? (
 						<Skeleton variant="rectangular" height={180} />
 					) : reservations.length === 0 ? (
-						<p className={'panel-empty'}>No reservations yet.</p>
+						<p className={'panel-empty'}>{t('No reservations yet.')}</p>
 					) : (
 						<ul className={'dash-list'}>
 							{reservations.map((reservation) => (
 								<li key={reservation._id}>
 									<div className={'item-main'}>
-										<span className={'item-title'}>{reservation.packageData?.packageTitle ?? 'Package removed'}</span>
+										<span className={'item-title'}>
+											{reservation.packageData?.packageTitle
+												? t(reservation.packageData.packageTitle)
+												: t('Package removed')}
+										</span>
 										<span className={'item-meta'}>
-											{reservation.memberData?.memberNick ?? '-'} · shoot{' '}
-											<Moment format="YYYY-MM-DD">{reservation.reservationDate}</Moment> · {formatKRW(reservation.reservationPrice)}
+											{reservation.memberData?.memberNick ?? '-'} · {t('shoot')}{' '}
+											<Moment format="YYYY-MM-DD">{reservation.reservationDate}</Moment> ·{' '}
+											{formatKRW(reservation.reservationPrice)}
 										</span>
 									</div>
-									<span className={statusBadge(reservation.reservationStatus)}>{statusLabel(reservation.reservationStatus)}</span>
+									<span className={statusBadge(reservation.reservationStatus)}>
+										{t(statusLabel(reservation.reservationStatus))}
+									</span>
 								</li>
 							))}
 						</ul>
@@ -116,15 +141,15 @@ const AdminDashboard = () => {
 
 				<section className={'dash-panel'} aria-labelledby="new-messages">
 					<div className={'panel-head'}>
-						<h3 id="new-messages">New messages</h3>
+						<h3 id="new-messages">{t('New messages')}</h3>
 						<Link href={'/_admin/cs/inquiry'} className={'panel-link'}>
-							Open the inbox
+							{t('Open the inbox')}
 						</Link>
 					</div>
 					{latestMessages.loading && !latestMessages.data ? (
 						<Skeleton variant="rectangular" height={180} />
 					) : messages.length === 0 ? (
-						<p className={'panel-empty'}>No new messages. Everything has been answered.</p>
+						<p className={'panel-empty'}>{t('No new messages. Everything has been answered.')}</p>
 					) : (
 						<ul className={'dash-list'}>
 							{messages.map((message) => (

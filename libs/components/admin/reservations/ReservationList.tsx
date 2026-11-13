@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'next-i18next';
 import Link from 'next/link';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import Moment from 'react-moment';
@@ -13,6 +14,7 @@ interface ReservationPanelListType {
 }
 
 export const ReservationPanelList = (props: ReservationPanelListType) => {
+	const { t } = useTranslation('common');
 	const { reservations } = props;
 
 	return (
@@ -22,7 +24,7 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 					<TableRow>
 						{headCells.map((cell) => (
 							<TableCell key={cell} align={cell === 'Reservation ID' ? 'left' : 'center'}>
-								{cell}
+								{t(cell)}
 							</TableCell>
 						))}
 					</TableRow>
@@ -31,7 +33,7 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 					{reservations.length === 0 && (
 						<TableRow>
 							<TableCell align="center" colSpan={headCells.length}>
-								<span className={'no-data'}>No reservations here.</span>
+								<span className={'no-data'}>{t('No reservations here.')}</span>
 							</TableCell>
 						</TableRow>
 					)}
@@ -41,7 +43,7 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 							<TableCell align="center">
 								{reservation.packageData ? (
 									<Link href={`/package/detail?id=${reservation.packageData._id}`}>
-										{reservation.packageData.packageTitle}
+										{t(reservation.packageData.packageTitle)}
 									</Link>
 								) : (
 									'-'
@@ -56,7 +58,9 @@ export const ReservationPanelList = (props: ReservationPanelListType) => {
 								<Moment format="YYYY.MM.DD">{reservation.createdAt}</Moment>
 							</TableCell>
 							<TableCell align="center">
-								<span className={statusBadge(reservation.reservationStatus)}>{statusLabel(reservation.reservationStatus)}</span>
+								<span className={statusBadge(reservation.reservationStatus)}>
+									{t(statusLabel(reservation.reservationStatus))}
+								</span>
 							</TableCell>
 						</TableRow>
 					))}

@@ -7,6 +7,7 @@ import moment from 'moment';
 import { Skeleton } from '@mui/material';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useTranslation } from 'next-i18next';
 import withLayoutFull from '../../libs/components/layout/LayoutFull';
 import CommentsSection from '../../libs/components/common/CommentsSection';
 import ArticleActions from '../../libs/components/community/ArticleActions';
@@ -47,6 +48,7 @@ const LATEST_LIMIT = 4; // newest posts listed in the side column
     category. The URL is /community/detail?id=… (older links also carry ?articleCategory=, which is no longer needed) **/
 const CommunityDetail: NextPage = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const articleId = typeof router.query.id === 'string' ? router.query.id : '';
 	const [liking, setLiking] = useState<boolean>(false);
@@ -118,7 +120,9 @@ const CommunityDetail: NextPage = () => {
 		if (!article) return;
 		setDeleting(true);
 		try {
-			await updateBoardArticle({ variables: { input: { _id: article._id, articleStatus: BoardArticleStatus.DELETE } } });
+			await updateBoardArticle({
+				variables: { input: { _id: article._id, articleStatus: BoardArticleStatus.DELETE } },
+			});
 			await router.replace(categoryHref(article.articleCategory));
 		} catch (err) {
 			setDeleting(false);
@@ -135,9 +139,9 @@ const CommunityDetail: NextPage = () => {
 			<div id="community-detail-page" className={'detail-page community-detail'}>
 				<div className={'container'}>
 					<div className={'empty-box detail-missing'}>
-						<p>This post doesn&apos;t exist or was removed.</p>
+						<p>{t("This post doesn't exist or was removed.")}</p>
 						<Link href={'/community'} className={'button-primary'}>
-							Back to Community
+							{t('Back to Community')}
 						</Link>
 					</div>
 				</div>
@@ -147,7 +151,12 @@ const CommunityDetail: NextPage = () => {
 
 	if (!article) {
 		return (
-			<div id="community-detail-page" className={'detail-page community-detail'} aria-busy="true" aria-label="Loading post">
+			<div
+				id="community-detail-page"
+				className={'detail-page community-detail'}
+				aria-busy="true"
+				aria-label={t('Loading post')}
+			>
 				<div className={'container'}>
 					<Skeleton width={200} className={'crumb-skeleton'} />
 					<div className={'post-layout'}>
@@ -173,16 +182,16 @@ const CommunityDetail: NextPage = () => {
 	const author = article.memberData;
 	const isMine = Boolean(user?._id) && user._id === article.memberId;
 	const views = article.articleViews ?? 0;
-	const label = categoryLabel(category);
+	const label = t(categoryLabel(category));
 	const cover = article.articleImage ? `${REACT_APP_API_URL}/${article.articleImage}` : '';
 
 	return (
 		<div id="community-detail-page" className={'detail-page community-detail'}>
 			<div className={'container'}>
-				<nav className={'breadcrumb'} aria-label="Breadcrumb">
+				<nav className={'breadcrumb'} aria-label={t('Breadcrumb')}>
 					<ol>
 						<li>
-							<Link href={'/community'}>Community</Link>
+							<Link href={'/community'}>{t('Community')}</Link>
 						</li>
 						<li>
 							<Link href={categoryHref(category)}>{label}</Link>
@@ -206,15 +215,15 @@ const CommunityDetail: NextPage = () => {
 									</h1>
 									<p className={'article-meta'}>
 										<span>
-											By{' '}
+											{t('By')}{' '}
 											<Link href={authorHref(article)} className={'meta-author'}>
-												{author ? studioName(author) : 'Member'}
+												{author ? studioName(author) : t('Member')}
 											</Link>
 										</span>
 										<time dateTime={new Date(article.createdAt).toISOString()}>
-											{moment(article.createdAt).format('MMMM D, YYYY')}
+											{moment(article.createdAt).format('LL')}
 										</time>
-										{views > 0 && <span>{plural(views, 'view')}</span>}
+										{views > 0 && <span>{plural(views, 'view', t)}</span>}
 									</p>
 								</header>
 
@@ -232,19 +241,24 @@ const CommunityDetail: NextPage = () => {
 								/>
 								{isMine &&
 									(confirmDelete ? (
-										<span className={'owner-actions'} role="group" aria-label="Delete this post?">
-											<span className={'confirm-text'}>Delete this post?</span>
-											<button type="button" className={'button-link danger'} disabled={deleting} onClick={deleteHandler}>
-												{deleting ? 'Deleting…' : 'Delete'}
+										<span className={'owner-actions'} role="group" aria-label={t('Delete this post?')}>
+											<span className={'confirm-text'}>{t('Delete this post?')}</span>
+											<button
+												type="button"
+												className={'button-link danger'}
+												disabled={deleting}
+												onClick={deleteHandler}
+											>
+												{deleting ? t('Deleting…') : t('Delete')}
 											</button>
 											<button type="button" className={'button-link'} onClick={() => setConfirmDelete(false)}>
-												Cancel
+												{t('Cancel')}
 											</button>
 										</span>
 									) : (
 										<span className={'owner-actions'}>
 											<button type="button" className={'button-link'} onClick={() => setConfirmDelete(true)}>
-												Delete post
+												{t('Delete post')}
 											</button>
 										</span>
 									))}

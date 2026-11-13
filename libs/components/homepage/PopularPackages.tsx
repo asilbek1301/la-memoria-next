@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
+import { useTranslation } from 'next-i18next';
 import { Skeleton } from '@mui/material';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { A11y, Navigation } from 'swiper';
@@ -26,6 +27,7 @@ const styleTabs: { value: StyleTab; label: string }[] = [
 
 const PopularPackages = (props: PopularPackagesProps) => {
 	const { initialInput } = props;
+	const { t } = useTranslation('common');
 	const [style, setStyle] = useState<StyleTab>('ALL');
 	const input: PackagesInquiry = {
 		...initialInput,
@@ -45,15 +47,20 @@ const PopularPackages = (props: PopularPackagesProps) => {
 	return (
 		<HomeSection
 			id="popular"
-			title="Most Popular Packages"
+			title={t('Most Popular Packages')}
 			aside={
 				<>
-					<FilterTabs label="Filter by style" options={styleTabs} value={style} onChange={setStyle} />
+					<FilterTabs
+						label={t('Filter by style')}
+						options={styleTabs.map((tab) => ({ ...tab, label: t(tab.label) }))}
+						value={style}
+						onChange={setStyle}
+					/>
 					<div className={'arrow-box'}>
-						<button type="button" className={'arrow-btn popular-prev'} aria-label="Previous packages">
+						<button type="button" className={'arrow-btn popular-prev'} aria-label={t('Previous packages')}>
 							<ChevronLeftRoundedIcon />
 						</button>
-						<button type="button" className={'arrow-btn popular-next'} aria-label="Next packages">
+						<button type="button" className={'arrow-btn popular-next'} aria-label={t('Next packages')}>
 							<ChevronRightRoundedIcon />
 						</button>
 					</div>
@@ -61,7 +68,7 @@ const PopularPackages = (props: PopularPackagesProps) => {
 			}
 		>
 			{showSkeleton ? (
-				<div className={'popular-skeleton'} aria-busy="true" aria-label="Loading popular packages">
+				<div className={'popular-skeleton'} aria-busy="true" aria-label={t('Loading popular packages')}>
 					{[0, 1, 2].map((i) => (
 						<div key={i}>
 							<Skeleton variant="rectangular" className={'skeleton portrait'} />
@@ -74,11 +81,13 @@ const PopularPackages = (props: PopularPackagesProps) => {
 				<EmptyState
 					message={
 						style === 'ALL'
-							? 'No packages have been published yet. Popular packages will appear here as couples start viewing them.'
-							: `No ${prettyEnum(style).toLowerCase()} style packages yet.`
+							? t(
+									'No packages have been published yet. Popular packages will appear here as couples start viewing them.',
+							  )
+							: t('No {{style}} style packages yet.', { style: t(prettyEnum(style)).toLowerCase() })
 					}
 					href="/package"
-					linkLabel="Browse all packages"
+					linkLabel={t('Browse all packages')}
 				/>
 			) : (
 				<Swiper

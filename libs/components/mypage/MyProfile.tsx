@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'next-i18next';
 import axios from 'axios';
 import { useMutation, useReactiveVar } from '@apollo/client';
 import { userVar } from '../../../apollo/store';
@@ -12,11 +13,15 @@ import { memberPhoto } from '../studio/studioSearch';
 
 const DESC_MAX = 300;
 
-type ProfileFields = Pick<MemberUpdate, 'memberNick' | 'memberFullName' | 'memberPhone' | 'memberAddress' | 'memberDesc' | 'memberImage'>;
+type ProfileFields = Pick<
+	MemberUpdate,
+	'memberNick' | 'memberFullName' | 'memberPhone' | 'memberAddress' | 'memberDesc' | 'memberImage'
+>;
 
 /** profile form: photo, nickname, name, phone, address and an "About" text (same UPDATE_MEMBER and token refresh as before) **/
 const MyProfile = () => {
 	const user = useReactiveVar(userVar);
+	const { t } = useTranslation('common');
 	const isStudio = user?.memberType === MemberType.STUDIO;
 	const fileRef = useRef<HTMLInputElement>(null);
 	const [form, setForm] = useState<ProfileFields>({});
@@ -112,7 +117,9 @@ const MyProfile = () => {
 
 	const image = memberPhoto(form.memberImage);
 	const nickOk = (form.memberNick?.trim().length ?? 0) >= 3 && (form.memberNick?.trim().length ?? 0) <= 12;
-	const nameOk = !form.memberFullName?.trim() || (form.memberFullName.trim().length >= 3 && form.memberFullName.trim().length <= 100);
+	const nameOk =
+		!form.memberFullName?.trim() ||
+		(form.memberFullName.trim().length >= 3 && form.memberFullName.trim().length <= 100);
 	const canSave = nickOk && nameOk && Boolean(form.memberPhone?.trim()) && !uploading && !saving;
 
 	return (
@@ -120,10 +127,10 @@ const MyProfile = () => {
 			<div className={'section-row'}>
 				<div>
 					<h2 id="profile-title" className={'detail-title'}>
-						Profile
+						{t('Profile')}
 					</h2>
 					<p className={'section-note'}>
-						{isStudio ? 'How your studio appears to couples.' : 'Your details for studios and other members.'}
+						{isStudio ? t('How your studio appears to couples.') : t('Your details for studios and other members.')}
 					</p>
 				</div>
 			</div>
@@ -131,47 +138,60 @@ const MyProfile = () => {
 			<form className={'my-form'} onSubmit={submit}>
 				<div className={'photo-field'}>
 					<div className={'my-avatar large'} aria-hidden="true">
-						{image ? <img src={image} alt="" /> : <span className={'arch-initial'}>{(form.memberNick ?? '?').charAt(0).toUpperCase()}</span>}
+						{image ? (
+							<img src={image} alt="" />
+						) : (
+							<span className={'arch-initial'}>{(form.memberNick ?? '?').charAt(0).toUpperCase()}</span>
+						)}
 					</div>
 					<div className={'photo-actions'}>
-						<p className={'field-label'}>Photo</p>
+						<p className={'field-label'}>{t('Photo')}</p>
 						<input ref={fileRef} type="file" accept="image/jpeg,image/jpg,image/png" hidden onChange={uploadImage} />
-						<button type="button" className={'button-secondary'} onClick={() => fileRef.current?.click()} disabled={uploading}>
-							{uploading ? 'Uploading…' : image ? 'Change photo' : 'Add a photo'}
+						<button
+							type="button"
+							className={'button-secondary'}
+							onClick={() => fileRef.current?.click()}
+							disabled={uploading}
+						>
+							{uploading ? t('Uploading…') : image ? t('Change photo') : t('Add a photo')}
 						</button>
-						<p className={'field-help'}>JPG or PNG.</p>
+						<p className={'field-help'}>{t('JPG or PNG.')}</p>
 					</div>
 				</div>
 
 				<div className={'form-grid'}>
 					<label className={'field'}>
-						<span className={'field-label'}>Nickname</span>
+						<span className={'field-label'}>{t('Nickname')}</span>
 						<input value={form.memberNick ?? ''} onChange={set('memberNick')} minLength={3} maxLength={12} required />
-						<span className={'field-help'}>3 to 12 characters.</span>
+						<span className={'field-help'}>{t('3 to 12 characters.')}</span>
 					</label>
 					<label className={'field'}>
 						<span className={'field-label'}>
-							{isStudio ? 'Studio name' : 'Full name'} <span className={'field-optional'}>(optional)</span>
+							{isStudio ? t('Studio name') : t('Full name')} <span className={'field-optional'}>{t('(optional)')}</span>
 						</span>
 						<input value={form.memberFullName ?? ''} onChange={set('memberFullName')} maxLength={100} />
-						{isStudio && <span className={'field-help'}>Shown instead of your nickname.</span>}
+						{isStudio && <span className={'field-help'}>{t('Shown instead of your nickname.')}</span>}
 					</label>
 					<label className={'field'}>
-						<span className={'field-label'}>Phone</span>
+						<span className={'field-label'}>{t('Phone')}</span>
 						<input type="tel" value={form.memberPhone ?? ''} onChange={set('memberPhone')} required />
 					</label>
 					<label className={'field'}>
-						<span className={'field-label'}>Address</span>
+						<span className={'field-label'}>{t('Address')}</span>
 						<input value={form.memberAddress ?? ''} onChange={set('memberAddress')} />
-						{isStudio && <span className={'field-help'}>Street, district, city. For example: 12, Dosan-daero, Gangnam-gu, Seoul</span>}
+						{isStudio && (
+							<span className={'field-help'}>
+								{t('Street, district, city. For example: 12, Dosan-daero, Gangnam-gu, Seoul')}
+							</span>
+						)}
 					</label>
 					<label className={'field wide'}>
 						<span className={'field-label'}>
-							About <span className={'field-optional'}>(optional)</span>
+							{t('About')} <span className={'field-optional'}>{t('(optional)')}</span>
 						</span>
 						<textarea rows={4} maxLength={DESC_MAX} value={form.memberDesc ?? ''} onChange={set('memberDesc')} />
 						<span className={'field-help'}>
-							{isStudio ? 'Shown on your studio page. ' : ''}
+							{isStudio ? `${t('Shown on your studio page.')} ` : ''}
 							{(form.memberDesc ?? '').length} / {DESC_MAX}
 						</span>
 					</label>
@@ -179,7 +199,7 @@ const MyProfile = () => {
 
 				<div className={'form-foot'}>
 					<button type="submit" className={'button-primary'} disabled={!canSave}>
-						{saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
+						{saving ? t('Saving…') : saved ? t('Saved') : t('Save changes')}
 					</button>
 				</div>
 			</form>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { useReactiveVar } from '@apollo/client';
 import ChatBubbleOutlineRoundedIcon from '@mui/icons-material/ChatBubbleOutlineRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
@@ -54,6 +55,7 @@ const groupMessages = (messages: ChatMessage[], myId: string) =>
     logged-in members can write (the socket lives in libs/chat/chatSocket.ts) **/
 const Chat = () => {
 	const router = useRouter();
+	const { t } = useTranslation('common');
 	const user = useReactiveVar(userVar);
 	const messages = useReactiveVar(chatMessagesVar);
 	const online = useReactiveVar(chatOnlineVar);
@@ -137,7 +139,11 @@ const Chat = () => {
 
 	const groups = groupMessages(messages, myId);
 	const statusText =
-		status === 'open' ? `${online} online` : status === 'connecting' ? 'Connecting…' : 'Reconnecting…';
+		status === 'open'
+			? t('{{online}} online', { online })
+			: status === 'connecting'
+			? t('Connecting…')
+			: t('Reconnecting…');
 
 	return (
 		<div className={`chat-widget ${open ? 'open' : ''}`}>
@@ -147,7 +153,13 @@ const Chat = () => {
 				className={'chat-launcher'}
 				aria-expanded={open}
 				aria-controls="chat-panel"
-				aria-label={open ? 'Close the chat' : unread ? `Open the chat (${unread} new)` : 'Open the chat'}
+				aria-label={
+					open
+						? t('Close the chat')
+						: unread
+						? t('Open the chat ({{count}} new)', { count: unread })
+						: t('Open the chat')
+				}
 				onClick={() => (open ? close() : setChatOpen(true))}
 			>
 				{open ? <CloseRoundedIcon /> : <ChatBubbleOutlineRoundedIcon />}
@@ -158,29 +170,35 @@ const Chat = () => {
 				id="chat-panel"
 				className={'chat-panel'}
 				role="dialog"
-				aria-label="Community chat"
+				aria-label={t('Community chat')}
 				aria-hidden={!open}
 				onKeyDown={(e) => e.key === 'Escape' && close()}
 			>
 				<header className={'chat-head'}>
 					<div>
-						<h2 className={'chat-title'}>Community chat</h2>
+						<h2 className={'chat-title'}>{t('Community chat')}</h2>
 						<p className={`chat-status ${status}`}>
 							<span className={'status-dot'} aria-hidden="true" />
 							{statusText}
 						</p>
 					</div>
-					<button ref={closeRef} type="button" className={'chat-close'} aria-label="Close the chat" onClick={close}>
+					<button
+						ref={closeRef}
+						type="button"
+						className={'chat-close'}
+						aria-label={t('Close the chat')}
+						onClick={close}
+					>
 						<CloseRoundedIcon />
 					</button>
 				</header>
 
 				<div className={'chat-log'} ref={logRef} role="log" aria-live="polite" onScroll={onScroll}>
 					{groups.length === 0 ? (
-						<p className={'chat-empty'}>No messages yet.</p>
+						<p className={'chat-empty'}>{t('No messages yet.')}</p>
 					) : (
 						groups.map((group) => {
-							const name = group.member ? studioName(group.member) : 'Guest';
+							const name = group.member ? studioName(group.member) : t('Guest');
 							const photo = memberPhoto(group.member?.memberImage);
 							return (
 								<div key={group.key} className={`chat-group ${group.mine ? 'mine' : ''}`}>
@@ -190,7 +208,7 @@ const Chat = () => {
 										</span>
 									)}
 									<div className={'group-body'}>
-										<span className={group.mine ? 'visually-hidden' : 'chat-name'}>{group.mine ? 'You' : name}</span>
+										<span className={group.mine ? 'visually-hidden' : 'chat-name'}>{group.mine ? t('You') : name}</span>
 										{group.texts.map((text, index) => (
 											<p key={index} className={'chat-bubble'}>
 												{text}
@@ -204,7 +222,7 @@ const Chat = () => {
 				</div>
 				{newBelow && (
 					<button type="button" className={'chat-new'} onClick={() => scrollToEnd('smooth')}>
-						New messages <KeyboardArrowDownRoundedIcon />
+						{t('New messages')} <KeyboardArrowDownRoundedIcon />
 					</button>
 				)}
 
@@ -212,7 +230,7 @@ const Chat = () => {
 					{user?._id ? (
 						<form className={'composer-form'} onSubmit={send}>
 							<label className={'visually-hidden'} htmlFor="chat-input">
-								Message
+								{t('Message')}
 							</label>
 							<textarea
 								ref={inputRef}
@@ -220,14 +238,14 @@ const Chat = () => {
 								rows={1}
 								maxLength={MESSAGE_MAX}
 								value={draft}
-								placeholder="Write a message"
+								placeholder={t('Write a message')}
 								onChange={(e) => setDraft(e.target.value)}
 								onKeyDown={onInputKey}
 							/>
 							<button
 								type="submit"
 								className={'chat-send'}
-								aria-label="Send"
+								aria-label={t('Send')}
 								disabled={!draft.trim() || status !== 'open'}
 							>
 								<ArrowUpwardRoundedIcon />
@@ -236,7 +254,7 @@ const Chat = () => {
 					) : (
 						<p className={'chat-login'}>
 							<Link href={`/account/join?referrer=${encodeURIComponent(router.asPath)}`} className={'button-link'}>
-								Log in to chat
+								{t('Log in to chat')}
 							</Link>
 						</p>
 					)}

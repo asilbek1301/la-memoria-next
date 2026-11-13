@@ -3,6 +3,7 @@ import { Drawer, Menu, MenuItem } from '@mui/material';
 import CheckRoundedIcon from '@mui/icons-material/CheckRounded';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
+import { useTranslation } from 'next-i18next';
 import { prettyEnum } from '../../utils';
 
 interface SentenceSelectProps {
@@ -20,7 +21,10 @@ interface SentenceSelectProps {
 
 /** one bracketed word of the sentence filter: a menu on desktop, a bottom sheet on phones **/
 const SentenceSelect = (props: SentenceSelectProps) => {
-	const { name, label, allLabel, values, selected, onSelect, className = '' } = props;
+	const { t } = useTranslation('common');
+	const { label, values, selected, onSelect, className = '' } = props;
+	const name = t(props.name);
+	const allLabel = t(props.allLabel);
 	const device = useDeviceDetect();
 	const menuId = useId();
 	const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -34,7 +38,11 @@ const SentenceSelect = (props: SentenceSelectProps) => {
 
 	const options = [
 		{ value: null, label: allLabel, active: selected.length === 0 },
-		...values.map((value) => ({ value, label: prettyEnum(value), active: selected.length === 1 && selected[0] === value })),
+		...values.map((value) => ({
+			value,
+			label: t(prettyEnum(value)),
+			active: selected.length === 1 && selected[0] === value,
+		})),
 	];
 
 	return (
@@ -45,7 +53,7 @@ const SentenceSelect = (props: SentenceSelectProps) => {
 				aria-haspopup={device === 'mobile' ? 'dialog' : 'menu'}
 				aria-expanded={open}
 				aria-controls={open ? menuId : undefined}
-				aria-label={`${name}: ${label}. Change ${name.toLowerCase()}`}
+				aria-label={t('{{name}}: {{label}}. Change {{field}}', { name, label, field: name.toLowerCase() })}
 				onClick={(e) => setAnchorEl(e.currentTarget)}
 			>
 				<span className={'select-value'}>{label}</span>

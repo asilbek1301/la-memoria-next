@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { Member } from '../../types/member/member';
@@ -14,30 +15,31 @@ const CANDIDATES = 50;
 type Lead = 'rank' | 'likes' | 'views' | 'followers';
 
 // the order the spotlight is chosen by, and how each reason reads
-const leads: { key: Lead; value: (studio: Member) => number; label: string; why: (name: string) => string }[] = [
+// label and why are translation keys; why gets the studio name as {{name}}
+const leads: { key: Lead; value: (studio: Member) => number; label: string; why: string }[] = [
 	{
 		key: 'rank',
 		value: (studio) => studio.memberRank ?? 0,
 		label: 'Top ranked studio',
-		why: (name) => `${name} ranks first for packages, posts, likes and views. Rankings update every night.`,
+		why: '{{name}} ranks first for packages, posts, likes and views. Rankings update every night.',
 	},
 	{
 		key: 'likes',
 		value: (studio) => studio.memberLikes ?? 0,
 		label: 'Most liked studio',
-		why: (name) => `${name} has more likes than any other studio.`,
+		why: '{{name}} has more likes than any other studio.',
 	},
 	{
 		key: 'views',
 		value: (studio) => studio.memberViews ?? 0,
 		label: 'Most viewed studio',
-		why: (name) => `${name} has more profile views than any other studio.`,
+		why: '{{name}} has more profile views than any other studio.',
 	},
 	{
 		key: 'followers',
 		value: (studio) => studio.memberFollowers ?? 0,
 		label: 'Most followed studio',
-		why: (name) => `${name} has more followers than any other studio.`,
+		why: '{{name}} has more followers than any other studio.',
 	},
 ];
 
@@ -54,12 +56,15 @@ const pickSpotlight = (studios: Member[]) => {
 	if (!studio) return { studio: undefined, lead: undefined };
 	// the reason is the first number where this studio is ahead of every other studio
 	const others = sorted.slice(1);
-	const lead = leads.find((item) => item.value(studio) > 0 && others.every((other) => item.value(studio) > item.value(other)));
+	const lead = leads.find(
+		(item) => item.value(studio) > 0 && others.every((other) => item.value(studio) > item.value(other)),
+	);
 	return { studio, lead };
 };
 
 /** the leading studio, shown large above the grid with the reason it leads (page 1 without a search only) **/
 const StudioSpotlight = () => {
+	const { t } = useTranslation('common');
 	/** APOLLO REQUESTS: the top studios (memberRank), then the leader's three newest packages **/
 	const { data: studioData, loading: studioLoading } = useQuery(GET_STUDIOS, {
 		variables: { input: { page: 1, limit: CANDIDATES, sort: 'memberRank', direction: 'DESC', search: {} } },
@@ -69,7 +74,13 @@ const StudioSpotlight = () => {
 
 	const { data: packagesData, loading: packagesLoading } = useQuery(GET_PACKAGES, {
 		variables: {
-			input: { page: 1, limit: RECENT_PACKAGES, sort: 'createdAt', direction: 'DESC', search: { memberId: studio?._id } },
+			input: {
+				page: 1,
+				limit: RECENT_PACKAGES,
+				sort: 'createdAt',
+				direction: 'DESC',
+				search: { memberId: studio?._id },
+			},
 		},
 		skip: !studio?._id || packageCount === 0,
 	});
@@ -77,7 +88,7 @@ const StudioSpotlight = () => {
 
 	if (studioLoading) {
 		return (
-			<section className={'studio-spotlight'} aria-busy="true" aria-label="Loading studio spotlight">
+			<section className={'studio-spotlight'} aria-busy="true" aria-label={t('Loading studio spotlight')}>
 				<div className={'spotlight-portrait'}>
 					<Skeleton variant="rectangular" className={'skeleton arch-skeleton'} />
 				</div>
@@ -94,16 +105,16 @@ const StudioSpotlight = () => {
 	const name = studioName(studio);
 	const href = studioHref(studio);
 	const image = studioImage(studio);
-	const location = studioLocation(studio.memberAddress);
+	const location = studioLocation(studio.memberAddress, t);
 	const followers = studio.memberFollowers ?? 0;
 	const likes = studio.memberLikes ?? 0;
 	const views = studio.memberViews ?? 0;
 	// the number behind the reason is darker; views only show when they are the reason
 	const stats = [
-		{ key: 'packages', text: packageCount > 0 && plural(packageCount, 'package') },
-		{ key: 'followers', text: followers > 0 && plural(followers, 'follower') },
-		{ key: 'likes', text: likes > 0 && plural(likes, 'like') },
-		{ key: 'views', text: lead?.key === 'views' && plural(views, 'view') },
+		{ key: 'packages', text: packageCount > 0 && plural(packageCount, 'package', t) },
+		{ key: 'followers', text: followers > 0 && plural(followers, 'follower', t) },
+		{ key: 'likes', text: likes > 0 && plural(likes, 'like', t) },
+		{ key: 'views', text: lead?.key === 'views' && plural(views, 'view', t) },
 	].filter((stat) => stat.text);
 
 	return (
@@ -118,14 +129,14 @@ const StudioSpotlight = () => {
 
 			<div className={'spotlight-body'}>
 				<p className={'spotlight-label'}>
-					{lead ? lead.label : 'Studio spotlight'}
+					{lead ? t(lead.label) : t('Studio spotlight')}
 					{location ? ` · ${location}` : ''}
 				</p>
 				<h2 id="spotlight-name" className={'spotlight-name'}>
 					{name}
 				</h2>
-				{lead && <p className={'spotlight-why'}>{lead.why(name)}</p>}
-				{studio.memberDesc && <p className={'spotlight-desc'}>{studio.memberDesc}</p>}
+				{lead && <p className={'spotlight-why'}>{t(lead.why, { name })}</p>}
+				{studio.memberDesc && <p className={'spotlight-desc'}>{t(studio.memberDesc)}</p>}
 				{stats.length > 0 && (
 					<p className={'spotlight-stats'}>
 						{stats.map((stat, index) => (
@@ -139,7 +150,7 @@ const StudioSpotlight = () => {
 
 				{packageCount > 0 && (
 					<div className={'spotlight-packages'}>
-						<p className={'mini-label'}>Recent packages</p>
+						<p className={'mini-label'}>{t('Recent packages')}</p>
 						<ul className={'mini-grid'}>
 							{packagesLoading && packages.length === 0
 								? Array.from({ length: Math.min(packageCount, RECENT_PACKAGES) }).map((_, i) => (
@@ -155,7 +166,7 @@ const StudioSpotlight = () => {
 													<span className={'mini-media'}>
 														{thumb ? <img src={thumb} alt="" loading="lazy" /> : <span className={'img-placeholder'} />}
 													</span>
-													<span className={'mini-title'}>{pkg.packageTitle}</span>
+													<span className={'mini-title'}>{t(pkg.packageTitle)}</span>
 												</Link>
 											</li>
 										);
@@ -165,7 +176,7 @@ const StudioSpotlight = () => {
 				)}
 
 				<Link href={href} className={'button-primary'}>
-					View studio
+					{t('View studio')}
 				</Link>
 			</div>
 		</section>

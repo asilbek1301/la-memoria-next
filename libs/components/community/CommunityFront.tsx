@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { useQuery } from '@apollo/client';
 import { Skeleton } from '@mui/material';
 import { GET_BOARD_ARTICLES } from '../../../apollo/user/query';
@@ -25,6 +26,7 @@ const frontInput = (sort: string, limit: number, category?: BoardArticleCategory
 
 /** first page only: the most-liked post as a lead story, and the five most-read posts **/
 const CommunityFront = ({ category }: { category?: BoardArticleCategory }) => {
+	const { t } = useTranslation('common');
 	/** APOLLO REQUESTS **/
 	const lead = useQuery(GET_BOARD_ARTICLES, {
 		fetchPolicy: 'cache-and-network',
@@ -41,7 +43,7 @@ const CommunityFront = ({ category }: { category?: BoardArticleCategory }) => {
 
 	if ((lead.loading && !lead.data) || (read.loading && !read.data)) {
 		return (
-			<section className={'community-front'} aria-busy="true" aria-label="Loading top posts">
+			<section className={'community-front'} aria-busy="true" aria-label={t('Loading top posts')}>
 				<div className={'front-lead'}>
 					<Skeleton variant="rectangular" className={'skeleton wide'} />
 					<div className={'lead-body'}>
@@ -64,10 +66,10 @@ const CommunityFront = ({ category }: { category?: BoardArticleCategory }) => {
 	const image = story.articleImage ? `${REACT_APP_API_URL}/${story.articleImage}` : '';
 	const href = articleHref(story);
 	const text = articleExcerpt(story.articleContent);
-	const label = categoryLabel(story.articleCategory);
+	const label = t(categoryLabel(story.articleCategory));
 
 	return (
-		<section className={'community-front'} aria-label="Top posts">
+		<section className={'community-front'} aria-label={t('Top posts')}>
 			<article className={'front-lead'}>
 				<Link href={href} className={`lead-media ${image ? '' : 'no-image'}`} tabIndex={-1} aria-hidden="true">
 					{image ? <img src={image} alt="" /> : <span className={'img-placeholder category'}>{label}</span>}
@@ -88,7 +90,7 @@ const CommunityFront = ({ category }: { category?: BoardArticleCategory }) => {
 			{mostRead.length > 0 && (
 				<aside className={'front-read'} aria-labelledby="most-read-title">
 					<h2 id="most-read-title" className={'read-title'}>
-						Most read
+						{t('Most read')}
 					</h2>
 					<ol className={'read-list'}>
 						{mostRead.map((article, index) => {
@@ -104,7 +106,7 @@ const CommunityFront = ({ category }: { category?: BoardArticleCategory }) => {
 											{article.articleTitle}
 										</Link>
 										<p className={'read-meta'}>
-											{[author, comments > 0 && plural(comments, 'comment')].filter(Boolean).join(' · ')}
+											{[author, comments > 0 && plural(comments, 'comment', t)].filter(Boolean).join(' · ')}
 										</p>
 									</div>
 								</li>

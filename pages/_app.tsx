@@ -6,12 +6,17 @@ import { light } from '../scss/MaterialTheme';
 import { ApolloProvider } from '@apollo/client';
 import { useApollo } from '../apollo/client';
 import { appWithTranslation } from 'next-i18next';
+import moment from 'moment';
+import 'moment/locale/ko';
+import 'moment/locale/ru';
 import { bodyFont, headingFont, homeHeadingFont, koreanFont, logoFont } from '../libs/fonts';
 import '../scss/app.scss';
 import '../scss/pc/main.scss';
 import '../scss/mobile/main.scss';
 
-const App = ({ Component, pageProps }: AppProps) => {
+const App = ({ Component, pageProps, router }: AppProps) => {
+	// month names and "3 days ago" follow the page language ('kr' is Korean, moment calls it 'ko')
+	moment.locale(router.locale === 'kr' ? 'ko' : router.locale ?? 'en');
 	// @ts-ignore
 	const [theme, setTheme] = useState(createTheme(light));
 	const client = useApollo(pageProps.initialApolloState);

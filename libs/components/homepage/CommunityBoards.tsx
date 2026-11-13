@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@apollo/client';
+import { useTranslation } from 'next-i18next';
 import { Skeleton } from '@mui/material';
 import CommunityCard from './CommunityCard';
 import { BoardArticle } from '../../types/board-article/board-article';
@@ -15,6 +16,7 @@ const articlesInput = {
 };
 
 const CommunityBoards = () => {
+	const { t } = useTranslation('common');
 	/** APOLLO REQUESTS **/
 
 	const { loading: getArticlesLoading, data: getArticlesData } = useQuery(GET_BOARD_ARTICLES, {
@@ -27,11 +29,11 @@ const CommunityBoards = () => {
 	return (
 		<HomeSection
 			id="community"
-			title="From the Community"
-			aside={<ViewAllLink href={'/community?articleCategory=FREE'} label="Read all articles" />}
+			title={t('From the Community')}
+			aside={<ViewAllLink href={'/community?articleCategory=FREE'} label={t('Read all articles')} />}
 		>
 			{getArticlesLoading && articles.length === 0 ? (
-				<div className={'article-grid'} aria-busy="true" aria-label="Loading articles">
+				<div className={'article-grid'} aria-busy="true" aria-label={t('Loading articles')}>
 					{[0, 1, 2].map((i) => (
 						<div key={i}>
 							<Skeleton variant="rectangular" className={'skeleton wide'} />
@@ -42,9 +44,9 @@ const CommunityBoards = () => {
 				</div>
 			) : articles.length === 0 ? (
 				<EmptyState
-					message="No articles yet. Be the first to share your story."
+					message={t('No articles yet. Be the first to share your story.')}
 					href="/community?articleCategory=FREE"
-					linkLabel="Go to the community"
+					linkLabel={t('Go to the community')}
 				/>
 			) : (
 				<div className={`article-grid ${articles.length === 1 ? 'single' : ''}`}>

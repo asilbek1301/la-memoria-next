@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { withRouter } from 'next/router';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 import { List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import Collapse from '@mui/material/Collapse';
 import Typography from '@mui/material/Typography';
@@ -11,6 +12,7 @@ import cookies from 'js-cookie';
 import useDeviceDetect from '../../hooks/useDeviceDetect';
 
 const AdminMenuList = (props: any) => {
+	const { t } = useTranslation('common');
 	const device = useDeviceDetect();
 	const [, setMobileLayout] = useState(false);
 	const [] = useState('Users');
@@ -44,8 +46,8 @@ const AdminMenuList = (props: any) => {
 			case 'users':
 				setClickMenu(['Users']);
 				break;
-			default:
-				setClickMenu([]); // the dashboard
+			default: // the dashboard
+				setClickMenu([]);
 				break;
 		}
 
@@ -135,7 +137,7 @@ const AdminMenuList = (props: any) => {
 						<ListItemIcon sx={{ minWidth: 0, mr: openMenu ? 3 : 'auto', justifyContent: 'center' }}>
 							<SquaresFour size={20} color="currentColor" weight="fill" />
 						</ListItemIcon>
-						<ListItemText>Dashboard</ListItemText>
+						<ListItemText>{t('Dashboard')}</ListItemText>
 					</ListItemButton>
 				</Link>
 			</List>
@@ -160,7 +162,7 @@ const AdminMenuList = (props: any) => {
 						>
 							{item.icon}
 						</ListItemIcon>
-						<ListItemText>{item.title}</ListItemText>
+						<ListItemText>{t(item.title)}</ListItemText>
 						{clickMenu.find((menu: string) => item.title === menu) ? <ExpandLess /> : <ExpandMore />}
 					</ListItemButton>
 					<Collapse
@@ -179,7 +181,7 @@ const AdminMenuList = (props: any) => {
 											className={clickMenu[0] === item.title && clickSubMenu === sub.title ? 'li on' : 'li'}
 										>
 											<Typography variant={'body2'} component={'span'}>
-												{sub.title}
+												{t(sub.title)}
 											</Typography>
 										</ListItemButton>
 									</Link>
